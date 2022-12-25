@@ -1,0 +1,4 @@
+namespace server 
+{
+class ConnSocket;
+}
