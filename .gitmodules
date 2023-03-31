@@ -1,0 +1,3 @@
+[submodule "webserv_sample"]
+	path = webserv_sample
+	url = https://github.com/JUNNETWORKS/42-webserv.git
