@@ -20,26 +20,20 @@ Webserv::~Webserv()
 }
 Webserv::Webserv(const Webserv &socket) : epfd(0)
 {
-    //this->sockets = socket.sockets;
     init_socket();
 }
 Webserv& Webserv::operator=(const Webserv &socket)
 {
     if (&socket == this)
         return (*this);
-    //this->sockets = socket.sockets;
     return (*this);
 }
 
 void Webserv::init_socket()
 {
     try{
-        //cout << "No.1 sockets size=" << sockets.size() << endl;
         Socket *sock = new Socket();
-        //cout << "No.2 sockets size=" << sockets.size() << endl;
         this->sockets.push_back(sock);
-        //exit(1);
-        //cout << "No.3 sockets size=" << sockets.size() << endl;
     }catch(std::exception &e) {
         close_all();
         throw std::exception();
@@ -96,7 +90,7 @@ void Webserv::communication()
     if(init_epoll() == false){
         return ;
     }
-    while(1) 
+    while(1)
     {
         int nfds = epoll_wait(this->epfd, event, size, -1);
         if (nfds == 0) {
@@ -116,6 +110,10 @@ void Webserv::communication()
             //test
             string test = string(data);
             cout << "test:" << endl << test << endl;
+
+            //todo send something
+            //char r_data[] = "test";
+            //socket->send(r_data);
         }
     }
 }
