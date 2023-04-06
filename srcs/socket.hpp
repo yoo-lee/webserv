@@ -19,9 +19,10 @@ class Socket
         void close_fd();
         int getSockFD();
         char *recv();
-        bool send(char *data);
+        bool send(std::string& data);
     protected:
         int sock_fd;
+        int fd;
         std::string port;
         virtual void init();
         virtual int makeSocket();

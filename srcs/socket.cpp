@@ -99,14 +99,14 @@ char *Socket::recv()
     char *buf;
     ssize_t read_size;
 
-    int read_fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
-    if (read_fd < 0)
+    this->fd= accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    if (this->fd < 0)
     {
         cout << "Error accept():" << strerror(errno) << endl;
         return (NULL);
     }
     buf = new char[BUF_MAX];
-    read_size = read(read_fd, buf, BUF_MAX);
+    read_size = read(this->fd, buf, BUF_MAX);
     while(read_size == BUF_MAX)
     {
         //todo
@@ -114,4 +114,14 @@ char *Socket::recv()
     }
 
     return (buf);
+}
+
+bool Socket::send(std::string& data)
+{
+
+    int result = write(this->fd, data.c_str(), data.size());
+    cout << "send::::::" << data << ", result:" << result << endl;
+    close(this->fd);
+    
+    return (true);
 }

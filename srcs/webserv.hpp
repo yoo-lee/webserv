@@ -7,6 +7,7 @@ class Webserv
 {
     public:
         Webserv();
+        Webserv(const std::vector<std::string> ports);
         //Webserv(size_t size);
         //Webserv(const Webserv &socket);
         Webserv(const Webserv &sockets);

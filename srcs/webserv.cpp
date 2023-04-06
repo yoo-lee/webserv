@@ -14,6 +14,13 @@ Webserv::Webserv() : epfd(0)
 {
     init_socket();
 }
+
+Webserv::Webserv(const std::vector<std::string> ports)
+{
+    init_socket();
+}
+
+
 Webserv::~Webserv()
 {
     close_all();
@@ -112,8 +119,11 @@ void Webserv::communication()
             cout << "test:" << endl << test << endl;
 
             //todo send something
-            //char r_data[] = "test";
-            //socket->send(r_data);
+            std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
+            //std::string r_data = "HTTP/1.1 204 No Content";
+            cout <<"r_data=" << r_data << endl;
+            socket->send(r_data);
+            delete data;
         }
     }
 }
