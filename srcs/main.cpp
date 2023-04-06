@@ -1,6 +1,6 @@
 
 #include "webserv.hpp"
-#include "config.hpp"
+//#include "config.hpp"
 #include <string>
 #include <iostream>
 
