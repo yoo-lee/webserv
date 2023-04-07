@@ -18,7 +18,7 @@ class Socket
         virtual void communication();
         void close_fd();
         int getSockFD();
-        char *recv();
+        int recv();
         bool send(std::string& data);
     protected:
         int sock_fd;

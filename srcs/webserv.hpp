@@ -1,5 +1,5 @@
-#ifndef SOCKETS_HPP
-#define SOCKETS_HPP
+#ifndef WEBSERV_HPP
+#define WEBSERV_HPP
 #include <vector>
 #include "tcp_socket.hpp"
 

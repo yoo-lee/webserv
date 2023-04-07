@@ -3,8 +3,25 @@
 //#include "config.hpp"
 #include <string>
 #include <iostream>
+#include "split.hpp"
 
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
 int main(int argc, char const* argv[]) {
+
+    /*
+    string test = "  test1 test2 test3  ";
+    Split sp(test , " ");
+    cout << "start: " << sp.size() << endl;
+    for(int i=0;i< sp.size();i++)
+    {
+
+        cout << "sp:" << sp[i] << endl;
+    }
+    cout << "end:" << sp.size() << endl;
+    */
     /*
     if (argc != 2) {
         std::cout << "Error: Specify config file" << std::endl;

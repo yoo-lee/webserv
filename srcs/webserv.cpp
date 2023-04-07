@@ -1,5 +1,6 @@
 #include "webserv.hpp"
 #include "tcp_socket.hpp"
+#include "request.hpp"
 #include <sys/epoll.h>
 #include <iostream>
 #include <string.h>
@@ -111,19 +112,21 @@ void Webserv::communication()
         for (int i = 0; i < nfds; i++)
         {
             Socket *socket = find_socket(event[i].data.fd);
-            char *data = socket->recv();
+            int fd = socket->recv();
+            Request req(fd);
+
             //todo  do something with data
 
             //test
-            string test = string(data);
-            cout << "test:" << endl << test << endl;
+            //string test = string(data);
+            //cout << "test:" << endl << test << endl;
 
             //todo send something
             std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
             //std::string r_data = "HTTP/1.1 204 No Content";
             cout <<"r_data=" << r_data << endl;
             socket->send(r_data);
-            delete data;
+            //delete data;
         }
     }
 }
