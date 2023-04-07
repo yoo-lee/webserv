@@ -14,7 +14,7 @@ using std::map;
 
 Request::Request(int fd_) : fd(fd_)
 {
-    cout << "Request constractor" << endl;
+    //cout << "Request constractor" << endl;
     this->parse();
 }
 
@@ -84,6 +84,8 @@ void Request::print_request()
 
 void Request::parse()
 {
+
+
     string str;
     dup2(this->fd, 0);
     getline(cin, str);
@@ -99,16 +101,19 @@ void Request::parse()
         this->version = *(++ite);
         string header;
         string value;
-        getline(cin, str);
+        //getline(cin, str);
 
         while((getline(cin, header,  ' ')) ) {
+            //cout << "header:" << header << endl;
             getline(cin, value);
+            //cout << "value:" << value << endl;
             int a1 = header.c_str()[0];
             int a2 = header.c_str()[1];
             if (a1 == 13 && a2 == 10){
                 break;
             }
             this->headers.insert(make_pair(header.substr(0, header.size()-1), value));
+            //cout << "next" << endl << std::flush ;
         }
     } catch (std::exception &e){
         e.what();
