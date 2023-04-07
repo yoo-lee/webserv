@@ -84,7 +84,6 @@ void Request::print_request()
 
 void Request::parse()
 {
-
     string str;
     dup2(this->fd, 0);
     getline(cin, str);
@@ -115,5 +114,25 @@ void Request::parse()
         e.what();
     }
     this->print_request();
-
 }
+
+const METHOD Request::get_method()
+{
+    return (this->method);
+}
+
+const string &Request::get_uri()
+{
+    return (this->uri);
+}
+
+const string &Request::get_version()
+{
+    return (this->version);
+}
+
+const map<string, string> &Request::get_headers()
+{
+    return (this->headers);
+}
+

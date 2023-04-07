@@ -22,6 +22,10 @@ class Request
     public:
         Request(int fd);
         ~Request();
+        const METHOD get_method();
+        const std::string &get_uri();
+        const std::string &get_version();
+        const std::map<std::string, std::string> &get_headers();
     private:
         const static int BUF_MAX = 1024;
         void parse();
@@ -33,7 +37,6 @@ class Request
         std::string uri;
         std::string version;
         void print_request();
-
 };
 
 #endif
