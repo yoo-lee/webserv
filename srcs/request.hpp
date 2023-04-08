@@ -2,6 +2,7 @@
 #define REQUEST_HPP
 #include <map>
 #include <string>
+#include "split.hpp"
 
 enum E_METHOD{
     GET,
@@ -29,7 +30,7 @@ class Request
     private:
         const static int BUF_MAX = 1024;
         void parse();
-        int fd;
+        const int fd;
         std::map<std::string, std::string> headers;
         std::string identify_method(METHOD method);
         METHOD identify_method(std::string method);
@@ -37,6 +38,9 @@ class Request
         std::string uri;
         std::string version;
         void print_request();
+        std::string &get_next_line(int fd);
+        std::string err_line = "";
+        //Split *sp;
 };
 
 #endif

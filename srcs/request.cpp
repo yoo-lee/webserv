@@ -1,5 +1,6 @@
 #include "request.hpp"
 #include "split.hpp"
+#include "get_next_line.hpp"
 #include <string>
 #include <unistd.h>
 #include <iostream>
@@ -82,42 +83,31 @@ void Request::print_request()
     }
 }
 
+
 void Request::parse()
 {
 
-
-    string str;
-    dup2(this->fd, 0);
-    getline(cin, str);
+    GetNextLine gnl(this->fd);
+    string str = gnl.getline();
     Split sp(str, " ");
-    try {
-        Split::iterator ite = sp.begin();
-        if (sp.size() != 3){
-            throw std::exception();
-        }
-
-        this->method = identify_method(*ite);
-        this->uri = *(++ite);
-        this->version = *(++ite);
-        string header;
-        string value;
-        //getline(cin, str);
-
-        while((getline(cin, header,  ' ')) ) {
-            //cout << "header:" << header << endl;
-            getline(cin, value);
-            //cout << "value:" << value << endl;
-            int a1 = header.c_str()[0];
-            int a2 = header.c_str()[1];
-            if (a1 == 13 && a2 == 10){
-                break;
-            }
-            this->headers.insert(make_pair(header.substr(0, header.size()-1), value));
-            //cout << "next" << endl << std::flush ;
-        }
-    } catch (std::exception &e){
-        e.what();
+    if (sp.size() != 3){
+        throw std::exception();
     }
+    Split::iterator ite = sp.begin();
+    this->method = identify_method(*ite);
+    this->uri = *(++ite);
+    this->version = *(++ite);
+    string header;
+    string value;
+    while((str != gnl.last_str)) {
+        str = gnl.getline();
+        Split header(str, " ");
+        if(header.size() == 2)
+            this->headers.insert(make_pair(header[0].substr(0, header[0].size()-1), header[1]));
+        else
+            break;
+    }
+    //for test
     this->print_request();
 }
 
