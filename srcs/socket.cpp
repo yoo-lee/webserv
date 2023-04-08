@@ -65,6 +65,7 @@ Socket::Socket() : sock_fd(0), port("11111")
 }
 Socket::~Socket()
 {
+    delete this->req;
 }
 Socket::Socket(const Socket &sock_fdet) : sock_fd(sock_fdet.sock_fd), port(sock_fdet.port)
 {
@@ -91,40 +92,27 @@ void Socket::close_fd()
     close(this->sock_fd);
 }
 
-int Socket::recv()
+Request *Socket::recv()
 {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
-    //const int BUF_MAX = 4096;
-    //char *buf;
-    //ssize_t read_size;
 
     this->fd= accept(this->sock_fd,(struct sockaddr *)&client, &len);
     if (this->fd < 0)
     {
         cout << "Error accept():" << strerror(errno) << endl;
-        return (-1);
+        return (NULL);
     }
-    return (this->fd);
-    /*
-    buf = new char[BUF_MAX];
-    read_size = read(this->fd, buf, BUF_MAX);
-    while(read_size == BUF_MAX)
-    {
-        //todo
-        break;
-    }
-
-    return (buf);
-    */
+    if (this->req != NULL)
+        delete this->req;
+    this->req = new Request(this->fd);
+    return (this->req);
 }
 
 bool Socket::send(std::string& data)
 {
 
     write(this->fd, data.c_str(), data.size());
-    //cout << "send::::::" << data << ", result:" << result << endl;
     close(this->fd);
-    
     return (true);
 }

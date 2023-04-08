@@ -1,6 +1,7 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
+#include "request.hpp"
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string>
@@ -18,7 +19,7 @@ class Socket
         virtual void communication();
         void close_fd();
         int getSockFD();
-        int recv();
+        Request *recv();
         bool send(std::string& data);
     protected:
         int sock_fd;
@@ -27,6 +28,7 @@ class Socket
         virtual void init();
         virtual int makeSocket();
         virtual void setAddrInfo(struct addrinfo &info);
+        Request *req;
         //struct sockaddr_in hint;
 };
 

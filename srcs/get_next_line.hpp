@@ -11,13 +11,16 @@ class GetNextLine{
         std::string &getline();
         std::string last_str = "";
         size_t size();
+        int get_extra_buf(char *buf);
     private:
         const static int BUF_MAX = 1024;
+        char buf[BUF_MAX];
+        ssize_t buf_size;
         const int fd;
         Split *sp;
         //std::vector<std::string> vec;
         size_t pos;
-        void readLine();
+        void read_line();
 };
 
 #endif

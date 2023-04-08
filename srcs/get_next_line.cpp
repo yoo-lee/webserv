@@ -10,7 +10,7 @@ using std::string;
 
 GetNextLine::GetNextLine(int fd_) : fd(fd_), sp(NULL), pos(0)
 {
-    this->readLine();
+    this->read_line();
 }
 
 GetNextLine::~GetNextLine()
@@ -18,21 +18,19 @@ GetNextLine::~GetNextLine()
     delete sp;
 }
 
-void GetNextLine::readLine()
+void GetNextLine::read_line()
 {
-    char buf[BUF_MAX];
-
     int cnt = 0;
     while (1){
-        ssize_t rval = recv(this->fd, buf, BUF_MAX, MSG_DONTWAIT);
-        if (rval > 0)
+        this->buf_size = recv(this->fd, this->buf, BUF_MAX, MSG_DONTWAIT);
+        if (this->buf_size > 0)
             break;
         else if (cnt > 10)
             return ;
         usleep(10);
         cnt++;
     }
-    string str = string(buf);
+    string str = string(this->buf);
     if (sp == NULL)
         this->sp = new Split(str, "\n");
     else
@@ -46,10 +44,31 @@ size_t GetNextLine::size()
     return (this->sp->size());
 }
 
+
+int GetNextLine::get_extra_buf(char *cp_buf)
+{
+    ssize_t i = 0;
+    while(i < this->buf_size)
+    {
+        if (buf[i+3] == 10 && buf[i+2] == 13 && buf[i+1] == 10 && buf[i] == 13){
+            int size = this->buf_size - (i+4);
+            i +=2;
+            ssize_t j = 0;
+            while(i < this->buf_size){
+                cp_buf[j++] = buf[i++];
+            }
+            return (size);
+        }
+        i++;
+    }
+    cp_buf = NULL;
+    return (0);
+}
+
 string &GetNextLine::getline()
 {
     if (this->sp == NULL || this->sp->size() == pos+1) {
-        this->readLine();
+        this->read_line();
     }
     if (this->sp == NULL)
         return (this->last_str);

@@ -13,9 +13,8 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_)
+Request::Request(int fd_) : fd(fd_), buf_size(0)
 {
-    //cout << "Request constractor" << endl;
     this->parse();
 }
 
@@ -102,40 +101,19 @@ void Request::parse()
     std::string::size_type pos;
     while((str != gnl.last_str)) {
         str = gnl.getline();
-        //cout << "while str:" << str << endl;
         pos = str.find(" ");
         if (pos == string::npos || str.size() <= 0)
         {
-            int a = str.c_str()[0];
-            //cout << "pos=" << pos << endl;
-            //cout << "str size=" << str.size() << endl;
-            //cout << "a=" << a << endl;
-            //cout << "str=" << str << endl;
             break;
         }
-            //throw std::exception();
         header = str.substr(0, pos-1);
-
-        //Split header(str, " ");
         if(header.size() < 2)
         {
-            //int a = header.c_str()[0];
-            //int b = header.c_str()[1];
-            //cout << "last:" << a << ", b=" << b << endl;
-            //cout << "str=" << str << endl;
             break;
         }
         this->headers.insert(make_pair(str.substr(0, pos-1), str.substr(pos)));
-        //else
-            //break;
     }
-    //for test
-    //cout << "end:" ;
-    //str = gnl.getline();
-    //cout << str << endl;
-    //str = gnl.getline();
-    //cout << str << endl;
-    this->print_request();
+    this->buf_size = gnl.get_extra_buf(this->extra_buf);
 }
 
 const METHOD Request::get_method()
@@ -156,5 +134,19 @@ const string &Request::get_version()
 const map<string, string> &Request::get_headers()
 {
     return (this->headers);
+}
+
+int Request::read_buf(char *cp_buf)
+{
+    if (this->buf_size > 0)
+    {
+        int tmp = this->buf_size;
+        while(this->buf_size--){
+            cp_buf[this->buf_size] = this->extra_buf[this->buf_size];
+        }
+        return (tmp);
+    }
+    ssize_t tmp = (recv(this->fd, cp_buf, BUF_MAX, MSG_DONTWAIT));
+    return (tmp);
 }
 

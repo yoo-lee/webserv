@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hsano <hsano@student.42tokyo.jp>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/04/09 01:57:52 by hsano             #+#    #+#             */
+/*   Updated: 2023/04/09 02:57:40 by sano             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "webserv.hpp"
 #include "tcp_socket.hpp"
 #include "request.hpp"
@@ -112,8 +124,17 @@ void Webserv::communication()
         for (int i = 0; i < nfds; i++)
         {
             Socket *socket = find_socket(event[i].data.fd);
-            int fd = socket->recv();
-            Request req(fd);
+            Request *req = socket->recv();
+            //Request req(fd);
+            req->print_request();
+
+            char buf[1024]{0};
+            int size = req->read_buf(buf);
+            while(size > 0){
+                cout << "body test: size=" << size << endl << "body:" << string(buf) << endl;
+            size = req->read_buf(buf);
+            }
+            
 
             //todo  do something with data
 
@@ -126,6 +147,7 @@ void Webserv::communication()
             //std::string r_data = "HTTP/1.1 204 No Content";
             //cout <<"r_data=" << r_data << endl;
             socket->send(r_data);
+            //socket->read_all();
             //delete data;
         }
     }
