@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <unistd.h>
 
 using std::cout;
 using std::endl;
@@ -20,9 +21,17 @@ GetNextLine::~GetNextLine()
 void GetNextLine::readLine()
 {
     char buf[BUF_MAX];
-    ssize_t rval = recv(this->fd, buf, BUF_MAX, 0);
-    if (rval < 0)
-        return ;
+
+    int cnt = 0;
+    while (1){
+        ssize_t rval = recv(this->fd, buf, BUF_MAX, MSG_DONTWAIT);
+        if (rval > 0)
+            break;
+        else if (cnt > 10)
+            return ;
+        usleep(10);
+        cnt++;
+    }
     string str = string(buf);
     if (sp == NULL)
         this->sp = new Split(str, "\n");

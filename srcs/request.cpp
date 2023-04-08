@@ -99,15 +99,42 @@ void Request::parse()
     this->version = *(++ite);
     string header;
     string value;
+    std::string::size_type pos;
     while((str != gnl.last_str)) {
         str = gnl.getline();
-        Split header(str, " ");
-        if(header.size() == 2)
-            this->headers.insert(make_pair(header[0].substr(0, header[0].size()-1), header[1]));
-        else
+        //cout << "while str:" << str << endl;
+        pos = str.find(" ");
+        if (pos == string::npos || str.size() <= 0)
+        {
+            int a = str.c_str()[0];
+            //cout << "pos=" << pos << endl;
+            //cout << "str size=" << str.size() << endl;
+            //cout << "a=" << a << endl;
+            //cout << "str=" << str << endl;
             break;
+        }
+            //throw std::exception();
+        header = str.substr(0, pos-1);
+
+        //Split header(str, " ");
+        if(header.size() < 2)
+        {
+            //int a = header.c_str()[0];
+            //int b = header.c_str()[1];
+            //cout << "last:" << a << ", b=" << b << endl;
+            //cout << "str=" << str << endl;
+            break;
+        }
+        this->headers.insert(make_pair(str.substr(0, pos-1), str.substr(pos)));
+        //else
+            //break;
     }
     //for test
+    //cout << "end:" ;
+    //str = gnl.getline();
+    //cout << str << endl;
+    //str = gnl.getline();
+    //cout << str << endl;
     this->print_request();
 }
 

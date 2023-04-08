@@ -124,7 +124,7 @@ void Webserv::communication()
             //todo send something
             std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
             //std::string r_data = "HTTP/1.1 204 No Content";
-            cout <<"r_data=" << r_data << endl;
+            //cout <<"r_data=" << r_data << endl;
             socket->send(r_data);
             //delete data;
         }
