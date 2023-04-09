@@ -52,7 +52,7 @@ int GetNextLine::get_extra_buf(char *cp_buf)
     {
         if (buf[i+3] == 10 && buf[i+2] == 13 && buf[i+1] == 10 && buf[i] == 13){
             int size = this->buf_size - (i+4);
-            i +=2;
+            i +=4;
             ssize_t j = 0;
             while(i < this->buf_size){
                 cp_buf[j++] = buf[i++];

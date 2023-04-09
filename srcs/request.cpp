@@ -85,7 +85,6 @@ void Request::print_request()
 
 void Request::parse()
 {
-
     GetNextLine gnl(this->fd);
     string str = gnl.getline();
     Split sp(str, " ");

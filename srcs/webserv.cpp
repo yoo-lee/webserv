@@ -6,7 +6,7 @@
 /*   By: hsano <hsano@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/09 01:57:52 by hsano             #+#    #+#             */
-/*   Updated: 2023/04/09 02:57:40 by sano             ###   ########.fr       */
+/*   Updated: 2023/04/09 03:09:34 by sano             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ void Webserv::communication()
             int size = req->read_buf(buf);
             while(size > 0){
                 cout << "body test: size=" << size << endl << "body:" << string(buf) << endl;
-            size = req->read_buf(buf);
+                size = req->read_buf(buf);
             }
             
 
