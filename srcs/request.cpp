@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), buf_size(0)
+Request::Request(int fd_) : fd(fd_), buf_size(0), method(NG)
 {
     this->parse();
 }
@@ -87,8 +87,15 @@ void Request::parse()
 {
     GetNextLine gnl(this->fd);
     string str = gnl.getline();
+    if (str == gnl.last_str)
+        return;
     Split sp(str, " ");
     if (sp.size() != 3){
+        cout << "size:" << sp.size() << endl;
+        cout << "str:[" << str << "]" << endl;
+        str = gnl.getline();
+        cout << "str:[" << str << "]" << endl;
+        cout << "Error:not 3 factor" << endl;
         throw std::exception();
     }
     Split::iterator ite = sp.begin();

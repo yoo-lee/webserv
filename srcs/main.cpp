@@ -23,6 +23,9 @@ int main(int argc, char const* argv[]) {
     //todo
     std::vector<std::string> ports;
 
+    ports.push_back("11111");
+    ports.push_back("11112");
+    ports.push_back("11113");
     // ソケットの初期設定
     Webserv webserv = Webserv(ports);
     webserv.communication();

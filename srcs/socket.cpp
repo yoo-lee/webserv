@@ -26,6 +26,9 @@ void Socket::setAddrInfo(struct addrinfo &info)
 void Socket::init()
 {
     this->sock_fd= makeSocket();
+    this->clientinfo;
+    //memset(clientinfo, 0, sizeof(s_clientinfo));
+    this->ev.data.ptr = &clientinfo;
     if (this->sock_fd < 0)
     {
          cout << strerror(errno) << endl;
@@ -63,6 +66,12 @@ Socket::Socket() : sock_fd(0), port("11111")
 {
     init();
 }
+
+Socket::Socket(std::string port_) : sock_fd(0) ,port(port_)
+{
+    init();
+}
+
 Socket::~Socket()
 {
     delete this->req;
@@ -92,17 +101,61 @@ void Socket::close_fd()
     close(this->sock_fd);
 }
 
-Request *Socket::recv()
+
+int Socket::accept_request()
+{
+    //int fd = 0;
+    struct sockaddr_in client;
+    //struct epoll_event ev = {0};
+    socklen_t len = sizeof(client);
+
+    this->fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    if (this->fd < 0)
+    {
+        cout << "Error accept():" << strerror(errno) << endl;
+        //return ();
+    }
+    //ev.events = EPOLLIN | EPOLLONESHOT;
+    //this->clientinfo.fd = this->fd;
+    return (this->fd);
+}
+
+/*
+Request *Socket::recv(int fd)
 {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
 
-    this->fd= accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    cout << "socket recv No.1 fd=" << this->sock_fd << endl;
+    this->fd= accept(fd,(struct sockaddr *)&client, &len);
+    cout << "socket recv No.2 fd=" << this->sock_fd << endl;
     if (this->fd < 0)
     {
         cout << "Error accept():" << strerror(errno) << endl;
         return (NULL);
     }
+    if (this->req != NULL)
+        delete this->req;
+    this->req = new Request(this->fd);
+    return (this->req);
+}
+*/
+
+Request *Socket::recv()
+{
+    //struct sockaddr_in client;
+    //socklen_t len = sizeof(client);
+
+    /*
+    cout << "socket recv No.1 fd=" << this->sock_fd << endl;
+    this->fd= accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    cout << "socket recv No.2 fd=" << this->sock_fd << endl;
+    if (this->fd < 0)
+    {
+        cout << "Error accept():" << strerror(errno) << endl;
+        return (NULL);
+    }
+    */
     if (this->req != NULL)
         delete this->req;
     this->req = new Request(this->fd);

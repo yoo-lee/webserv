@@ -16,11 +16,12 @@ class Webserv
         void communication();
     private:
         int epfd;
-        void init_socket();
+        void init_socket(std::vector<std::string>);
         bool init_epoll();
         void close_all();
         std::vector<Socket*> sockets;
-        Socket* find_socket(int socket_fd);
+        Socket* find_listen_socket(int socket_fd);
+        //struct epoll_event ev;
 
 };
 #endif
