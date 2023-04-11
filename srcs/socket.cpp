@@ -166,6 +166,6 @@ bool Socket::send(std::string& data)
 {
 
     write(this->fd, data.c_str(), data.size());
-    close(this->fd);
+    //close(this->fd);
     return (true);
 }
