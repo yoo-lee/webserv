@@ -115,7 +115,7 @@ int Socket::accept_request()
         cout << "Error accept():" << strerror(errno) << endl;
         //return ();
     }
-    //ev.events = EPOLLIN | EPOLLONESHOT;
+    //ev.events = EPOLLIN;
     //this->clientinfo.fd = this->fd;
     return (this->fd);
 }

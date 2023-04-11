@@ -19,6 +19,7 @@ class Webserv
         void init_socket(std::vector<std::string>);
         bool init_epoll();
         void close_all();
+        void connected_communication(int fd, struct epoll_event *event, Socket *socket);
         std::vector<Socket*> sockets;
         Socket* find_listen_socket(int socket_fd);
         //struct epoll_event ev;
