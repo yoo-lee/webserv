@@ -17,6 +17,7 @@ class Token {
         ANYCHAR,
     };
     Token(std::string str, Type type) : _str(str), _type(type) {}
+    Token(char c, Type type) : _str(std::string(&c, 1)), _type(type) {}
     static std::string getTypeName(Type type) {
         if (type == COMMA)
             return "COMMA";

@@ -18,32 +18,23 @@ class Lexer {
             setState();
             if (_state == Token::SEMI || _state == Token::DQUOTE ||
                 _state == Token::LCURLY || _state == Token::RCURLY) {
-                _token_list.push_back(
-                    new Token(std::string(consume(), 1), _state));
+                _token_list.push_back(new Token(consume(), _state));
             } else if (_state == Token::ANYCHAR) {
-                while (_text.length() != 0 && _state == Token::ANYCHAR) {
-                    buf += consume();
-                    setState();
-                }
+                while (_text.length() != 0 && _state == Token::ANYCHAR)
+                    buf += updateState();
                 _token_list.push_back(new Token(buf, Token::ANYCHAR));
                 buf = "";
-                consume();
             } else if (_state == Token::INT) {
-                while (_text.length() != 0 && _state == Token::INT) {
-                    buf += consume();
-                    setState();
-                }
-                _token_list.push_back(new Token(buf, _state));
+                while (_text.length() != 0 && _state == Token::INT)
+                    buf += updateState();
+                _token_list.push_back(new Token(buf, Token::INT));
                 buf = "";
-                consume();
             } else if (_state == Token::ID) {
-                while (_text.length() != 0 && _state == Token::ID) {
-                    buf += consume();
-                    setState();
-                }
-                _token_list.push_back(new Token(buf, _state));
+                while (_text.length() != 0 && _state == Token::ID)
+                    buf += updateState();
+
+                _token_list.push_back(new Token(buf, Token::ID));
                 buf = "";
-                consume();
             } else
                 consume();
         }
@@ -64,16 +55,32 @@ class Lexer {
         } else if (c == '"') {
             return Token::DQUOTE;
         } else if (c >= '0' && c <= '9') {
-            if (_state == Token::INT)
-                return Token::INT;
-            else if (_state == Token::ID)
+            if (_state == Token::ID)
                 return Token::ID;
+            if (_state == Token::ANYCHAR)
+                return Token::ANYCHAR;
+            return Token::INT;
         } else if (isprint(c)) {
             if (_state == Token::ID)
                 return Token::ID;
+            return Token::ANYCHAR;
         }
+        throw std::runtime_error("Invalid character: '" + std::string(&c, 1) +
+                                 "'");
     }
-    void setState() { _state = getState(_text[0]); }
+    void setState() {
+        std::cout << "'" << Token::getTypeName(_state) << "' =>";
+        _state = getState(_text[0]);
+        std::cout << "'" << Token::getTypeName(_state) << "' (" << _text[0]
+                  << ")" << std::endl;
+    }
+
+    char updateState() {
+        char c = consume();
+        setState();
+        return c;
+    }
+
     char consume() {
         char buf = _text[0];
         _text = _text.substr(1);
