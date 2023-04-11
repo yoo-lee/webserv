@@ -85,83 +85,41 @@ bool Webserv::init_epoll()
 
 Socket* Webserv::find_listen_socket(int socket_fd)
 {
-    cout << "find_listen_socket No.1 fd=" << socket_fd << endl;
     for (size_t i=0;i< this->sockets.size(); i++)
     {
         if (this->sockets[i]->getSockFD() == socket_fd){
-            cout << "find_listen_socket No.2 fd=" << socket_fd << endl;
             return (this->sockets[i]);
         }
     }
-    cout << "find_listen_socket No.3 fd=" << socket_fd << endl;
     return (NULL);
 }
 
 void Webserv::connected_communication(int fd, struct epoll_event *event, Socket *socket)
 {
-    cout << "connected_communication No.1" << endl;
-    /*
-    std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
-    cout << "sock_event[i].data.fd=" << sock_event[i].data.fd << endl;
-    if (tmp_fd == sock_fds.end())
-    {
-        cout << "end error" << endl;
-        continue;
-    }
-    */
-    //socket = map_socks.at(fd);
-//cout << "epoll_wait No.7 EPOLLIN=" << EPOLLIN << ", events=" << sock_event[i].events << endl;
     if (event->events & EPOLLIN){
-        cout << "epoll_wait No.8 tmp_fd=" << fd << endl;
         Request *req = socket->recv();
-
-        //Request *req = socket->recv();
-cout << "epoll_wait No.9" << endl;
         if (req->get_method() == NG){
-            cout << "epoll_wait No.10" << endl;
-            //break;
+            cout << "error;connected_communication No.1" << endl;
+            return ;
         }
-        //Request req(fd);
-cout << "epoll_wait No.11" << endl;
         req->print_request();
-cout << "epoll_wait No.12" << endl;
         char buf[1024]{0};
         int size = req->read_buf(buf);
-cout << "epoll_wait No.13" << endl;
         while(size > 0){
-            cout << "body test: size=" << size << endl << "body:" << string(buf) << endl;
             size = req->read_buf(buf);
         }
-cout << "epoll_wait No.13" << endl;
-
         event->events = EPOLLOUT;
-cout << "epoll_wait No.14" << endl;
-        //server_event.events = EPOLLIN | EPOLLONESHOT;
-        //server_event.data.fd = fd;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
-            cout << "epoll_ctl No.2 error" << endl;
+            cout << "error;connected_communication No.2" << endl;
         }
-cout << "epoll_wait No.15" << endl;
-
     }else if (event->events & EPOLLOUT){
-cout << "epoll_wait No.16" << endl;
-        //if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, *tmp_fd, &(sock_event[i])) != 0){
-            //cout << "epoll_ctl No.3 error" << endl;
-        //}
-cout << "epoll_wait No.17" << endl;
         std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
-        //std::string r_data = "HTTP/1.1 204 No Content";
-        //cout <<"r_data=" << r_data << endl;
         socket->send(r_data);
-        cout << "epoll_wait No.9" << endl;
         event->events = EPOLLIN;
-
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
-            cout << "epoll_ctl No.3 error" << endl;
+            cout << "error;connected_communication No.3" << endl;
         }
     }
-    //if (sock_event[i].fd == )
-
 }
 
 void Webserv::communication()
@@ -177,11 +135,8 @@ void Webserv::communication()
     }
     while(1)
     {
-        cout << "epoll_wait No.1 nfds=" << endl;
         int nfds = epoll_wait(this->epfd, sock_event, size, -1);
-        cout << "epoll_wait No.2 nfds=" << nfds << endl;
         if (nfds == 0) {
-        cout << "epoll_wait No.3" << endl;
             continue;
         }
         else if (nfds < 0)
@@ -189,12 +144,9 @@ void Webserv::communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return ;
         }
-        cout << "epoll_wait No.4 nfds=" << endl;
         for (int i = 0; i < nfds; i++)
         {
-
             std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
-            cout << "epoll_wait No.5, i=" << i << ", fd=" << sock_event[i].data.fd << endl;
             if (tmp_fd != sock_fds.end())
             {
                 Socket *socket = map_socks.at(*tmp_fd);
@@ -206,46 +158,17 @@ void Webserv::communication()
             if (socket)
             {
                 int fd = socket->accept_request();
-                cout << "epoll_wait No.6 accept_request recv fd=" << fd << endl;
                 sock_fds.push_back(fd);
                 memset(&server_event, 0, sizeof(server_event));
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
-                //server_event.data.ptr = malloc(sizeof(Socket));
-                cout << "sizeof(ptr)" << sizeof(server_event.data.ptr) << endl;
-                cout << "sizeof(socket)" << sizeof(socket) << endl;
                 map_socks.insert(std::make_pair(fd, socket));
-                cout << "add maps size:" << map_socks.size() << endl;
                 if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
                 {
                     cout << "epoll_ctl error No.1" << endl;
                     continue;
                 }
             }
-            else
-            {
-
-            }
-
-            //cout << "epoll_wait No.6" << endl;
-
-            //char buf[1024]{0};
-            //int size = req->read_buf(buf);
-            //while(size > 0){
-                //cout << "body test: size=" << size << endl << "body:" << string(buf) << endl;
-                ////size = req->read_buf(buf);
-            //}
-            //cout << "epoll_wait No.8" << endl;
-
-            //todo  do something with data
-
-            //test
-            //string test = string(data);
-            //cout << "test:" << endl << test << endl;
-
-            //todo send something
-            //socket->read_all();
-            //delete data;
         }
     }
 }

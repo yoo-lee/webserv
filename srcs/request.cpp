@@ -87,14 +87,9 @@ void Request::parse()
 {
     GetNextLine gnl(this->fd);
     string str = gnl.getline();
-    cout << "parse No.1  this->fd=" << this->fd << endl;
     if (str == gnl.last_str){
-        cout << gnl.getline() << endl;
-        cout << gnl.getline() << endl;
-        cout << gnl.getline() << endl;
         return;
     }
-    cout << "parse No.2" << endl;
     Split sp(str, " ");
     if (sp.size() != 3){
         cout << "size:" << sp.size() << endl;
@@ -104,7 +99,6 @@ void Request::parse()
         cout << "Error:not 3 factor" << endl;
         throw std::exception();
     }
-    cout << "parse No.3" << endl;
     Split::iterator ite = sp.begin();
     this->method = identify_method(*ite);
     this->uri = *(++ite);
@@ -126,7 +120,6 @@ void Request::parse()
         }
         this->headers.insert(make_pair(str.substr(0, pos-1), str.substr(pos)));
     }
-    cout << "parse No.4" << endl;
     this->buf_size = gnl.get_extra_buf(this->extra_buf);
 }
 
