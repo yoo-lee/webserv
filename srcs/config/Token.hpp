@@ -9,34 +9,23 @@ class Token {
         COMMA,
         SEMI,
         DQUOTE,
+        SQUOTE,
+        STRING,
         LCURLY,
         RCURLY,
         INT,
         ID,
-        WS,
+        WHITE_SPACE,
         ANYCHAR,
     };
     Token(std::string str, Type type) : _str(str), _type(type) {}
     Token(char c, Type type) : _str(std::string(&c, 1)), _type(type) {}
     static std::string getTypeName(Type type) {
-        if (type == COMMA)
-            return "COMMA";
-        if (type == SEMI)
-            return "SEMI";
-        if (type == DQUOTE)
-            return "DQUOTE";
-        if (type == LCURLY)
-            return "LCURLY";
-        if (type == RCURLY)
-            return "RCURLY";
-        if (type == INT)
-            return "INT";
-        if (type == ID)
-            return "ID";
-        if (type == WS)
-            return "WS";
-        if (type == ANYCHAR)
-            return "ANYCHAR";
+        const char* type_name_list[] = {
+            "COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING", "LCURLY",
+            "RCURLY", "INT",  "ID",     "WHITE_SPACE", "ANYCHAR"};
+        if (type <= ANYCHAR)
+            return type_name_list[type];
         return "UNKNOWN";
     }
     Type getType() const { return _type; }
