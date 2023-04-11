@@ -1,10 +1,5 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-
-/**
-
-
-*/
 #include <fstream>
 #include <string>
 #include <vector>
@@ -22,7 +17,7 @@ class Config {
 Config::Config(std::string file_text) : _file_text(file_text) {
     Lexer lexer(_file_text);
     std::vector<Token*> token_list = lexer.getTokenList();
-    for (int i = 0; i < token_list.size(); i++) {
+    for (std::size_t i = 0; i < token_list.size(); i++) {
         std::cout << *token_list[i] << std::endl;
     }
 }
