@@ -4,23 +4,20 @@
 #include <string>
 #include <vector>
 #include "Lexer.hpp"
+
 class Config {
    private:
     std::string _file_text;
     std::string data;
 
    public:
+    Lexer lexer;
     Config(std::string file_path);
     ~Config(){};
 };
 
-Config::Config(std::string file_text) : _file_text(file_text) {
-    Lexer lexer(_file_text);
-    std::vector<Token*> token_list = lexer.getTokenList();
-    for (std::size_t i = 0; i < token_list.size(); i++) {
-        std::cout << *token_list[i] << std::endl;
-    }
-}
+Config::Config(std::string file_text)
+    : _file_text(file_text), lexer((_file_text)) {}
 
 #ifdef TEST
 #include <fstream>
@@ -34,6 +31,10 @@ int main() {
     }
     file.close();
     Config config(str);
+    std::vector<Token*> token_list = config.lexer.getTokenList();
+    for (std::size_t i = 0; i < token_list.size(); i++) {
+        std::cout << *token_list[i] << std::endl;
+    }
     return 0;
 }
 #endif

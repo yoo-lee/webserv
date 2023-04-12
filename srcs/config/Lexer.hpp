@@ -9,7 +9,7 @@ class Lexer {
     std::string _text;
     Token::Type _state;
     std::vector<Token*> _token_list;
-    Token::Type getState(char c) const throw(std::runtime_error);
+    Token::Type getState(char c) const;
     void setState();
     char updateState();
     char consume();

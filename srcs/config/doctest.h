@@ -39,9 +39,6 @@
 // =================================================================================================
 // =================================================================================================
 
-#ifndef DOCTEST_H
-#define DOCTEST_H
-
 #ifndef DOCTEST_LIBRARY_INCLUDED
 #define DOCTEST_LIBRARY_INCLUDED
 
@@ -7107,6 +7104,3 @@ DOCTEST_SUPPRESS_COMMON_WARNINGS_POP
 #undef NOMINMAX
 #undef DOCTEST_UNDEF_NOMINMAX
 #endif // DOCTEST_UNDEF_NOMINMAX
-
-
-#endif /* DOCTEST_H */

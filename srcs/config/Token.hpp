@@ -24,6 +24,8 @@ class Token {
     static std::string getTypeName(Token::Type type);
     std::string getStr() const;
     friend std::ostream& operator<<(std::ostream& os, const Token& token);
+    bool operator==(const Token& rhs) const;
+    bool operator!=(const Token& rhs) const;
 
    private:
     Type _type;

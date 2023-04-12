@@ -5,10 +5,12 @@ CXXFLAGS = -Wall -Wextra  -std=c++98 -fsanitize=address -g3
 test: ${SRCS}
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	./test
+
 re :
 	- rm test
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	./test
+
 utest: ${SRCS}
-	${CXX} ${SRCS} ${CXXFLAGS} -D UNIT_TEST -o test
+	${CXX} ${SRCS} -D UNIT_TEST -o test
 	./test

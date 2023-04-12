@@ -3,8 +3,12 @@
 #include <iostream>
 #include <vector>
 #include "Token.hpp"
+#ifdef UNIT_TEST
+#include "doctest.h"
+#endif
 
-Lexer::Lexer(std::string text) : _text(text) {
+Lexer::Lexer(std::string text)
+    : _text(text), _token_list(std::vector<Token*>()) {
     while (_text.length() != 0) {
         std::string buf;
         setState();
@@ -48,7 +52,7 @@ Lexer::~Lexer() {
     _token_list.clear();
 }
 
-Token::Type Lexer::getState(char c) const throw(std::runtime_error) {
+Token::Type Lexer::getState(char c) const {
     if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f') {
         return Token::WHITE_SPACE;
     } else if (c == '{') {
@@ -99,5 +103,19 @@ std::vector<Token*> Lexer::getTokenList() const {
 }
 
 #ifdef UNIT_TEST
-int main();
+TEST_CASE("Lexer Basic Char Test") {
+    CHECK(Lexer("").getTokenList().size() == 0);
+    CHECK(Lexer("''").getTokenList().size() == 0);
+    CHECK(Lexer("ANYCHAR").getTokenList()[0] ==
+          new Token("ANYCHAR", Token::ANYCHAR));
+    CHECK(Lexer("4NYCH4R").getTokenList()[0] ==
+          new Token("4NYCH4R", Token::ANYCHAR));
+    CHECK(Lexer(";").getTokenList()[0] == new Token(";", Token::SEMI));
+    CHECK(Lexer("{").getTokenList()[0] == new Token("{", Token::LCURLY));
+    CHECK(Lexer("}").getTokenList()[0] == new Token("}", Token::RCURLY));
+    CHECK(Lexer(",").getTokenList()[0] == new Token(",", Token::COMMA));
+    CHECK(Lexer("100").getTokenList()[0] == new Token("100", Token::INT));
+    CHECK(Lexer("\"string test\"").getTokenList()[0] ==
+          new Token("string test", Token::STRING));
+}
 #endif
