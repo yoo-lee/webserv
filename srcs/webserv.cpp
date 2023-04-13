@@ -105,6 +105,8 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         }
         req->print_request();
         char buf[1024]{0};
+
+        //test( following code will be removed)
         int size = req->read_buf(buf);
         cout << "body:" << endl;
         while(size > 0){
