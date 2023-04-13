@@ -111,14 +111,26 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             cout << string(buf) << endl;
             size = req->read_buf(buf);
         }
-        event->events = EPOLLOUT | EPOLLONESHOT;
+
+        //todo. do something in server
+        bool read_all = true;
+        if (read_all == false)
+            return ;
+
+        event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
             cout << "error;connected_communication No.2" << endl;
         }
     }else if (event->events & EPOLLOUT){
         std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
         socket->send(r_data);
-        event->events = EPOLLIN | EPOLLONESHOT;
+
+        //todo
+        bool write_all = true;
+        if (write_all == false)
+            return ;
+
+        event->events = EPOLLIN;
         if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
             cout << "error;connected_communication No.3" << endl;
         }
@@ -140,6 +152,7 @@ void Webserv::communication()
     while(1)
     {
         int nfds = epoll_wait(this->epfd, sock_event, size, -1);
+
         if (nfds == 0) {
             continue;
         }
@@ -156,7 +169,6 @@ void Webserv::communication()
                 Socket *socket = map_socks.at(*tmp_fd);
                 connected_communication(*tmp_fd, &(sock_event[i]), socket);
                 continue;
-
             }
             Socket *socket = find_listen_socket(sock_event[i].data.fd);
             if (socket)
@@ -164,7 +176,7 @@ void Webserv::communication()
                 int fd = socket->accept_request();
                 sock_fds.push_back(fd);
                 memset(&server_event, 0, sizeof(server_event));
-                server_event.events = EPOLLIN | EPOLLONESHOT;
+                server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
                 map_socks.insert(std::make_pair(fd, socket));
                 if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))

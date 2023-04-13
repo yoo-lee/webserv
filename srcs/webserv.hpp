@@ -14,6 +14,7 @@ class Webserv
         Webserv& operator=(const Webserv &sockets);
         ~Webserv();
         void communication();
+        bool change_epoll_config_to_write(int fd, int event);
     private:
         int epfd;
         void init_socket(std::vector<std::string>);
