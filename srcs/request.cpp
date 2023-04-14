@@ -102,7 +102,15 @@ void Request::parse()
     Split::iterator ite = sp.begin();
     this->method = identify_method(*ite);
     this->uri = *(++ite);
-    this->path = *(ite);
+    const char *path = this->uri.c_str();
+    size_t cnt = 0;
+    while (path && *path){
+        if(*path != '/')
+            break;
+        cnt++;
+        path++;
+    }
+    this->path = this->uri.substr(cnt);
     this->version = *(++ite);
     string header;
     string value;
@@ -158,12 +166,19 @@ int Request::read_buf(char *cp_buf)
     return (tmp);
 }
 
+const string& Request::get_path()
+{
+    return (this->path);
+}
+
 string Request::get_ip_address()
 {
+    //todo
     return ("127.0.0.1");
 }
 
 string Request::get_domain()
 {
+    //todo
     return ("test.com");
 }
