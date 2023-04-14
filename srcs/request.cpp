@@ -102,6 +102,7 @@ void Request::parse()
     Split::iterator ite = sp.begin();
     this->method = identify_method(*ite);
     this->uri = *(++ite);
+    this->path = *(ite);
     this->version = *(++ite);
     string header;
     string value;
@@ -157,3 +158,12 @@ int Request::read_buf(char *cp_buf)
     return (tmp);
 }
 
+string Request::get_ip_address()
+{
+    return ("127.0.0.1");
+}
+
+string Request::get_domain()
+{
+    return ("test.com");
+}

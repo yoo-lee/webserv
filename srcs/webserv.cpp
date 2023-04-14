@@ -1,6 +1,7 @@
 #include "webserv.hpp"
 #include "tcp_socket.hpp"
 #include "request.hpp"
+#include "cgi.hpp"
 #include <sys/epoll.h>
 #include <iostream>
 #include <string.h>
@@ -115,6 +116,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         }
 
         //todo. do something in server
+        CGI cgi(*req);
         bool read_all = true;
         if (read_all == false)
             return ;

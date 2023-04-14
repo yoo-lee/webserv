@@ -24,11 +24,14 @@ class Request
         Request(int fd);
         ~Request();
         const METHOD get_method();
-        const std::string &get_uri();
+        const std::string &get_path();
+        const std::string &get_uri(); // will remove
         const std::string &get_version();
         const std::map<std::string, std::string> &get_headers();
         void print_request();
         int read_buf(char *buf);
+        std::string get_domain();
+        std::string get_ip_address();
     private:
         void parse();
         const static int BUF_MAX = 1024;
@@ -39,10 +42,13 @@ class Request
         std::string identify_method(METHOD method);
         METHOD identify_method(std::string method);
         METHOD method;
-        std::string uri;
+        std::string uri; //will remove
+        std::string path;
         std::string version;
         std::string &get_next_line(int fd);
         std::string err_line = "";
+        std::string domain;
+        std::string ip;
         //Split *sp;
 };
 
