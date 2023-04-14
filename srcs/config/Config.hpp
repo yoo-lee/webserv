@@ -30,7 +30,7 @@ int main() {
         str += c;
     }
     file.close();
-    Config config(str);
+    Config config("}");
     std::vector<Token*> token_list = config.lexer.getTokenList();
     for (std::size_t i = 0; i < token_list.size(); i++) {
         std::cout << *token_list[i] << std::endl;

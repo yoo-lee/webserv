@@ -1,16 +1,22 @@
 SRCS = Config.cpp Lexer.cpp Token.cpp
 OBJS = ${SRCS:.cpp=.o}
 CXX = g++
-CXXFLAGS = -Wall -Wextra  -std=c++98 -fsanitize=address -g3
+CXXFLAGS = -Wall -Wextra  -std=c++98 -g3
 test: ${SRCS}
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	./test
 
+run:
+	./test
+
+tr: test run
+
 re :
 	- rm test
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
-	./test
+	# ./test
 
 utest: ${SRCS}
-	${CXX} ${SRCS} -D UNIT_TEST -o test
-	./test
+	${CXX} ${SRCS} -g3 -D UNIT_TEST -o test
+
+utr: utest run

@@ -13,10 +13,10 @@ Token::Token(char c, Token::Type type)
     : _type(type), _str(std::string(&c, 1)) {}
 
 std::string Token::getTypeName(Token::Type type) {
-    const char* type_name_list[] = {"COMMA",  "SEMI",        "DQUOTE", "SQUOTE",
-                                    "STRING", "LCURLY",      "RCURLY", "INT",
-                                    "ID",     "WHITE_SPACE", "ANYCHAR"};
-    if (type <= Token::ANYCHAR)
+    const char* type_name_list[] = {
+        "COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING",  "LCURLY",
+        "RCURLY", "INT",  "ID",     "WHITE_SPACE", "ANYCHAR", "NONE"};
+    if (type <= Token::NONE && type >= 0)
         return type_name_list[type];
     return "UNKNOWN";
 }
@@ -37,13 +37,19 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
 Token::~Token() {}
 
 bool Token::operator==(const Token& rhs) const {
-    return _type == rhs._type && _str == rhs._str;
+    return _type == rhs.getType() && _str == rhs.getStr();
 }
 bool Token::operator!=(const Token& rhs) const {
     return !(*this == rhs);
 }
 
-#ifdef UNIT_TESTj
+Token& Token::operator=(const Token& rhs) {
+    _type = rhs._type;
+    _str = rhs._str;
+    return *this;
+}
+
+#ifdef UNIT_TEST
 TEST_CASE("Token Class Test") {
     CHECK(Token::getTypeName(Token::COMMA) == "COMMA");
     CHECK(Token::getTypeName(Token::SEMI) == "SEMI");

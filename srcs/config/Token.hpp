@@ -16,6 +16,7 @@ class Token {
         ID,
         WHITE_SPACE,
         ANYCHAR,
+        NONE
     };
     Token(std::string str, Type type);
     Token(char c, Type type);
@@ -26,6 +27,7 @@ class Token {
     friend std::ostream& operator<<(std::ostream& os, const Token& token);
     bool operator==(const Token& rhs) const;
     bool operator!=(const Token& rhs) const;
+    Token& operator=(const Token& rhs);
 
    private:
     Type _type;
