@@ -1,0 +1,16 @@
+STRING=1
+SQUOTE=2
+COMMA=3
+SEMI=4
+DQUOTE=5
+LCURLY=6
+RCURLY=7
+INT=8
+ID=9
+WS=10
+'\''=2
+','=3
+';'=4
+'"'=5
+'{'=6
+'}'=7
