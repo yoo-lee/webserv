@@ -12,36 +12,35 @@ Lexer::Lexer(std::string text)
     while (_text.length() != 0 && _state != Token::NONE) {
         std::string buf = "";
         setState();
-        if (_state == Token::DQUOTE) {
-            consume();
-            while (_text.length() != 0 && _text[0] != '"')
-                buf += consume();
-            _token_list.push_back(new Token(buf, Token::STRING));
-            consume();
-        } else if (_state == Token::SQUOTE) {
-            consume();
-            while (_text.length() != 0 && _text[0] != '\'')
-                buf += consume();
-            _token_list.push_back(new Token(buf, Token::STRING));
-            consume();
-        } else if (_state == Token::COMMA || _state == Token::SEMI ||
-                   _state == Token::DQUOTE || _state == Token::LCURLY ||
-                   _state == Token::RCURLY) {
-            _token_list.push_back(new Token(consume(), _state));
-        } else if (_state == Token::ANYCHAR) {
-            while (_text.length() != 0 && _state == Token::ANYCHAR)
-                buf += updateState();
-            _token_list.push_back(new Token(buf, Token::ANYCHAR));
-        } else if (_state == Token::INT) {
-            while (_text.length() != 0 && _state == Token::INT)
-                buf += updateState();
-            _token_list.push_back(new Token(buf, Token::INT));
-        } else if (_state == Token::ID) {
-            while (_text.length() != 0 && _state == Token::ID)
-                buf += updateState();
-            _token_list.push_back(new Token(buf, Token::ID));
-        } else
-            consume();
+        switch (_state) {
+            char quote;
+            Token::Type token_type;
+            case Token::DQUOTE:
+            case Token::SQUOTE:
+                quote = consume();
+                while (_text.length() != 0 && _text[0] != quote)
+                    buf += consume();
+                _token_list.push_back(new Token(buf, Token::STRING));
+                consume();
+                break;
+            case Token::COMMA:
+            case Token::SEMI:
+            case Token::LCURLY:
+            case Token::RCURLY:
+                _token_list.push_back(new Token(consume(), _state));
+                break;
+            case Token::ANYCHAR:
+            case Token::INT:
+            case Token::ID:
+                token_type = _state;
+                while (_text.length() != 0 && _state == token_type)
+                    buf += updateState();
+                _token_list.push_back(new Token(buf, token_type));
+                break;
+            default:
+                consume();
+                break;
+        }
     }
 }
 
@@ -54,27 +53,34 @@ Lexer::~Lexer() {
 }
 
 Token::Type Lexer::getState(char c) const {
-    if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f') {
-        return Token::WHITE_SPACE;
-    } else if (c == '{') {
-        return Token::LCURLY;
-    } else if (c == '}') {
-        return Token::RCURLY;
-    } else if (c == ';') {
-        return Token::SEMI;
-    } else if (c == ',') {
-        return Token::COMMA;
-    } else if (c == '"') {
-        return Token::DQUOTE;
-    } else if (c == '\'') {
-        return Token::SQUOTE;
-    } else if (c >= '0' && c <= '9') {
+    switch (c) {
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+        case '\f':
+            return Token::WHITE_SPACE;
+        case '{':
+            return Token::LCURLY;
+        case '}':
+            return Token::RCURLY;
+        case ';':
+            return Token::SEMI;
+        case ',':
+            return Token::COMMA;
+        case '"':
+            return Token::DQUOTE;
+        case '\'':
+            return Token::SQUOTE;
+    }
+    if (c >= '0' && c <= '9') {
         if (_state == Token::ID)
             return Token::ID;
         if (_state == Token::ANYCHAR)
             return Token::ANYCHAR;
         return Token::INT;
-    } else if (isprint(c)) {
+    }
+    if (isprint(c)) {
         if (_state == Token::ID)
             return Token::ID;
         return Token::ANYCHAR;

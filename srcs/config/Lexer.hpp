@@ -13,6 +13,8 @@ class Lexer {
     void setState();
     char updateState();
     char consume();
+    void tokenize();
+    std::string extractString(Token::Type quote_type);
 
    public:
     Lexer(std::string text);
