@@ -29,7 +29,6 @@ Lexer::Lexer(std::string text)
             case Token::RCURLY:
                 _token_list.push_back(new Token(consume(), _state));
                 break;
-            case Token::ANYCHAR:
             case Token::INT:
             case Token::ID:
                 token_type = _state;
@@ -76,14 +75,14 @@ Token::Type Lexer::getState(char c) const {
     if (c >= '0' && c <= '9') {
         if (_state == Token::ID)
             return Token::ID;
-        if (_state == Token::ANYCHAR)
-            return Token::ANYCHAR;
+        if (_state == Token::ID)
+            return Token::ID;
         return Token::INT;
     }
     if (isprint(c)) {
         if (_state == Token::ID)
             return Token::ID;
-        return Token::ANYCHAR;
+        return Token::ID;
     }
     if (_text.length() == 0)
         return Token::NONE;
@@ -120,10 +119,8 @@ std::vector<Token*> Lexer::getTokenList() const {
 TEST_CASE("Lexer Basic Char Test") {
     CHECK(Lexer("").getTokenList().size() == 0);
     CHECK(Lexer("''").getTokenList().size() == 1);
-    CHECK(*Lexer("ANYCHAR").getTokenList()[0] ==
-          Token("ANYCHAR", Token::ANYCHAR));
-    CHECK(*Lexer("ANYCH4R").getTokenList()[0] ==
-          Token("ANYCH4R", Token::ANYCHAR));
+    CHECK(*Lexer("ID").getTokenList()[0] == Token("ID", Token::ID));
+    CHECK(*Lexer("ANYCH4R").getTokenList()[0] == Token("ANYCH4R", Token::ID));
     CHECK(*Lexer("4NYCH4R").getTokenList()[0] == Token("4", Token::INT));
     CHECK(*Lexer(";").getTokenList()[0] == Token(";", Token::SEMI));
     CHECK(*Lexer("{").getTokenList()[0] == Token("{", Token::LCURLY));
@@ -138,9 +135,9 @@ TEST_CASE("Lexer Simple Statement Test") {
     Lexer l("key param1 param2;");
     std::vector<Token*> tl = l.getTokenList();
     REQUIRE(tl.size() == 4);
-    CHECK(*tl[0] == Token("key", Token::ANYCHAR));
-    CHECK(*tl[1] == Token("param1", Token::ANYCHAR));
-    CHECK(*tl[2] == Token("param2", Token::ANYCHAR));
+    CHECK(*tl[0] == Token("key", Token::ID));
+    CHECK(*tl[1] == Token("param1", Token::ID));
+    CHECK(*tl[2] == Token("param2", Token::ID));
     CHECK(*tl[3] == Token(";", Token::SEMI));
 }
 
@@ -148,9 +145,9 @@ TEST_CASE("Lexer Block Statement Test") {
     Lexer l("key param1 param2 {\n}");
     std::vector<Token*> tl = l.getTokenList();
     REQUIRE(tl.size() == 5);
-    CHECK(*tl[0] == Token("key", Token::ANYCHAR));
-    CHECK(*tl[1] == Token("param1", Token::ANYCHAR));
-    CHECK(*tl[2] == Token("param2", Token::ANYCHAR));
+    CHECK(*tl[0] == Token("key", Token::ID));
+    CHECK(*tl[1] == Token("param1", Token::ID));
+    CHECK(*tl[2] == Token("param2", Token::ID));
     CHECK(*tl[3] == Token("{", Token::LCURLY));
     CHECK(*tl[4] == Token("}", Token::RCURLY));
 }
@@ -159,16 +156,16 @@ TEST_CASE("Lexer Complex Block Statement Test") {
     Lexer l("key1 param1 param2 {\nkey2 param3 param4 {\nkey3 value;\n}\n}");
     std::vector<Token*> tl = l.getTokenList();
     REQUIRE(tl.size() == 13);
-    CHECK(*tl[0] == Token("key1", Token::ANYCHAR));
-    CHECK(*tl[1] == Token("param1", Token::ANYCHAR));
-    CHECK(*tl[2] == Token("param2", Token::ANYCHAR));
+    CHECK(*tl[0] == Token("key1", Token::ID));
+    CHECK(*tl[1] == Token("param1", Token::ID));
+    CHECK(*tl[2] == Token("param2", Token::ID));
     CHECK(*tl[3] == Token("{", Token::LCURLY));
-    CHECK(*tl[4] == Token("key2", Token::ANYCHAR));
-    CHECK(*tl[5] == Token("param3", Token::ANYCHAR));
-    CHECK(*tl[6] == Token("param4", Token::ANYCHAR));
+    CHECK(*tl[4] == Token("key2", Token::ID));
+    CHECK(*tl[5] == Token("param3", Token::ID));
+    CHECK(*tl[6] == Token("param4", Token::ID));
     CHECK(*tl[7] == Token("{", Token::LCURLY));
-    CHECK(*tl[8] == Token("key3", Token::ANYCHAR));
-    CHECK(*tl[9] == Token("value", Token::ANYCHAR));
+    CHECK(*tl[8] == Token("key3", Token::ID));
+    CHECK(*tl[9] == Token("value", Token::ID));
     CHECK(*tl[10] == Token(";", Token::SEMI));
     CHECK(*tl[11] == Token("}", Token::RCURLY));
     CHECK(*tl[12] == Token("}", Token::RCURLY));
@@ -181,8 +178,8 @@ TEST_CASE("Lexer practical Test1") {
         "'\n    '\"$http_user_agent\" \"$http_x_forwarded_for\"';");
     std::vector<Token*> tl = l.getTokenList();
     REQUIRE(tl.size() == 6);
-    CHECK(*tl[0] == Token("log_format", Token::ANYCHAR));
-    CHECK(*tl[1] == Token("main", Token::ANYCHAR));
+    CHECK(*tl[0] == Token("log_format", Token::ID));
+    CHECK(*tl[1] == Token("main", Token::ID));
     CHECK(*tl[2] ==
           Token("$remote_addr - $remote_user [$time_local] \"$request\" ",
                 Token::STRING));
@@ -197,7 +194,7 @@ TEST_CASE("Lexer practical Test2") {
     Lexer l("gzip_disable \"MSIE [1-6]\\.\";");
     std::vector<Token*> tl = l.getTokenList();
     REQUIRE(tl.size() == 3);
-    CHECK(*tl[0] == Token("gzip_disable", Token::ANYCHAR));
+    CHECK(*tl[0] == Token("gzip_disable", Token::ID));
     CHECK(*tl[1] == Token("MSIE [1-6]\\.", Token::STRING));
     CHECK(*tl[2] == Token(";", Token::SEMI));
 }

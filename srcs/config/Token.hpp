@@ -15,7 +15,6 @@ class Token {
         INT,
         ID,
         WHITE_SPACE,
-        ANYCHAR,
         NONE
     };
     Token(std::string str, Type type);

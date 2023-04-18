@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cAT"})
 public class ExprParser extends Parser {
 	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
@@ -16,14 +16,14 @@ public class ExprParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8, 
+		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8,
 		ID=9, WS=10;
 	public static final int
-		RULE_program = 0, RULE_statement = 1, RULE_simpleStatement = 2, RULE_blockStatement = 3, 
+		RULE_program = 0, RULE_statement = 1, RULE_simpleStatement = 2, RULE_blockStatement = 3,
 		RULE_directive = 4, RULE_parameters = 5, RULE_parameter = 6;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"program", "statement", "simpleStatement", "blockStatement", "directive", 
+			"program", "statement", "simpleStatement", "blockStatement", "directive",
 			"parameters", "parameter"
 		};
 	}
@@ -37,7 +37,7 @@ public class ExprParser extends Parser {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY", 
+			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY",
 			"INT", "ID", "WS"
 		};
 	}

@@ -13,9 +13,9 @@ Token::Token(char c, Token::Type type)
     : _type(type), _str(std::string(&c, 1)) {}
 
 std::string Token::getTypeName(Token::Type type) {
-    const char* type_name_list[] = {
-        "COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING",  "LCURLY",
-        "RCURLY", "INT",  "ID",     "WHITE_SPACE", "ANYCHAR", "NONE"};
+    const char* type_name_list[] = {"COMMA",  "SEMI",        "DQUOTE", "SQUOTE",
+                                    "STRING", "LCURLY",      "RCURLY", "INT",
+                                    "ID",     "WHITE_SPACE", "NONE"};
     if (type <= Token::NONE && type >= 0)
         return type_name_list[type];
     return "UNKNOWN";
@@ -61,7 +61,6 @@ TEST_CASE("Token Class Test") {
     CHECK(Token::getTypeName(Token::INT) == "INT");
     CHECK(Token::getTypeName(Token::ID) == "ID");
     CHECK(Token::getTypeName(Token::WHITE_SPACE) == "WHITE_SPACE");
-    CHECK(Token::getTypeName(Token::ANYCHAR) == "ANYCHAR");
     CHECK(Token::getTypeName(Token::Type(100)) == "UNKNOWN");
 }
 #endif
