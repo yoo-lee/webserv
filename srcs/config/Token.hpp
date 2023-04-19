@@ -2,9 +2,11 @@
 #define TOKEN_H
 #include <iostream>
 #include <string>
-class Token {
-   public:
-    enum Type {
+class Token
+{
+  public:
+    enum Type
+    {
         COMMA,
         SEMI,
         DQUOTE,
@@ -23,12 +25,12 @@ class Token {
     Type getType() const;
     static std::string getTypeName(Token::Type type);
     std::string getStr() const;
-    friend std::ostream& operator<<(std::ostream& os, const Token& token);
-    bool operator==(const Token& rhs) const;
-    bool operator!=(const Token& rhs) const;
-    Token& operator=(const Token& rhs);
+    friend std::ostream &operator<<(std::ostream &os, const Token &token);
+    bool operator==(const Token &rhs) const;
+    bool operator!=(const Token &rhs) const;
+    Token &operator=(const Token &rhs);
 
-   private:
+  private:
     Type _type;
     std::string _str;
 };

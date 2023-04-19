@@ -1,12 +1,13 @@
 #ifndef AST_H
 #define AST_H
-#include <exception>
-#include <queue>
-#include <stdexcept>
-#include <vector>
 #include "ASTNode.hpp"
 #include "SyntaxError.hpp"
 #include "Token.hpp"
+#include <exception>
+#include <ostream>
+#include <queue>
+#include <stdexcept>
+#include <vector>
 
 /*
 program: statement*;
@@ -31,25 +32,27 @@ INT: [0-9]+;
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
  */
-class AST {
-   private:
-    std::vector<Token*> _tokens;
-    ASTNode* root;
-    std::queue<Token*> _buf;
-
-   public:
-    ASTNode* program();
-    ASTNode* statement();
-    ASTNode* try_simple_statement();
-    ASTNode* try_block_statement();
-    ASTNode* directive();
-    ASTNode* parameters();
-    ASTNode* parameter();
-    ASTNode* consume(Token::Type type) throw(syntax_error);
+class AST
+{
+  private:
+    std::vector<Token *> _tokens;
+    ASTNode *root;
+    std::queue<Token *> _buf;
+    ASTNode *program();
+    ASTNode *statement();
+    ASTNode *try_simple_statement();
+    ASTNode *try_block_statement();
+    ASTNode *directive();
+    ASTNode *parameters();
+    ASTNode *parameter();
+    ASTNode *consume(Token::Type type) throw(syntax_error);
     void backtrace();
     void decide();
-    AST(std::vector<Token*> tokens);
-};
 
+  public:
+    AST();
+    AST(std::vector<Token *> tokens);
+    friend std::ostream &operator<<(std::ostream &os, const AST &ast);
+};
 
 #endif /* AST_H */

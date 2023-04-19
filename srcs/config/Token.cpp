@@ -7,50 +7,62 @@
 #include "doctest.h"
 #endif
 
-Token::Token(std::string str, Token::Type type) : _type(type), _str(str) {}
+Token::Token(std::string str, Token::Type type) : _type(type), _str(str)
+{
+}
 
-Token::Token(char c, Token::Type type)
-    : _type(type), _str(std::string(&c, 1)) {}
+Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1))
+{
+}
 
-std::string Token::getTypeName(Token::Type type) {
-    const char* type_name_list[] = {"COMMA",  "SEMI",        "DQUOTE", "SQUOTE",
-                                    "STRING", "LCURLY",      "RCURLY", "INT",
-                                    "ID",     "WHITE_SPACE", "NONE"};
+std::string Token::getTypeName(Token::Type type)
+{
+    const char *type_name_list[] = {"COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING", "LCURLY",
+                                    "RCURLY", "INT",  "ID",     "WHITE_SPACE", "NONE"};
     if (type <= Token::NONE && type >= 0)
         return type_name_list[type];
     return "UNKNOWN";
 }
 
-Token::Type Token::getType() const {
+Token::Type Token::getType() const
+{
     return _type;
 }
 
-std::string Token::getStr() const {
+std::string Token::getStr() const
+{
     return _str;
 }
 
-std::ostream& operator<<(std::ostream& os, const Token& token) {
+std::ostream &operator<<(std::ostream &os, const Token &token)
+{
     os << token.getStr() << " : " << Token::getTypeName(token.getType());
     return os;
 }
 
-Token::~Token() {}
+Token::~Token()
+{
+}
 
-bool Token::operator==(const Token& rhs) const {
+bool Token::operator==(const Token &rhs) const
+{
     return _type == rhs.getType() && _str == rhs.getStr();
 }
-bool Token::operator!=(const Token& rhs) const {
+bool Token::operator!=(const Token &rhs) const
+{
     return !(*this == rhs);
 }
 
-Token& Token::operator=(const Token& rhs) {
+Token &Token::operator=(const Token &rhs)
+{
     _type = rhs._type;
-    _str  = rhs._str;
+    _str = rhs._str;
     return *this;
 }
 
 #ifdef UNIT_TEST
-TEST_CASE("Token Class Test") {
+TEST_CASE("Token Class Test")
+{
     CHECK(Token::getTypeName(Token::COMMA) == "COMMA");
     CHECK(Token::getTypeName(Token::SEMI) == "SEMI");
     CHECK(Token::getTypeName(Token::DQUOTE) == "DQUOTE");
