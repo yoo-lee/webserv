@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include "tcp_socket.hpp"
+#include "string.h"
 //#include <netdb.h>
 //#include <sys/types.h>
 
@@ -26,8 +27,8 @@ void Socket::setAddrInfo(struct addrinfo &info)
 void Socket::init()
 {
     this->sock_fd= makeSocket();
-    this->clientinfo;
-    //memset(clientinfo, 0, sizeof(s_clientinfo));
+    //this->clientinfo;
+    memset(&(this->clientinfo), 0, sizeof(s_clientinfo));
     this->ev.data.ptr = &clientinfo;
     if (this->sock_fd < 0)
     {
@@ -36,7 +37,8 @@ void Socket::init()
          throw std::runtime_error("Failed to create sock_fdet\n");
     }
 
-    struct addrinfo hint{0};
+    struct addrinfo hint;
+    memset(&hint, 0, sizeof(struct addrinfo));
     setAddrInfo(hint);
     struct addrinfo *res = NULL;
     int err = getaddrinfo(NULL, this->port.c_str(), &hint, &res);
@@ -106,6 +108,7 @@ int Socket::accept_request()
 {
     //int fd = 0;
     struct sockaddr_in client;
+    memset(&client, 0, sizeof(struct sockaddr_in));
     //struct epoll_event ev = {0};
     socklen_t len = sizeof(client);
 

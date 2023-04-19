@@ -1,7 +1,7 @@
 #include "webserv.hpp"
 #include "tcp_socket.hpp"
 #include "request.hpp"
-#include "cgi.hpp"
+//#include "cgi.hpp"
 #include <sys/epoll.h>
 #include <iostream>
 #include <string.h>
@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <unistd.h>
+#include <errno.h>
 
 #define NEVENTS 16
 using std::cout;
@@ -33,6 +34,7 @@ Webserv::~Webserv()
 }
 Webserv::Webserv(const Webserv &webserv) : epfd(0)
 {
+    (void)webserv;
 }
 Webserv& Webserv::operator=(const Webserv &socket)
 {
@@ -71,12 +73,12 @@ bool Webserv::init_epoll()
     }
     for(size_t i=0; i < this->sockets.size();i++)
     {
-        struct epoll_event ev{0};
+        struct epoll_event ev;
+        memset(&ev, 0, sizeof(struct epoll_event));
         Socket *socket = this->sockets[i];
 
         ev.events = EPOLLIN;
         ev.data.fd = socket->getSockFD();
-        //ev.data.ptr = malloc(sizeof(Socket));
         if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, socket->getSockFD(), &ev) != 0){
             cout << "Epoll Ctl Error:" << strerror(errno) << endl;
             return (false);
@@ -105,7 +107,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
         }
         req->print_request();
-        char buf[1024]{0};
+        char buf[1024];
 
         //test( following code will be removed)
         int size = req->read_buf(buf);
@@ -116,7 +118,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         }
 
         //todo. do something in server
-        CGI cgi(*req);
+        //CGI cgi(*req);
         bool read_all = true;
         if (read_all == false)
             return ;
@@ -146,11 +148,15 @@ void Webserv::communication()
 {
     size_t size = this->sockets.size();
     struct epoll_event sock_event[size];
-    struct epoll_event server_event = {0};
+    struct epoll_event server_event;
+
+    memset(&(sock_event[0]), 0, sizeof(struct epoll_event) * size);
+    memset(&server_event, 0, sizeof(struct epoll_event));
+
     std::vector<int> sock_fds;
     std::map<int, Socket*> map_socks;
 
-    if(init_epoll() == false){
+    if(this->init_epoll() == false){
         return ;
     }
     while(1)

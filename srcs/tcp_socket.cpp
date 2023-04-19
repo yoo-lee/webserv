@@ -20,7 +20,8 @@ void TCPSocket::init()
          throw std::runtime_error("Failed to create sock_fdet\n");
     }
 
-    struct addrinfo hint{0};
+    struct addrinfo hint;
+    memset(&hint, 0, sizeof(struct addrinfo));
     hint.ai_family = AF_INET;
     hint.ai_flags = AI_PASSIVE;
     hint.ai_socktype = SOCK_STREAM;

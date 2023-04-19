@@ -11,6 +11,8 @@ using std::cout;
 using std::endl;
 int main(int argc, char const* argv[]) {
 
+    (void)argc;
+    (void)argv;
     /*
     if (argc != 2) {
         std::cout << "Error: Specify config file" << std::endl;

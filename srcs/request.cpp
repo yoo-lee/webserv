@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), buf_size(0), method(NG)
+Request::Request(int fd_) : fd(fd_), buf_size(0), method(NG), err_line("")
 {
     this->parse();
 }
@@ -132,7 +132,7 @@ void Request::parse()
     this->buf_size = gnl.get_extra_buf(this->extra_buf);
 }
 
-const METHOD Request::get_method()
+METHOD Request::get_method()
 {
     return (this->method);
 }
