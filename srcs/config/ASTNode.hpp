@@ -1,23 +1,43 @@
-#ifndef ATNODE_H
-#define ATNODE_H
+#ifndef AST_NODE_H
+#define AST_NODE_H
+#include "Token.hpp"
+#include <ostream>
 #include <vector>
-class ATNode {
-   public:
-    enum Type {
+class ASTNode
+{
+  public:
+    enum Type
+    {
         PROGRAM,
         STATEMENT,
         SIMPLE_STATEMENT,
         BLOCK_STATEMENT,
         DIRECTIVE,
         PARAMETERS,
-        PARAMETER
+        PARAMETER,
+        ID,
+        STRING,
+        INT,
+        SEMI,
+        LCURLY,
+        RCURLY
     };
-    ATNode(Type type, std::vector<ATNode*> children);
-    ~ATNode();
+    ASTNode(ASTNode::Type type, std::vector<ASTNode *> children);
+    ASTNode(ASTNode::Type type, std::string value);
+    ASTNode(ASTNode::Type type, ASTNode *child);
+    ASTNode(ASTNode *at_node);
+    ~ASTNode();
+    friend std::ostream &operator<<(std::ostream &os, const ASTNode &node);
+    ASTNode::Type getType() const;
+    std::vector<ASTNode *> getChildren() const;
+    std::string getValue() const;
+    static std::string ASTNodeTypeToStr(ASTNode::Type type);
+    static ASTNode::Type TokenTypeToASTNodeType(Token::Type type);
 
-   private:
-    Type _type;
-    std::vector<ATNode*> _children;
+  private:
+    ASTNode::Type _type;
+    std::vector<ASTNode *> _children;
+    std::string _value;
 };
 
-#endif /* ATNODE_H */
+#endif /* AST_NODE_H */

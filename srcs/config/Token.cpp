@@ -45,7 +45,7 @@ bool Token::operator!=(const Token& rhs) const {
 
 Token& Token::operator=(const Token& rhs) {
     _type = rhs._type;
-    _str = rhs._str;
+    _str  = rhs._str;
     return *this;
 }
 

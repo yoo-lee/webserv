@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cAT"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ExprLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
@@ -16,7 +16,7 @@ public class ExprLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8,
+		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8, 
 		ID=9, WS=10;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -28,7 +28,7 @@ public class ExprLexer extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY", "INT",
+			"STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY", "INT", 
 			"ID", "WS"
 		};
 	}
@@ -42,7 +42,7 @@ public class ExprLexer extends Lexer {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY",
+			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY", 
 			"INT", "ID", "WS"
 		};
 	}

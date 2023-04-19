@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cAT"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ExprParser extends Parser {
 	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
@@ -16,14 +16,14 @@ public class ExprParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8,
+		STRING=1, SQUOTE=2, COMMA=3, SEMI=4, DQUOTE=5, LCURLY=6, RCURLY=7, INT=8, 
 		ID=9, WS=10;
 	public static final int
-		RULE_program = 0, RULE_statement = 1, RULE_simpleStatement = 2, RULE_blockStatement = 3,
+		RULE_program = 0, RULE_statement = 1, RULE_simpleStatement = 2, RULE_blockStatement = 3, 
 		RULE_directive = 4, RULE_parameters = 5, RULE_parameter = 6;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"program", "statement", "simpleStatement", "blockStatement", "directive",
+			"program", "statement", "simpleStatement", "blockStatement", "directive", 
 			"parameters", "parameter"
 		};
 	}
@@ -37,7 +37,7 @@ public class ExprParser extends Parser {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY",
+			null, "STRING", "SQUOTE", "COMMA", "SEMI", "DQUOTE", "LCURLY", "RCURLY", 
 			"INT", "ID", "WS"
 		};
 	}
@@ -240,9 +240,6 @@ public class ExprParser extends Parser {
 		}
 		public TerminalNode LCURLY() { return getToken(ExprParser.LCURLY, 0); }
 		public TerminalNode RCURLY() { return getToken(ExprParser.RCURLY, 0); }
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
-		}
 		public List<StatementContext> statement() {
 			return getRuleContexts(StatementContext.class);
 		}
@@ -264,33 +261,23 @@ public class ExprParser extends Parser {
 			{
 			setState(30);
 			directive();
-			setState(32);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING) | (1L << INT) | (1L << ID))) != 0)) {
-				{
-				setState(31);
-				parameters();
-				}
-			}
-
-			setState(34);
+			setState(31);
 			match(LCURLY);
-			setState(38);
+			setState(35);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==ID) {
 				{
 				{
-				setState(35);
+				setState(32);
 				statement();
 				}
 				}
-				setState(40);
+				setState(37);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(41);
+			setState(38);
 			match(RCURLY);
 			}
 		}
@@ -319,7 +306,7 @@ public class ExprParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(43);
+			setState(40);
 			match(ID);
 			}
 		}
@@ -351,22 +338,22 @@ public class ExprParser extends Parser {
 		ParametersContext _localctx = new ParametersContext(_ctx, getState());
 		enterRule(_localctx, 10, RULE_parameters);
 		try {
-			setState(49);
+			setState(46);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(45);
+				setState(42);
 				parameter();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(46);
+				setState(43);
 				parameter();
-				setState(47);
+				setState(44);
 				parameters();
 				}
 				break;
@@ -400,7 +387,7 @@ public class ExprParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(51);
+			setState(48);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING) | (1L << INT) | (1L << ID))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -424,21 +411,20 @@ public class ExprParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\f8\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\7\2\22\n\2\f\2\16\2\25"+
-		"\13\2\3\3\3\3\5\3\31\n\3\3\4\3\4\5\4\35\n\4\3\4\3\4\3\5\3\5\5\5#\n\5\3"+
-		"\5\3\5\7\5\'\n\5\f\5\16\5*\13\5\3\5\3\5\3\6\3\6\3\7\3\7\3\7\3\7\5\7\64"+
-		"\n\7\3\b\3\b\3\b\2\2\t\2\4\6\b\n\f\16\2\3\4\2\3\3\n\13\2\66\2\23\3\2\2"+
-		"\2\4\30\3\2\2\2\6\32\3\2\2\2\b \3\2\2\2\n-\3\2\2\2\f\63\3\2\2\2\16\65"+
-		"\3\2\2\2\20\22\5\4\3\2\21\20\3\2\2\2\22\25\3\2\2\2\23\21\3\2\2\2\23\24"+
-		"\3\2\2\2\24\3\3\2\2\2\25\23\3\2\2\2\26\31\5\6\4\2\27\31\5\b\5\2\30\26"+
-		"\3\2\2\2\30\27\3\2\2\2\31\5\3\2\2\2\32\34\5\n\6\2\33\35\5\f\7\2\34\33"+
-		"\3\2\2\2\34\35\3\2\2\2\35\36\3\2\2\2\36\37\7\6\2\2\37\7\3\2\2\2 \"\5\n"+
-		"\6\2!#\5\f\7\2\"!\3\2\2\2\"#\3\2\2\2#$\3\2\2\2$(\7\b\2\2%\'\5\4\3\2&%"+
-		"\3\2\2\2\'*\3\2\2\2(&\3\2\2\2()\3\2\2\2)+\3\2\2\2*(\3\2\2\2+,\7\t\2\2"+
-		",\t\3\2\2\2-.\7\13\2\2.\13\3\2\2\2/\64\5\16\b\2\60\61\5\16\b\2\61\62\5"+
-		"\f\7\2\62\64\3\2\2\2\63/\3\2\2\2\63\60\3\2\2\2\64\r\3\2\2\2\65\66\t\2"+
-		"\2\2\66\17\3\2\2\2\b\23\30\34\"(\63";
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\f\65\4\2\t\2\4\3"+
+		"\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\7\2\22\n\2\f\2\16\2\25"+
+		"\13\2\3\3\3\3\5\3\31\n\3\3\4\3\4\5\4\35\n\4\3\4\3\4\3\5\3\5\3\5\7\5$\n"+
+		"\5\f\5\16\5\'\13\5\3\5\3\5\3\6\3\6\3\7\3\7\3\7\3\7\5\7\61\n\7\3\b\3\b"+
+		"\3\b\2\2\t\2\4\6\b\n\f\16\2\3\4\2\3\3\n\13\2\62\2\23\3\2\2\2\4\30\3\2"+
+		"\2\2\6\32\3\2\2\2\b \3\2\2\2\n*\3\2\2\2\f\60\3\2\2\2\16\62\3\2\2\2\20"+
+		"\22\5\4\3\2\21\20\3\2\2\2\22\25\3\2\2\2\23\21\3\2\2\2\23\24\3\2\2\2\24"+
+		"\3\3\2\2\2\25\23\3\2\2\2\26\31\5\6\4\2\27\31\5\b\5\2\30\26\3\2\2\2\30"+
+		"\27\3\2\2\2\31\5\3\2\2\2\32\34\5\n\6\2\33\35\5\f\7\2\34\33\3\2\2\2\34"+
+		"\35\3\2\2\2\35\36\3\2\2\2\36\37\7\6\2\2\37\7\3\2\2\2 !\5\n\6\2!%\7\b\2"+
+		"\2\"$\5\4\3\2#\"\3\2\2\2$\'\3\2\2\2%#\3\2\2\2%&\3\2\2\2&(\3\2\2\2\'%\3"+
+		"\2\2\2()\7\t\2\2)\t\3\2\2\2*+\7\13\2\2+\13\3\2\2\2,\61\5\16\b\2-.\5\16"+
+		"\b\2./\5\f\7\2/\61\3\2\2\2\60,\3\2\2\2\60-\3\2\2\2\61\r\3\2\2\2\62\63"+
+		"\t\2\2\2\63\17\3\2\2\2\7\23\30\34%\60";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

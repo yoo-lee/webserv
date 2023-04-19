@@ -3,7 +3,7 @@ grammar Expr;
 program: statement*;
 statement: simpleStatement | blockStatement;
 simpleStatement: directive parameters? SEMI;
-blockStatement: directive parameters? LCURLY statement* RCURLY;
+blockStatement: directive LCURLY statement* RCURLY;
 directive: ID;
 parameters: parameter | parameter parameters;
 parameter: ID | STRING | INT;

@@ -1,96 +1,55 @@
-#ifndef AT_H
-#define AT_H
+#ifndef AST_H
+#define AST_H
+#include <exception>
+#include <queue>
+#include <stdexcept>
 #include <vector>
 #include "ASTNode.hpp"
+#include "SyntaxError.hpp"
 #include "Token.hpp"
-class AT {
+
+/*
+program: statement*;
+statement: simpleStatement | blockStatement;
+simpleStatement: directive parameters? SEMI;
+blockStatement: directive parameters? LCURLY statement* RCURLY;
+directive: ID;
+parameters: parameter | parameter parameters;
+parameter: ID | STRING | INT;
+
+STRING:
+        DQUOTE [a-zA-Z_0-9]+ DQUOTE
+        | SQUOTE [a-zA-Z_0-9]+ SQUOTE;
+
+SQUOTE: '\'';
+COMMA: ',';
+SEMI: ';';
+DQUOTE: '"';
+LCURLY: '{';
+RCURLY: '}';
+INT: [0-9]+;
+ID: [a-zA-Z_][a-zA-Z_0-9]*;
+WS: [ \t\n\r\f]+ -> skip;
+ */
+class AST {
    private:
     std::vector<Token*> _tokens;
+    ASTNode* root;
+    std::queue<Token*> _buf;
 
    public:
-    ATNode* program();
-    ATNode* statement();
-    ATNode* simple_statement();
-    ATNode* block_statement();
-    ATNode* directive();
-    ATNode* parameters();
-    ATNode* parameter();
-    AT(std::vector<Token*> tokens);
+    ASTNode* program();
+    ASTNode* statement();
+    ASTNode* try_simple_statement();
+    ASTNode* try_block_statement();
+    ASTNode* directive();
+    ASTNode* parameters();
+    ASTNode* parameter();
+    ASTNode* consume(Token::Type type) throw(syntax_error);
+    void backtrace();
+    void decide();
+    AST(std::vector<Token*> tokens);
 };
 
-AT::AT(std::vector<Token*> tokens) : _tokens(tokens) {}
 
-ATNode* AT::program() {
-    std::vector<ATNode*> children;
-    while (true) {
-        ATNode* statement_node = statement();
-        if (statement_node == NULL) {
-            break;
-        }
-        children.push_back(statement_node);
-    }
-    return new ATNode(ATNode::PROGRAM, children);
-}
-
-ATNode* AT::statement() {
-    ATNode* simple_statement_node = simple_statement();
-    if (simple_statement_node != NULL) {
-        return simple_statement_node;
-    }
-    ATNode* block_statement_node = block_statement();
-    if (block_statement_node != NULL) {
-        return block_statement_node;
-    }
-    return NULL;
-}
-
-ATNode* AT::simple_statement() {
-    ATNode* directive_node = directive();
-    if (directive_node == NULL) {
-        return NULL;
-    }
-    return new ATNode(ATNode::STATEMENT, {directive_node});
-}
-
-ATNode* AT::block_statement() {
-    ATNode* directive_node = directive();
-    if (directive_node == NULL) {
-        return NULL;
-    }
-    ATNode* parameters_node = parameters();
-    if (parameters_node == NULL) {
-        return NULL;
-    }
-    return new ATNode(ATNode::STATEMENT, {directive_node, parameters_node});
-}
-
-ATNode* AT::parameters() {
-    std::vector<ATNode*> children;
-    while (true) {
-        ATNode* parameter_node = parameter();
-        if (parameter_node == NULL) {
-            break;
-        }
-        children.push_back(parameter_node);
-    }
-    return new ATNode(ATNode::PARAMETERS, children);
-}
-
-ATNode* AT::parameter() {
-    ATNode* simple_statement_node = simple_statement();
-    if (simple_statement_node != NULL) {
-        return simple_statement_node;
-    }
-    ATNode* block_statement_node = block_statement();
-    if (block_statement_node != NULL) {
-        return block_statement_node;
-    }
-    return NULL;
-}
-
-ATNode* AT::directive() {
-    if ()
-        return NULL;
-}
-
-#endif /* AT_H */
+#endif /* AST_H */

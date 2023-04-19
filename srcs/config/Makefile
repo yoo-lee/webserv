@@ -1,4 +1,4 @@
-SRCS = Config.cpp Lexer.cpp Token.cpp
+SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp
 OBJS = ${SRCS:.cpp=.o}
 CXX = g++
 CXXFLAGS = -Wall -Wextra  -std=c++98 -g3
