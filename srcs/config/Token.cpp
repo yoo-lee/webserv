@@ -15,6 +15,12 @@ Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1))
 {
 }
 
+Token::Token(Token &token)
+{
+    _type = token.getType();
+    _str = token.getStr();
+}
+
 std::string Token::getTypeName(Token::Type type)
 {
     const char *type_name_list[] = {"COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING", "LCURLY",

@@ -35,9 +35,9 @@ WS: [ \t\n\r\f]+ -> skip;
 class AST
 {
   private:
-    std::vector<Token *> _tokens;
+    std::vector<Token> _tokens;
     ASTNode *root;
-    std::queue<Token *> _buf;
+    std::queue<Token> _buf;
     ASTNode *program();
     ASTNode *statement();
     ASTNode *try_simple_statement();
@@ -51,7 +51,7 @@ class AST
 
   public:
     AST();
-    AST(std::vector<Token *> tokens);
+    AST(std::vector<Token> tokens);
     friend std::ostream &operator<<(std::ostream &os, const AST &ast);
 };
 

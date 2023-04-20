@@ -21,6 +21,7 @@ class Token
     };
     Token(std::string str, Type type);
     Token(char c, Type type);
+    Token(Token &token);
     ~Token();
     Type getType() const;
     static std::string getTypeName(Token::Type type);

@@ -4,7 +4,7 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra  -std=c++98 -g3
 
 test: ${SRCS}
-	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
+	${CXX} ${SRCS} ${CXXF LAGS} -D TEST -o test
 
 run:
 	./test
@@ -16,7 +16,7 @@ re :
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	# ./test
 
-utest: ${SRCS}
-	${CXX} ${SRCS} -g3 -D UNIT_TEST -o test
+utest: Lexer.cpp Token.cpp
+	${CXX} Lexer.cpp Token.cpp -std=c++11 -g3 -D UNIT_TEST -o test
 
 utr: utest run

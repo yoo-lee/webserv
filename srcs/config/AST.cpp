@@ -2,7 +2,7 @@
 AST::AST() : root(NULL)
 {
 }
-AST::AST(std::vector<Token *> tokens) : _tokens(tokens), root(program())
+AST::AST(std::vector<Token> tokens) : _tokens(tokens), root(program())
 {
 }
 
@@ -109,7 +109,7 @@ ASTNode *AST::parameters()
 
 ASTNode *AST::parameter()
 {
-    Token current_token = *(_tokens.front());
+    Token current_token = _tokens.front();
     if (current_token.getType() == Token::ID)
         return new ASTNode(ASTNode::PARAMETER, consume(Token::ID));
     else if (current_token.getType() == Token::STRING)
@@ -128,10 +128,10 @@ ASTNode *AST::consume(Token::Type type) throw(syntax_error)
 {
     if (_tokens.empty())
         throw syntax_error("Unexpected end of file");
-    Token current_token = *(_tokens.front());
+    Token current_token = _tokens.front();
     if (current_token.getType() != type)
         throw syntax_error("Unexpected token");
-    std::cout << *(_tokens[0]) << std::endl;
+    std::cout << _tokens[0] << std::endl;
     _buf.push(_tokens[0]);
     _tokens.erase(_tokens.begin());
     return new ASTNode(ASTNode::TokenTypeToASTNodeType(type), current_token.getStr());
@@ -149,10 +149,7 @@ void AST::backtrace()
 void AST::decide()
 {
     while (!_buf.empty())
-    {
-        delete _buf.front();
         _buf.pop();
-    }
 }
 
 std::ostream &operator<<(std::ostream &os, const AST &ast)
