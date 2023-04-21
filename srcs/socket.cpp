@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include "tcp_socket.hpp"
 #include "string.h"
+#include <unistd.h>
+#include <fcntl.h>
 //#include <netdb.h>
 //#include <sys/types.h>
 
@@ -118,6 +120,9 @@ int Socket::accept_request()
         cout << "Error accept():" << strerror(errno) << endl;
         //return ();
     }
+    int cur_flags = fcntl(fd, F_GETFL, 0);
+    cur_flags |= O_NONBLOCK;
+    fcntl(fd, F_SETFL, cur_flags);
     //ev.events = EPOLLIN;
     //this->clientinfo.fd = this->fd;
     return (this->fd);

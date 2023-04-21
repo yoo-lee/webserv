@@ -24,6 +24,5 @@ class Webserv
         std::vector<Socket*> sockets;
         Socket* find_listen_socket(int socket_fd);
         //struct epoll_event ev;
-
 };
 #endif
