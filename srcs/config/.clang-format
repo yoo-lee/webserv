@@ -1,6 +1,0 @@
-BasedOnStyle: Google
-SortIncludes: true
-SortUsingDeclarations: true
-SortUsingNamespace: true
-AlignTrailingComments: true
-AlignConsecutiveAssignments: true
