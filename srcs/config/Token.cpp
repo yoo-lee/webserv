@@ -6,6 +6,9 @@
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
+Token::Token()
+{
+}
 
 Token::Token(std::string str, Token::Type type) : _type(type), _str(str)
 {
@@ -15,7 +18,7 @@ Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1))
 {
 }
 
-Token::Token(Token &token)
+Token::Token(const Token &token)
 {
     _type = token.getType();
     _str = token.getStr();

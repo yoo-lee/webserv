@@ -1,9 +1,12 @@
 #include "AST.hpp"
-AST::AST() : root(NULL)
+#include "Token.hpp"
+AST::AST() : root(NULL), _buf()
 {
 }
-AST::AST(std::vector<Token> tokens) : _tokens(tokens), root(program())
+
+AST::AST(std::vector<Token> tokens) : _tokens(tokens), _buf()
 {
+    root = program();
 }
 
 ASTNode *AST::program()
@@ -24,7 +27,7 @@ ASTNode *AST::program()
     return new ASTNode(ASTNode::PROGRAM, children);
 }
 
-ASTNode *AST::statement()
+ASTNode *AST::statement() throw(std::exception)
 {
     try
     {
@@ -46,30 +49,20 @@ ASTNode *AST::statement()
     {
         backtrace();
     }
-    throw std::runtime_error("statement not found");
+    throw std::exception();
 }
 
-ASTNode *AST::try_simple_statement()
+ASTNode *AST::try_simple_statement() throw(std::exception)
 {
     std::vector<ASTNode *> children = std::vector<ASTNode *>();
     children.push_back(directive());
     ASTNode *parameters_node = parameters();
-    while (true)
-    {
-        try
-        {
-            children.push_back(parameters_node);
-        }
-        catch (std::exception &e)
-        {
-            break;
-        }
-    }
+    children.push_back(parameters_node);
     children.push_back(new ASTNode(consume(Token::SEMI)));
     return new ASTNode(ASTNode::STATEMENT, children);
 }
 
-ASTNode *AST::try_block_statement()
+ASTNode *AST::try_block_statement() throw(std::exception)
 {
     std::vector<ASTNode *> children = std::vector<ASTNode *>();
     children.push_back(directive());
@@ -97,7 +90,8 @@ ASTNode *AST::parameters()
     {
         try
         {
-            children.push_back(parameter());
+            ASTNode *node = parameter();
+            children.push_back(node);
         }
         catch (std::exception &e)
         {
@@ -107,7 +101,7 @@ ASTNode *AST::parameters()
     return new ASTNode(ASTNode::PARAMETERS, children);
 }
 
-ASTNode *AST::parameter()
+ASTNode *AST::parameter() throw(std::exception)
 {
     Token current_token = _tokens.front();
     if (current_token.getType() == Token::ID)
@@ -116,7 +110,7 @@ ASTNode *AST::parameter()
         return new ASTNode(ASTNode::PARAMETER, consume(Token::STRING));
     else if (current_token.getType() == Token::INT)
         return new ASTNode(ASTNode::PARAMETER, consume(Token::INT));
-    throw std::runtime_error("parameter not found");
+    throw std::exception();
 }
 
 ASTNode *AST::directive()
@@ -131,7 +125,6 @@ ASTNode *AST::consume(Token::Type type) throw(syntax_error)
     Token current_token = _tokens.front();
     if (current_token.getType() != type)
         throw syntax_error("Unexpected token");
-    std::cout << _tokens[0] << std::endl;
     _buf.push(_tokens[0]);
     _tokens.erase(_tokens.begin());
     return new ASTNode(ASTNode::TokenTypeToASTNodeType(type), current_token.getStr());
@@ -152,8 +145,7 @@ void AST::decide()
         _buf.pop();
 }
 
-std::ostream &operator<<(std::ostream &os, const AST &ast)
+void AST::print_tree()
 {
-    os << ast.root;
-    return os;
+    root->print("");
 }

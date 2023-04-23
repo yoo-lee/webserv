@@ -39,12 +39,12 @@ class AST
     ASTNode *root;
     std::queue<Token> _buf;
     ASTNode *program();
-    ASTNode *statement();
-    ASTNode *try_simple_statement();
-    ASTNode *try_block_statement();
+    ASTNode *statement() throw(std::exception);
+    ASTNode *try_simple_statement() throw(std::exception);
+    ASTNode *try_block_statement() throw(std::exception);
     ASTNode *directive();
     ASTNode *parameters();
-    ASTNode *parameter();
+    ASTNode *parameter() throw(std::exception);
     ASTNode *consume(Token::Type type) throw(syntax_error);
     void backtrace();
     void decide();
@@ -52,7 +52,7 @@ class AST
   public:
     AST();
     AST(std::vector<Token> tokens);
-    friend std::ostream &operator<<(std::ostream &os, const AST &ast);
+    void print_tree();
 };
 
 #endif /* AST_H */

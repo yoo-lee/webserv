@@ -13,28 +13,6 @@ class Parser
   public:
     Parser(std::string file_text);
     ~Parser();
+    void print();
 };
-
-Parser::Parser(std::string file_text)
-{
-    // Lexer lexer(file_text);
-    (void)file_text;
-    Lexer lexer("simple statement;");
-    std::vector<Token> tokens = lexer.getTokenList();
-    _tree = AST(tokens);
-    std::cout << _tree << std::endl;
-}
-
-Parser::~Parser()
-{
-}
-
-#ifdef TEST
-int main()
-{
-    Parser parser("simple statement;");
-    return 0;
-}
-#endif
-
 #endif /* PARSER_H */

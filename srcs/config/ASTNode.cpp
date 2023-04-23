@@ -55,12 +55,11 @@ std::string ASTNode::ASTNodeTypeToStr(Type type)
     }
 }
 
-std::ostream &operator<<(std::ostream &os, const ASTNode &node)
+void ASTNode::print(std::string indent)
 {
-    os << "ASTNode(" << (node._type) << ", " << node._value << ")" << std::endl;
-    for (std::size_t i = 0; i < node._children.size(); ++i)
-        os << "  - " << *node._children[i] << std::endl;
-    return os;
+    std::cout << indent << ASTNode::ASTNodeTypeToStr(_type) << (_value != "" ? ", " + _value : "") << std::endl;
+    for (std::size_t i = 0; i < _children.size(); ++i)
+        _children[i]->print(indent + "  ");
 }
 
 ASTNode::ASTNode(ASTNode::Type type, std::vector<ASTNode *> children) : _type(type), _children(children), _value("")

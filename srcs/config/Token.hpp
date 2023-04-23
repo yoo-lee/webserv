@@ -19,9 +19,10 @@ class Token
         WHITE_SPACE,
         NONE
     };
+    Token();
     Token(std::string str, Type type);
     Token(char c, Type type);
-    Token(Token &token);
+    Token(const Token &token);
     ~Token();
     Type getType() const;
     static std::string getTypeName(Token::Type type);

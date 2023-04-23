@@ -1,17 +1,17 @@
 SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp
 OBJS = ${SRCS:.cpp=.o}
 CXX = g++
-CXXFLAGS = -Wall -Wextra  -std=c++98 -g3
+CXXFLAGS = -Wall -Wextra -std=c++98 -g3
 
 test: ${SRCS}
-	${CXX} ${SRCS} ${CXXF LAGS} -D TEST -o test
+	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 
 run:
 	./test
 
 tr: test run
 
-re :
+re : ${SRCS}
 	- rm test
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	# ./test

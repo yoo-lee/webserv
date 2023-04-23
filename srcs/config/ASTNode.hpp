@@ -27,10 +27,9 @@ class ASTNode
     ASTNode(ASTNode::Type type, ASTNode *child);
     ASTNode(ASTNode *at_node);
     ~ASTNode();
-    friend std::ostream &operator<<(std::ostream &os, const ASTNode &node);
     static std::string ASTNodeTypeToStr(ASTNode::Type type);
     static ASTNode::Type TokenTypeToASTNodeType(Token::Type type);
-    friend std::ostream &operator<<(std::ostream &os, const ASTNode &node);
+    void print(std::string indent);
 
   private:
     ASTNode::Type _type;
