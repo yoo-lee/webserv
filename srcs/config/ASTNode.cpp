@@ -128,56 +128,73 @@ ASTNode ASTNode::operator[](ASTNode::Type type)
     throw std::out_of_range("No child of type " + ASTNodeTypeToStr(type));
 }
 
+ASTNode::Type ASTNode::getType() const
+{
+
+    return _type;
+}
+std::string ASTNode::getValue() const
+{
+    return _value;
+}
+std::vector<ASTNode *> ASTNode::getChildren() const
+{
+    return _children;
+}
+
 #ifdef UNIT_TEST
-TEST_CASE("ASTNode::TokenTypeToASTNodeType")
+TEST_CASE("ASTNode")
 {
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::ID) == ASTNode::ID);
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::STRING) == ASTNode::STRING);
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::INT) == ASTNode::INT);
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::SEMI) == ASTNode::SEMI);
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::LCURLY) == ASTNode::LCURLY);
-    CHECK(ASTNode::TokenTypeToASTNodeType(Token::RCURLY) == ASTNode::RCURLY);
-    CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::COMMA), std::runtime_error);
-    CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::DQUOTE), std::runtime_error);
-    CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::SQUOTE), std::runtime_error);
-    CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::WHITE_SPACE), std::runtime_error);
-    CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::NONE), std::runtime_error);
-}
+    SUBCASE("TokenTypeToASTNodeType")
+    {
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::ID) == ASTNode::ID);
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::STRING) == ASTNode::STRING);
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::INT) == ASTNode::INT);
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::SEMI) == ASTNode::SEMI);
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::LCURLY) == ASTNode::LCURLY);
+        CHECK(ASTNode::TokenTypeToASTNodeType(Token::RCURLY) == ASTNode::RCURLY);
+        CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::COMMA), std::runtime_error);
+        CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::DQUOTE), std::runtime_error);
+        CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::SQUOTE), std::runtime_error);
+        CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::WHITE_SPACE), std::runtime_error);
+        CHECK_THROWS_AS(ASTNode::TokenTypeToASTNodeType(Token::NONE), std::runtime_error);
+    }
 
-TEST_CASE("ASTNode::ASTNodeTypeToStr")
-{
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PROGRAM) == "PROGRAM");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::STATEMENT) == "STATEMENT");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::SIMPLE_STATEMENT) == "SIMPLE_STATEMENT");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::BLOCK_STATEMENT) == "BLOCK_STATEMENT");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::DIRECTIVE) == "DIRECTIVE");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PARAMETERS) == "PARAMETERS");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PARAMETER) == "PARAMETER");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::ID) == "ID");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::STRING) == "STRING");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::INT) == "INT");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::SEMI) == "SEMI");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::LCURLY) == "LCURLY");
-    CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::RCURLY) == "RCURLY");
-}
+    SUBCASE("ASTNodeTypeToStr")
+    {
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PROGRAM) == "PROGRAM");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::STATEMENT) == "STATEMENT");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::SIMPLE_STATEMENT) == "SIMPLE_STATEMENT");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::BLOCK_STATEMENT) == "BLOCK_STATEMENT");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::DIRECTIVE) == "DIRECTIVE");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PARAMETERS) == "PARAMETERS");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::PARAMETER) == "PARAMETER");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::ID) == "ID");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::STRING) == "STRING");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::INT) == "INT");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::SEMI) == "SEMI");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::LCURLY) == "LCURLY");
+        CHECK(ASTNode::ASTNodeTypeToStr(ASTNode::RCURLY) == "RCURLY");
+    }
 
-TEST_CASE("ASTNode::==,!=")
-{
-    ASTNode a(ASTNode::ID, "a");
-    ASTNode b(ASTNode::ID, "b");
-    CHECK(a == a);
-    CHECK(a != b);
-}
+    SUBCASE("==,!=")
+    {
+        ASTNode a(ASTNode::ID, "a");
+        ASTNode b(ASTNode::ID, "b");
+        CHECK(a == a);
+        CHECK(a != b);
+    }
 
 #include <vector>
 
-TEST_CASE("ASTNode::[]")
-{
-    std::vector<ASTNode *> buf;
-    ASTNode *child = new ASTNode(ASTNode::ID, "id");
-    buf.push_back(child);
-    ASTNode parent(ASTNode::PROGRAM, buf);
-    CHECK(parent[ASTNode::ID] == child);
-    CHECK_THROWS_AS(parent[ASTNode::STRING], std::out_of_range);
+    SUBCASE("[]")
+    {
+        std::vector<ASTNode *> buf;
+        ASTNode *child = new ASTNode(ASTNode::ID, "id");
+        buf.push_back(child);
+        ASTNode parent(ASTNode::PROGRAM, buf);
+        CHECK(parent[ASTNode::ID] == child);
+        CHECK_THROWS_AS(parent[ASTNode::STRING], std::out_of_range);
+    }
 }
 #endif

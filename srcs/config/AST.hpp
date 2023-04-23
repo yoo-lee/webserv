@@ -3,7 +3,6 @@
 #include "ASTNode.hpp"
 #include "SyntaxError.hpp"
 #include "Token.hpp"
-#include <exception>
 #include <ostream>
 #include <queue>
 #include <stdexcept>
@@ -32,20 +31,21 @@ INT: [0-9]+;
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
  */
+#include "NotFound.hpp"
 class AST
 {
   private:
     std::vector<Token> _tokens;
-    ASTNode *root;
+    ASTNode *_root;
     std::queue<Token> _buf;
     ASTNode *program();
-    ASTNode *statement() throw(std::exception);
-    ASTNode *try_simple_statement() throw(std::exception);
-    ASTNode *try_block_statement() throw(std::exception);
+    ASTNode *statement();
+    ASTNode *try_simple_statement();
+    ASTNode *try_block_statement();
     ASTNode *directive();
     ASTNode *parameters();
-    ASTNode *parameter() throw(std::exception);
-    ASTNode *consume(Token::Type type) throw(syntax_error);
+    ASTNode *parameter();
+    ASTNode *consume(Token::Type type);
     void backtrace();
     void decide();
 
@@ -53,6 +53,7 @@ class AST
     AST();
     AST(std::vector<Token> tokens);
     void print_tree();
+    ASTNode *getRoot() const;
     bool operator==(const AST &other) const;
 };
 

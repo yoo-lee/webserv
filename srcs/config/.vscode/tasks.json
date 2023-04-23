@@ -5,7 +5,7 @@
             "label": "build",
             "command": "make",
             "args": [
-                "re"
+                "utest"
             ],
             "options": {
                 "cwd": "${fileDirname}"

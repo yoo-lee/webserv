@@ -33,6 +33,9 @@ class ASTNode
     bool operator==(const ASTNode &other) const;
     bool operator!=(const ASTNode &other) const;
     ASTNode operator[](ASTNode::Type type);
+    ASTNode::Type getType() const;
+    std::string getValue() const;
+    std::vector<ASTNode *> getChildren() const;
 
   private:
     ASTNode::Type _type;
