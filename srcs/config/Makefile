@@ -1,5 +1,5 @@
-SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp
-UNIT_TEST_SRCS = Lexer.cpp Token.cpp ASTNode.cpp AST.cpp
+SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp NotFound.cpp SyntaxError.cpp
+UNIT_TEST_SRCS = Lexer.cpp Token.cpp ASTNode.cpp AST.cpp NotFound.cpp SyntaxError.cpp
 OBJS = ${SRCS:.cpp=.o}
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++98 -g3
