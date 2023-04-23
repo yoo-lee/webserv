@@ -53,6 +53,7 @@ class AST
     AST();
     AST(std::vector<Token> tokens);
     void print_tree();
+    bool operator==(const AST &other) const;
 };
 
 #endif /* AST_H */

@@ -149,3 +149,8 @@ void AST::print_tree()
 {
     root->print("");
 }
+
+bool AST::operator==(const AST &other) const
+{
+    return *root == *other.root;
+}

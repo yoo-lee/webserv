@@ -1,4 +1,5 @@
 SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp
+UNIT_TEST_SRCS = Lexer.cpp Token.cpp ASTNode.cpp
 OBJS = ${SRCS:.cpp=.o}
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++98 -g3
@@ -16,7 +17,7 @@ re : ${SRCS}
 	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
 	# ./test
 
-utest: Lexer.cpp Token.cpp
-	${CXX} Lexer.cpp Token.cpp -std=c++11 -g3 -D UNIT_TEST -o test
+utest: ${UNIT_TEST_SRCS}
+	${CXX} ${UNIT_TEST_SRCS} -std=c++11 -g3 -D UNIT_TEST -o test
 
 utr: utest run

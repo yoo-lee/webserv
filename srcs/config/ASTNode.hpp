@@ -30,6 +30,9 @@ class ASTNode
     static std::string ASTNodeTypeToStr(ASTNode::Type type);
     static ASTNode::Type TokenTypeToASTNodeType(Token::Type type);
     void print(std::string indent);
+    bool operator==(const ASTNode &other) const;
+    bool operator!=(const ASTNode &other) const;
+    ASTNode operator[](ASTNode::Type type);
 
   private:
     ASTNode::Type _type;
