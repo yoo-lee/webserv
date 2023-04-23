@@ -7,9 +7,7 @@
 class not_found : public std::runtime_error
 {
   public:
-    explicit not_found(const std::string &message) : std::runtime_error(message)
-    {
-    }
+    not_found(const std::string &message);
 };
 
 #endif /* NOTFOUND_H */
