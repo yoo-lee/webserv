@@ -128,7 +128,18 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             cout << "error;connected_communication No.2" << endl;
         }
     }else if (event->events & EPOLLOUT){
-        std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
+        //std::string r_data = "HTTP/1.1 200 OK\r\ntext/plain;charset=UTF-8\r\nContent-Length:3\n\ntest5\r\n";
+        std::string r_data = "HTTP/1.1 200 OK\n\
+Date: Sun, 23 Apr 2023 13:14:41 GMT\n\
+Server: Apache/2.4.52 (Ubuntu)\n\
+Last-Modified: Sun, 23 Apr 2023 13:08:28 GMT\n\
+ETag: \"5-5fa00961c5691\"\n\
+Accept-Ranges: bytes\n\
+Content-Type: text/html\n\
+Content-Length: 4\n\
+\n\
+test\
+";
         socket->send(r_data);
 
         //todo
@@ -140,7 +151,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
             cout << "error;connected_communication No.3" << endl;
         }
-        close(fd);
+        //close(fd);
     }
 }
 

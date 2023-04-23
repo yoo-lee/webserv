@@ -173,7 +173,9 @@ Request *Socket::recv()
 bool Socket::send(std::string& data)
 {
 
+    char last = '\0';
     write(this->fd, data.c_str(), data.size());
+    write(this->fd, &last, 1);
     //close(this->fd);
     return (true);
 }
