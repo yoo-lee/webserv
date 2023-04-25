@@ -1,7 +1,7 @@
-SRCS = Config.cpp Parser.cpp AST.cpp ASTNode.cpp Lexer.cpp Token.cpp NotFound.cpp SyntaxError.cpp
-UNIT_TEST_SRCS = Lexer.cpp Token.cpp ASTNode.cpp AST.cpp NotFound.cpp SyntaxError.cpp
+UNIT_TEST_SRCS = Lexer.cpp Token.cpp ASTNode.cpp AST.cpp NotFound.cpp SyntaxError.cpp NonTerminalASTNode.cpp TerminalASTNode.cpp InvalidValue.cpp
+SRCS = Config.cpp Parser.cpp ${UNIT_TEST_SRCS}
 OBJS = ${SRCS:.cpp=.o}
-CXX = g++
+CXX = c++
 CXXFLAGS = -Wall -Wextra -std=c++98 -g3
 
 test: ${SRCS}

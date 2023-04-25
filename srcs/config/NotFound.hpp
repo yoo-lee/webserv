@@ -4,10 +4,10 @@
 #include <stdexcept>
 #include <string>
 
-class not_found : public std::runtime_error
+class NotFound : public std::runtime_error
 {
   public:
-    not_found(const std::string &message);
+    NotFound(const std::string &message);
 };
 
 #endif /* NOTFOUND_H */

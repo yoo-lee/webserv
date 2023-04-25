@@ -10,17 +10,17 @@ class Lexer
     std::string _text;
     Token::Type _state;
     std::vector<Token> _token_list;
-    Token::Type getState(char c) const;
-    void setState();
-    char updateState();
+    Token::Type get_state(char c) const;
+    void set_state();
+    char update_state();
     char consume();
     void tokenize();
-    std::string extractString(Token::Type quote_type);
+    std::string extract_str(Token::Type quote_type);
 
   public:
     Lexer(std::string text);
     ~Lexer();
-    std::vector<Token> getTokenList() const;
+    std::vector<Token> get_token_list() const;
 };
 
 #endif /* LEXER_H */

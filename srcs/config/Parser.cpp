@@ -5,7 +5,7 @@ Parser::Parser(std::string file_text)
     // Lexer lexer(file_text);
     (void)file_text;
     Lexer lexer("simple statement;");
-    std::vector<Token> tokens = lexer.getTokenList();
+    std::vector<Token> tokens = lexer.get_token_list();
     _tree = AST(tokens);
     print();
 }

@@ -1,5 +1,5 @@
-#ifndef AST_NODE_H
-#define AST_NODE_H
+#ifndef ASTNODE_H
+#define ASTNODE_H
 #include "Token.hpp"
 #include <ostream>
 #include <vector>
@@ -22,25 +22,17 @@ class ASTNode
         LCURLY,
         RCURLY
     };
-    ASTNode(ASTNode::Type type, std::vector<ASTNode *> children);
-    ASTNode(ASTNode::Type type, std::string value);
-    ASTNode(ASTNode::Type type, ASTNode *child);
-    ASTNode(ASTNode *at_node);
+    ASTNode(ASTNode *ast_node);
+    ASTNode(ASTNode::Type type);
     ~ASTNode();
-    static std::string ASTNodeTypeToStr(ASTNode::Type type);
-    static ASTNode::Type TokenTypeToASTNodeType(Token::Type type);
-    void print(std::string indent);
-    bool operator==(const ASTNode &other) const;
-    bool operator!=(const ASTNode &other) const;
-    ASTNode operator[](ASTNode::Type type);
-    ASTNode::Type getType() const;
-    std::string getValue() const;
-    std::vector<ASTNode *> getChildren() const;
+    static std::string ast_node_type_to_str(ASTNode::Type type);
+    static ASTNode::Type to_ast_node_type(Token::Type type);
+    virtual void print(std::string indent) = 0;
+    ASTNode::Type get_type() const;
+    friend std::ostream &operator<<(std::ostream &os, const ASTNode &node);
 
-  private:
+  protected:
     ASTNode::Type _type;
-    std::vector<ASTNode *> _children;
-    std::string _value;
 };
 
-#endif /* AST_NODE_H */
+#endif /* ASTNODE_H */

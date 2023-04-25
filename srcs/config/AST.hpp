@@ -1,7 +1,9 @@
 #ifndef AST_H
 #define AST_H
 #include "ASTNode.hpp"
+#include "NonTerminalASTNode.hpp"
 #include "SyntaxError.hpp"
+#include "TerminalASTNode.hpp"
 #include "Token.hpp"
 #include <ostream>
 #include <queue>
@@ -36,16 +38,16 @@ class AST
 {
   private:
     std::vector<Token> _tokens;
-    ASTNode *_root;
     std::queue<Token> _buf;
-    ASTNode *program();
-    ASTNode *statement();
-    ASTNode *try_simple_statement();
-    ASTNode *try_block_statement();
-    ASTNode *directive();
-    ASTNode *parameters();
-    ASTNode *parameter();
-    ASTNode *consume(Token::Type type);
+    NonTerminalASTNode *_root;
+    NonTerminalASTNode *program();
+    NonTerminalASTNode *statement();
+    NonTerminalASTNode *try_simple_statement();
+    NonTerminalASTNode *try_block_statement();
+    NonTerminalASTNode *directive();
+    NonTerminalASTNode *parameters();
+    NonTerminalASTNode *parameter();
+    TerminalASTNode *consume(Token::Type type);
     void backtrace();
     void decide();
 
@@ -53,8 +55,9 @@ class AST
     AST();
     AST(std::vector<Token> tokens);
     void print_tree();
-    ASTNode *getRoot() const;
+    NonTerminalASTNode *get_root() const;
     bool operator==(const AST &other) const;
+    bool operator!=(const AST &other) const;
 };
 
 #endif /* AST_H */

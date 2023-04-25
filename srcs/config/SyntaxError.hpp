@@ -4,10 +4,10 @@
 #include <stdexcept>
 #include <string>
 
-class syntax_error : public std::runtime_error
+class SyntaxError : public std::runtime_error
 {
   public:
-    syntax_error(const std::string &message);
+    SyntaxError(const std::string &message);
 };
 
 #endif /* SYNTAX_ERROR_H */

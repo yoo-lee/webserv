@@ -24,9 +24,9 @@ class Token
     Token(char c, Type type);
     Token(const Token &token);
     ~Token();
-    Type getType() const;
-    static std::string getTypeName(Token::Type type);
-    std::string getStr() const;
+    Type get_type() const;
+    static std::string get_typename(Token::Type type);
+    std::string get_str() const;
     friend std::ostream &operator<<(std::ostream &os, const Token &token);
     bool operator==(const Token &rhs) const;
     bool operator!=(const Token &rhs) const;
