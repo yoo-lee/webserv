@@ -93,6 +93,16 @@ std::vector<ASTNode *> NonTerminalASTNode::get_children() const
     return _children;
 };
 
+std::vector<ASTNode *> NonTerminalASTNode::get_non_terminal_children() const
+{
+    std::vector<ASTNode *> non_terminal_children;
+    for (std::size_t i = 0; i < _children.size(); ++i)
+    {
+        if (dynamic_cast<NonTerminalASTNode *>(_children[i]))
+            non_terminal_children.push_back(_children[i]);
+    }
+    return non_terminal_children;
+}
 bool NonTerminalASTNode::operator==(const ASTNode &other) const
 {
     if (dynamic_cast<const NonTerminalASTNode *>(&other) == 0)

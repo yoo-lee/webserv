@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 #include "AST.hpp"
+#include "Http.hpp"
 #include "Lexer.hpp"
 #include "Token.hpp"
 #include <iostream>
@@ -14,5 +15,7 @@ class Parser
     Parser(std::string file_text);
     ~Parser();
     void print();
+    ASTNode *get_root();
+    HTTP get_https() const;
 };
 #endif /* PARSER_H */
