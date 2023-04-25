@@ -78,6 +78,7 @@ NonTerminalASTNode::~NonTerminalASTNode()
     {
         delete _children[i];
     }
+    ASTNode::~ASTNode();
 }
 
 void NonTerminalASTNode::print(std::string indent)

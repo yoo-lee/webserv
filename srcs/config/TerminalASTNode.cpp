@@ -32,6 +32,7 @@ TerminalASTNode::TerminalASTNode(TerminalASTNode *node) : ASTNode(node), _value(
 
 TerminalASTNode::~TerminalASTNode()
 {
+    ASTNode::~ASTNode();
 }
 
 void TerminalASTNode::print(std::string indent)

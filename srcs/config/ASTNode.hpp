@@ -24,7 +24,7 @@ class ASTNode
     };
     ASTNode(ASTNode *ast_node);
     ASTNode(ASTNode::Type type);
-    ~ASTNode();
+    virtual ~ASTNode();
     static std::string ast_node_type_to_str(ASTNode::Type type);
     static ASTNode::Type to_ast_node_type(Token::Type type);
     virtual void print(std::string indent) = 0;
