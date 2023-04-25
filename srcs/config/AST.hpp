@@ -7,6 +7,7 @@
 #include "Token.hpp"
 #include <ostream>
 #include <queue>
+#include <stack>
 #include <stdexcept>
 #include <vector>
 
@@ -38,18 +39,17 @@ class AST
 {
   private:
     std::vector<Token> _tokens;
-    std::queue<Token> _buf;
     NonTerminalASTNode *_root;
     NonTerminalASTNode *program();
     NonTerminalASTNode *statement();
-    NonTerminalASTNode *try_simple_statement();
-    NonTerminalASTNode *try_block_statement();
-    NonTerminalASTNode *directive();
-    NonTerminalASTNode *parameters();
-    NonTerminalASTNode *parameter();
-    TerminalASTNode *consume(Token::Type type);
-    void backtrace();
-    void decide();
+    NonTerminalASTNode *try_simple_statement(std::stack<Token> &buf);
+    NonTerminalASTNode *try_block_statement(std::stack<Token> &buf);
+    NonTerminalASTNode *directive(std::stack<Token> &buf);
+    NonTerminalASTNode *parameters(std::stack<Token> &buf);
+    NonTerminalASTNode *parameter(std::stack<Token> &buf);
+    TerminalASTNode *consume(Token::Type type, std::stack<Token> &buf);
+    void backtrace(std::stack<Token> &buf);
+    void decide(std::stack<Token> &buf);
 
   public:
     AST();
