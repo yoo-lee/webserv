@@ -73,6 +73,7 @@ std::string Request::identify_method(METHOD method)
 
 void Request::print_request()
 {
+    cout << "Print Request!!!!!!!!!!!!!!!!!!!!" << endl;
     cout << "method: " << identify_method(this->method) << endl;
     cout << "uri: " << this->uri << endl;
     cout << "version: " << this->version << endl;
@@ -90,7 +91,6 @@ void Request::load_header(GetNextLine& gnl, char *buf)
 {
 
     string str = gnl.getline(buf, BUF_MAX);
-    //cout << "line test:" << str << endl;
     if (str == gnl.last_str){
         return;
     }
@@ -186,15 +186,25 @@ void Request::load_body(GetNextLine& gnl, char *buf)
     this->_body_size = size;
     int extra_buf_size = gnl.get_extra_buf(&buf);
     string transfer = this->search_header("transfer-encoding");
-    cout << "transfer:[" << transfer << "]" << endl;
+    string accept_char = this->search_header("accept-charset");
+    /*
+    if (accept_char == "utf-8")
+        cout << "OKOKOKOK accept-charset:" << accept_char << endl;
+    else {
+        cout << "NGNGNGNGNG [accept-charset] is not utf-8:" << accept_char << endl;
+        cout << "NGNGNGNGNG [accept-charset] is not utf-8 size:" << accept_char.size() << endl;
+    }
+    cout << "transfer-encoding:" << transfer << endl;
+    */
     //size -= extra_buf_size;
+    //  transfer-encoding:chunked
     if (transfer == "chunked")
     {
-        cout << "chunked No.1" << endl;
+        //cout << "chunked No.1" << endl;
     }
     else if (extra_buf_size > 0)
     {
-        cout << "content-length No.2 size:" << this->_body_size << endl;
+        //cout << "content-length No.2 size:" << this->_body_size << endl;
         this->_body = new char(this->_body_size);
         Utility::memcpy(this->_body, buf, extra_buf_size);
         string str = gnl.getline(&(this->_body[extra_buf_size]), this->_body_size - extra_buf_size);

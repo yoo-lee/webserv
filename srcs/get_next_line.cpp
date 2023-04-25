@@ -37,10 +37,11 @@ void GetNextLine::read_line(char *buf, size_t size)
         //cnt++;
     //}
     string str = string(buf);
-    if (sp == NULL)
-        this->sp = new Split(str, "\n");
-    else
-        this->sp->concat(str, "\n");
+    if (sp == NULL){
+        this->sp = new Split(str, "\r\n");
+    }else{
+        this->sp->concat(str, "\r\n");
+    }
 }
 
 size_t GetNextLine::size()
@@ -74,8 +75,9 @@ string &GetNextLine::getline(char *buff, size_t size)
     if (this->sp == NULL || this->sp->size() == pos+1) {
         this->read_line(buff, size);
     }
-    if (this->sp == NULL)
+    if (this->sp == NULL){
         return (this->last_str);
+    }
     if (this->sp->size() == pos+1) {
         return (this->last_str);
     }
