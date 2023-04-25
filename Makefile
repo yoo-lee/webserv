@@ -6,12 +6,11 @@ SRCDIR	:= ./srcs/
 SOCKET 	:= request.cpp socket.cpp tcp_socket.cpp
 CGI 	:= 
 SERVER 	:= webserv.cpp
-UTILITY := split.cpp get_next_line.cpp
+UTILITY := split.cpp get_next_line.cpp utility.cpp
 SRC			:= $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
 
 MANDATORY	:= main.cpp
 BONUS		:= main_bonus.cpp
-
 
 
 ifdef WITH_BONUS

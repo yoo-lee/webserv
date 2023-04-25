@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include "split.hpp"
+#include "get_next_line.hpp"
 
 enum E_METHOD{
     GET,
@@ -27,16 +28,19 @@ class Request
         const std::string &get_path();
         const std::string &get_uri(); // will remove
         const std::string &get_version();
+        const std::string &get_body_size();
         const std::map<std::string, std::string> &get_headers();
         void print_request();
-        int read_buf(char *buf);
+        int read_buf(char **buf);
         std::string get_domain();
         std::string get_ip_address();
     private:
         void parse();
+        std::string search_header(std::string);
         const static int BUF_MAX = 1024;
         const int fd;
-        int buf_size;
+        int _body_size;
+        char* _body;
         char extra_buf[BUF_MAX];
         std::map<std::string, std::string> headers;
         std::string identify_method(METHOD method);
@@ -49,6 +53,8 @@ class Request
         std::string err_line;
         std::string domain;
         std::string ip;
+        void load_header(GetNextLine& gnl, char *buf);
+        void load_body(GetNextLine& gnl, char *buf);
         //Split *sp;
 };
 

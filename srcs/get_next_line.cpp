@@ -10,7 +10,7 @@ using std::string;
 
 GetNextLine::GetNextLine(int fd_) : fd(fd_), sp(NULL), pos(0)
 {
-    this->read_line();
+    this->read_line(NULL, BUF_MAX);
 }
 
 GetNextLine::~GetNextLine()
@@ -18,19 +18,25 @@ GetNextLine::~GetNextLine()
     delete sp;
 }
 
-void GetNextLine::read_line()
+void GetNextLine::read_line(char *buf, size_t size)
 {
-    int cnt = 0;
-    while (1){
-        this->buf_size = recv(this->fd, this->buf, BUF_MAX, MSG_DONTWAIT);
-        if (this->buf_size > 0)
-            break;
-        else if (cnt > 10)
-            return ;
-        usleep(10);
-        cnt++;
+    //int cnt = 0;
+    //if (!buf)
+        //buf = this->_buf;
+    //while (1){
+    this->buf_size = recv(this->fd, buf, size, MSG_DONTWAIT);
+    if (this->buf_size < 0){
+        cout << "recv error" << endl;
+        return ;
     }
-    string str = string(this->buf);
+        //if (this->buf_size > 0)
+            //break;
+        //else if (cnt > 10)
+            //return ;
+        //usleep(10);
+        //cnt++;
+    //}
+    string str = string(buf);
     if (sp == NULL)
         this->sp = new Split(str, "\n");
     else
@@ -45,30 +51,28 @@ size_t GetNextLine::size()
 }
 
 
-int GetNextLine::get_extra_buf(char *cp_buf)
+int GetNextLine::get_extra_buf(char **buf)
 {
+    char *_buf = *buf;
     ssize_t i = 0;
     while(i < this->buf_size)
     {
-        if (buf[i+3] == 10 && buf[i+2] == 13 && buf[i+1] == 10 && buf[i] == 13){
+        if (_buf[i+3] == 10 && _buf[i+2] == 13 && _buf[i+1] == 10 && _buf[i] == 13){
             int size = this->buf_size - (i+4);
             i +=4;
-            ssize_t j = 0;
-            while(i < this->buf_size){
-                cp_buf[j++] = buf[i++];
-            }
+            *buf = &(_buf[i]);
             return (size);
         }
         i++;
     }
-    cp_buf = NULL;
+    *buf = NULL;
     return (0);
 }
 
-string &GetNextLine::getline()
+string &GetNextLine::getline(char *buff, size_t size)
 {
     if (this->sp == NULL || this->sp->size() == pos+1) {
-        this->read_line();
+        this->read_line(buff, size);
     }
     if (this->sp == NULL)
         return (this->last_str);

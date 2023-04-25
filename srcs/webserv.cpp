@@ -107,21 +107,21 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
         }
         req->print_request();
-        char buf[1024];
-
+        char *buf = NULL;
         //test( following code will be removed)
-        int size = req->read_buf(buf);
-        cout << "body:" << endl;
-        while(size > 0){
-            cout << string(buf) << endl;
-            size = req->read_buf(buf);
-        }
+        req->read_buf(&buf);
+        //while(size > 0){
+            //cout << string(buf) << endl;
+            //size = req->read_buf(buf);
+        //}
 
         //todo. do something in server
         //CGI cgi(*req);
+        /*
         bool read_all = true;
         if (read_all == false)
             return ;
+            */
 
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
@@ -173,7 +173,6 @@ void Webserv::communication()
     while(1)
     {
         int nfds = epoll_wait(this->epfd, sock_event, size, -1);
-
         if (nfds == 0) {
             continue;
         }
