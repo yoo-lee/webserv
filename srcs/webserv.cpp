@@ -106,22 +106,23 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             cout << "error;connected_communication No.1" << endl;
             return ;
         }
+
+        // Test (will remove)
         req->print_request();
-        char *buf = NULL;
-        //test( following code will be removed)
-        req->read_buf(&buf);
-        //while(size > 0){
-            //cout << string(buf) << endl;
-            //size = req->read_buf(buf);
-        //}
+        // Body Test
+        cout << "Body(only string):" << endl;
+        char buf[1024];
+        int size = req->read_buf(buf);
+        while(size > 0){
+            cout << buf << endl;
+            size = req->read_buf(buf);
+        }
 
         //todo. do something in server
         //CGI cgi(*req);
-        /*
         bool read_all = true;
         if (read_all == false)
             return ;
-            */
 
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){

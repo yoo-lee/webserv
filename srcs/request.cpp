@@ -16,14 +16,14 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _body_size(0), _body(NULL),method(NG),  err_line("")
+Request::Request(int fd_) : fd(fd_), _content_length(0), _gnl(this->fd) , method(NG),  err_line("")
 {
     this->parse();
 }
 
 Request::~Request()
 {
-    delete _body;
+    //delete _body;
     //close(this->fd);
 }
 
@@ -87,18 +87,17 @@ void Request::print_request()
     }
 }
 
-void Request::load_header(GetNextLine& gnl, char *buf)
+void Request::parse()
 {
-
-    string str = gnl.getline(buf, BUF_MAX);
-    if (str == gnl.last_str){
+    string str = _gnl.getline();
+    if (str == _gnl.last_str){
         return;
     }
     Split sp(str, " ");
     if (sp.size() != 3){
         cout << "size:" << sp.size() << endl;
         cout << "str:[" << str << "]" << endl;
-        str = gnl.getline(buf, BUF_MAX);
+        str = _gnl.getline();
         cout << "str:[" << str << "]" << endl;
         cout << "Error:not 3 factor" << endl;
         throw std::exception();
@@ -121,8 +120,8 @@ void Request::load_header(GetNextLine& gnl, char *buf)
     string header;
     string value;
     std::string::size_type pos;
-    while((str != gnl.last_str)) {
-        str = gnl.getline(buf, BUF_MAX);
+    while((str != _gnl.last_str)) {
+        str = _gnl.getline();
         pos = str.find(":");
         if (pos == string::npos || str.size() <= 0)
         {
@@ -141,16 +140,15 @@ void Request::load_header(GetNextLine& gnl, char *buf)
         this->headers.insert(make_pair(header, value));
     }
 
-}
-
-void Request::parse()
-{
-    char extra_buf[BUF_MAX];
-    GetNextLine gnl(this->fd);
-    load_header(gnl, extra_buf);
-    this->print_request();
-    load_body(gnl, extra_buf);
-
+    string size_str = this->search_header("content-length");
+    int size = -1;
+    if (size_str != ""){
+        std::stringstream ss;
+        ss << size_str;
+        ss >> size;
+    }
+    this->_content_length = size;
+    this->_transfer_encoding = this->search_header("transfer-encoding");
 }
 
 METHOD Request::get_method()
@@ -173,64 +171,13 @@ const map<string, string> &Request::get_headers()
     return (this->headers);
 }
 
-
-void Request::load_body(GetNextLine& gnl, char *buf)
+int Request::read_buf(char *buf)
 {
-    string size_str = this->search_header("content-length");
-    int size = -1;
-    if (size_str != ""){
-        std::stringstream ss;
-        ss << size_str;
-        ss >> size;
-    }
-    this->_body_size = size;
-    int extra_buf_size = gnl.get_extra_buf(&buf);
-    string transfer = this->search_header("transfer-encoding");
-    string accept_char = this->search_header("accept-charset");
-    /*
-    if (accept_char == "utf-8")
-        cout << "OKOKOKOK accept-charset:" << accept_char << endl;
-    else {
-        cout << "NGNGNGNGNG [accept-charset] is not utf-8:" << accept_char << endl;
-        cout << "NGNGNGNGNG [accept-charset] is not utf-8 size:" << accept_char.size() << endl;
-    }
-    cout << "transfer-encoding:" << transfer << endl;
-    */
-    //size -= extra_buf_size;
-    //  transfer-encoding:chunked
-    if (transfer == "chunked")
-    {
-        //cout << "chunked No.1" << endl;
-    }
-    else if (extra_buf_size > 0)
-    {
-        //cout << "content-length No.2 size:" << this->_body_size << endl;
-        this->_body = new char(this->_body_size);
-        Utility::memcpy(this->_body, buf, extra_buf_size);
-        string str = gnl.getline(&(this->_body[extra_buf_size]), this->_body_size - extra_buf_size);
-    }
-}
 
-int Request::read_buf(char **cp_buf)
-{
-    //char *test_nu = NULL;
-    *cp_buf = this->_body;
-    //cout << "this->_body address:" << &(this->_body) << endl;
-    //cout << "test NULL:" << test_nu << endl;
-    //cout << "this->_body:" << (this->_body) << endl;
-    return (this->_body_size);
-    /*
-    if (this->buf_size > 0)
-    {
-        int tmp = this->buf_size;
-        while(this->buf_size--){
-            cp_buf[this->buf_size] = this->extra_buf[this->buf_size];
-        }
-        return (tmp);
-    }
-    ssize_t tmp = (read_line(this->fd, cp_buf, BUF_MAX, MSG_DONTWAIT));
-    return (tmp);
-    */
+    int size = this->_gnl.get_extra_buf(buf);
+    if (size > 0)
+        return (size);
+    return (_gnl.get_body(&(buf[size]), BUF_MAX));
 }
 
 const string& Request::get_path()

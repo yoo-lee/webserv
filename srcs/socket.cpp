@@ -108,10 +108,8 @@ void Socket::close_fd()
 
 int Socket::accept_request()
 {
-    //int fd = 0;
     struct sockaddr_in client;
     memset(&client, 0, sizeof(struct sockaddr_in));
-    //struct epoll_event ev = {0};
     socklen_t len = sizeof(client);
 
     this->fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
@@ -123,8 +121,6 @@ int Socket::accept_request()
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
-    //ev.events = EPOLLIN;
-    //this->clientinfo.fd = this->fd;
     return (this->fd);
 }
 
@@ -151,19 +147,6 @@ Request *Socket::recv(int fd)
 
 Request *Socket::recv()
 {
-    //struct sockaddr_in client;
-    //socklen_t len = sizeof(client);
-
-    /*
-    cout << "socket recv No.1 fd=" << this->sock_fd << endl;
-    this->fd= accept(this->sock_fd,(struct sockaddr *)&client, &len);
-    cout << "socket recv No.2 fd=" << this->sock_fd << endl;
-    if (this->fd < 0)
-    {
-        cout << "Error accept():" << strerror(errno) << endl;
-        return (NULL);
-    }
-    */
     if (this->req != NULL)
         delete this->req;
     this->req = new Request(this->fd);
@@ -176,6 +159,5 @@ bool Socket::send(std::string& data)
     char last = '\0';
     write(this->fd, data.c_str(), data.size());
     write(this->fd, &last, 1);
-    //close(this->fd);
     return (true);
 }
