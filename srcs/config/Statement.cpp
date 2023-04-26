@@ -10,6 +10,11 @@ Statement::Statement(std::string directive, std::vector<std::string> params) : _
 {
 }
 
+Statement::Statement(std::string directive, std::string param) : _directive(directive)
+{
+    _params.push_back(param);
+}
+
 Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params)
 {
 }
@@ -20,11 +25,18 @@ Statement::~Statement()
 
 void Statement::print(std::ostream &os) const
 {
-    os << _directive << ": ";
+    os << "directive: '" << _directive << "' , params: [ ";
     for (size_t i = 0; i < _params.size(); i++)
     {
-        os << _params[i] << " ";
+        os << "'" << _params[i] << "' ";
     }
+    os << "]";
+}
+
+std::ostream &operator<<(std::ostream &os, const Statement &statement)
+{
+    statement.print(os);
+    return os;
 }
 
 std::string Statement::get_directive() const

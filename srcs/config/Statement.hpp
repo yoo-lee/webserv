@@ -10,7 +10,8 @@ class Statement
     std::vector<std::string> _params;
 
   public:
-    Statement(std::string directive, std::vector<std::string> _params);
+    Statement(std::string directive, std::vector<std::string> params);
+    Statement(std::string directive, std::string param);
     Statement(const Statement &statement);
     ~Statement();
 
@@ -19,5 +20,7 @@ class Statement
 
     virtual void print(std::ostream &os) const;
 };
+
+std::ostream &operator<<(std::ostream &os, const Statement &statement);
 
 #endif /* STATEMENT_H */

@@ -1,4 +1,4 @@
-UNIT_TEST_SRCS = AST.cpp Lexer.cpp Token.cpp NotFound.cpp SyntaxError.cpp  InvalidValue.cpp SimpleStatement.cpp BlockStatement.cpp Statement.cpp
+UNIT_TEST_SRCS = AST.cpp Lexer.cpp Token.cpp NotFound.cpp SyntaxError.cpp  InvalidValue.cpp BlockStatement.cpp Statement.cpp
 SRCS = Config.cpp Parser.cpp ${UNIT_TEST_SRCS}
 UNIT_OBJS = ${UNIT_TEST_SRCS:.cpp=.o}
 OBJS = ${SRCS:.cpp=.o}

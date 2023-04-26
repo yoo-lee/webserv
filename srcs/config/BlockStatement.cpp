@@ -1,5 +1,4 @@
 #include "BlockStatement.hpp"
-#include "SimpleStatement.hpp"
 #include <string>
 #include <vector>
 #ifdef UNIT_TEST
@@ -38,10 +37,10 @@ void BlockStatement::print(std::ostream &os) const
             os << "\t"
                << "NULL"
                << "\n";
-        else if (dynamic_cast<SimpleStatement *>(_child_statements[i]))
-            os << "\t" << *dynamic_cast<SimpleStatement *>(_child_statements[i]) << ";\n";
-        else
+        else if (dynamic_cast<BlockStatement *>(_child_statements[i]))
             os << "\t" << *dynamic_cast<BlockStatement *>(_child_statements[i]) << "\n";
+        else
+            os << "\t" << *_child_statements[i] << "\n";
     }
     os << "}";
 }
@@ -65,8 +64,8 @@ TEST_CASE("BlockStatement constructor")
     params.push_back("param2");
 
     std::vector<Statement *> child_statements;
-    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
-    SimpleStatement *s2 = new SimpleStatement("directive2", "value2");
+    Statement *s1 = new Statement("directive1", "value1");
+    Statement *s2 = new Statement("directive2", "value2");
     child_statements.push_back(s1);
     child_statements.push_back(s2);
 
@@ -87,8 +86,8 @@ TEST_CASE("BlockStatement copy constructor")
     params.push_back("param2");
 
     std::vector<Statement *> child_statements;
-    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
-    SimpleStatement *s2 = new SimpleStatement("directive2", "value2");
+    Statement *s1 = new Statement("directive1", "value1");
+    Statement *s2 = new Statement("directive2", "value2");
     child_statements.push_back(s1);
     child_statements.push_back(s2);
 

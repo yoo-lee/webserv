@@ -34,7 +34,6 @@ WS: [ \t\n\r\f]+ -> skip;
  */
 #include "BlockStatement.hpp"
 #include "NotFound.hpp"
-#include "SimpleStatement.hpp"
 #include "Statement.hpp"
 class AST
 {
@@ -43,7 +42,7 @@ class AST
     std::vector<Statement *> _root;
     std::vector<Statement *> program();
     Statement *statement();
-    SimpleStatement *try_simple_statement(std::stack<Token> &buf);
+    Statement *try_simple_statement(std::stack<Token> &buf);
     BlockStatement *try_block_statement(std::stack<Token> &buf);
     std::string directive(std::stack<Token> &buf);
     std::vector<std::string> parameters(std::stack<Token> &buf);

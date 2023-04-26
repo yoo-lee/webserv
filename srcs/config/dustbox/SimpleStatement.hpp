@@ -6,10 +6,8 @@
 class SimpleStatement : public Statement
 {
   private:
-    std::string _value;
-
   public:
-    SimpleStatement(std::string directive, std::vector<std::string> _params, std::string value);
+    SimpleStatement(std::string directive, std::vector<std::string> _params);
     SimpleStatement(std::string directive, std::string value);
     SimpleStatement(const SimpleStatement &s);
     ~SimpleStatement();

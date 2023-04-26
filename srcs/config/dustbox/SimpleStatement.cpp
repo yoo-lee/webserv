@@ -32,7 +32,7 @@ std::string SimpleStatement::get_value() const
 void SimpleStatement::print(std::ostream &os) const
 {
     Statement::print(os);
-    os << _value;
+    os << " value: '" << _value << "'";
 }
 
 std::ostream &operator<<(std::ostream &os, const SimpleStatement &statement)

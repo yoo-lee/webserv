@@ -1,7 +1,6 @@
 #include "AST.hpp"
 #include "BlockStatement.hpp"
 #include "NotFound.hpp"
-#include "SimpleStatement.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 #ifdef UNIT_TEST
@@ -32,7 +31,7 @@ Statement *AST::statement()
     std::stack<Token> buf;
     try
     {
-        SimpleStatement *node = try_simple_statement(buf);
+        Statement *node = try_simple_statement(buf);
         decide(buf);
         return node;
     }
@@ -57,16 +56,16 @@ AST::~AST()
 {
     for (size_t i = 0; i < _root.size(); i++)
     {
-        if (dynamic_cast<SimpleStatement *>(_root[i]))
-            delete dynamic_cast<SimpleStatement *>(_root[i]);
-        else
+        if (dynamic_cast<BlockStatement *>(_root[i]))
             delete dynamic_cast<BlockStatement *>(_root[i]);
+        else
+            delete _root[i];
     }
 }
 
-SimpleStatement *AST::try_simple_statement(std::stack<Token> &buf)
+Statement *AST::try_simple_statement(std::stack<Token> &buf)
 {
-    return new SimpleStatement(directive(buf), parameters(buf), consume(Token::SEMI, buf));
+    return new Statement(directive(buf), parameters(buf));
 }
 
 BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
@@ -158,7 +157,10 @@ void AST::print_tree()
 
     for (size_t i = 0; i < _root.size(); i++)
     {
-        std::cout << (*(dynamic_cast<SimpleStatement *>(_root[i]))) << std::endl;
+        if (dynamic_cast<BlockStatement *>(_root[i]))
+            std::cout << (*(dynamic_cast<BlockStatement *>(_root[i]))) << std::endl;
+        else
+            std::cout << (*(dynamic_cast<Statement *>(_root[i]))) << std::endl;
     }
 }
 
@@ -171,7 +173,7 @@ std::vector<Statement *> AST::get_root() const
 #include "Lexer.hpp"
 TEST_CASE("AST: Simple")
 {
-    AST ast1(Lexer("block{simple statement;}").get_token_list());
+    AST ast1(Lexer("block param { simple statement; }").get_token_list());
     ast1.print_tree();
 }
 /* --------------内部構造を大きく変えたので動きません--------------
