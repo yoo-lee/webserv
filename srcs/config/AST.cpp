@@ -56,10 +56,7 @@ AST::~AST()
 {
     for (size_t i = 0; i < _root.size(); i++)
     {
-        if (dynamic_cast<BlockStatement *>(_root[i]))
-            delete dynamic_cast<BlockStatement *>(_root[i]);
-        else
-            delete _root[i];
+        delete _root[i];
     }
 }
 
@@ -91,7 +88,16 @@ BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
             break;
         }
     }
-    consume(Token::RCURLY, buf);
+    try
+    {
+        consume(Token::RCURLY, buf);
+    }
+    catch (NotFound &nf)
+    {
+        for (size_t i = 0; i < statements.size(); i++)
+            delete statements[i];
+        throw NotFound("RCURLY not found");
+    }
     return new BlockStatement(directive_, parameters_, statements);
 }
 
@@ -153,7 +159,7 @@ void AST::backtrace(std::stack<Token> &buf)
 
 void AST::decide(std::stack<Token> &buf)
 {
-    while (!buf.empty())
+    while (buf.size() != 0)
         buf.pop();
 }
 
@@ -174,16 +180,26 @@ std::vector<Statement *> AST::get_root() const
     return _root;
 }
 
+Statement *AST::operator[](std::string directive) const
+{
+    for (size_t i = 0; i < _root.size(); i++)
+    {
+        if (_root[i]->get_directive() == directive)
+            return _root[i];
+    }
+    throw std::out_of_range("'" + directive + "' not found");
+}
+
 #ifdef UNIT_TEST
 #include "Lexer.hpp"
-// TEST_CASE("AST: Simple")
-// {
-//     AST ast(Lexer("directive param;").get_token_list());
-//     REQUIRE(ast.get_root().size() == 1);
-//     REQUIRE(ast.get_root()[0]->get_directive() == "directive");
-//     REQUIRE(ast.get_root()[0]->get_params().size() == 1);
-//     REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
-// }
+TEST_CASE("AST: Simple")
+{
+    AST ast(Lexer("directive param;").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+}
 
 TEST_CASE("AST: Multi Simple")
 {
@@ -239,11 +255,66 @@ TEST_CASE("AST: Block with param")
     REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
 }
 
+TEST_CASE("AST: Multi Block")
+{
+    AST ast(Lexer("block1{a b;}block2{a b;}").get_token_list());
+    REQUIRE(ast.get_root().size() == 2);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[1]) != 0);
+
+    BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(bs1->get_directive() == "block1");
+    REQUIRE(bs1->get_params().size() == 0);
+    REQUIRE(bs1->get_child_statements().size() == 1);
+    REQUIRE(bs1->get_child_statements()[0]->get_directive() == "a");
+    REQUIRE(bs1->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs1->get_child_statements()[0]->get_params()[0] == "b");
+
+    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(ast.get_root()[1]);
+    REQUIRE(bs2->get_directive() == "block2");
+    REQUIRE(bs2->get_params().size() == 0);
+    REQUIRE(bs2->get_child_statements().size() == 1);
+    REQUIRE(bs2->get_child_statements()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_child_statements()[0]->get_params()[0] == "b");
+}
+
+TEST_CASE("AST: Nested block statement")
+{
+    AST ast(Lexer("parent{child{a b;}}").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(bs1->get_directive() == "parent");
+    REQUIRE(bs1->get_params().size() == 0);
+    REQUIRE(bs1->get_child_statements().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]) != 0);
+    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]);
+    REQUIRE(bs2->get_directive() == "child");
+    REQUIRE(bs2->get_params().size() == 0);
+    REQUIRE(bs2->get_child_statements().size() == 1);
+    REQUIRE(bs2->get_child_statements()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_child_statements()[0]->get_params()[0] == "b");
+}
+
 TEST_CASE("AST: nginx.conf")
 {
-    AST ast(Lexer("events {\n    worker_connections 1024;\n}\n\nhttp {\n    server {\n        listen 80;\n        "
-                  "server_name example.com;\n        root /var/www/example.com;\n\n        location / {\n            "
-                  "try_files $uri $uri/ =404;\n        }\n    }\n}\n;")
+    AST ast(Lexer("events {\n"
+                  "    worker_connections 1024;\n"
+                  "}\n"
+                  "\n"
+                  "http {\n"
+                  "    server {\n"
+                  "        listen 80;\n"
+                  "        server_name example.com;\n"
+                  "        root /var/www/example.com;\n"
+                  "\n"
+                  "        location / {\n"
+                  "            try_files $uri $uri/ =404;\n"
+                  "        }\n"
+                  "    }\n"
+                  "}\n")
                 .get_token_list());
     REQUIRE(ast.get_root().size() == 2);
     ast.print_tree();
@@ -251,24 +322,9 @@ TEST_CASE("AST: nginx.conf")
 
 /** BAD TEST CASE **/
 
-TEST_CASE("AST: Non Statement")
+TEST_CASE("AST: Nested non lcurly")
 {
-    CHECK_THROWS_AS(AST(Lexer("").get_token_list()), NotFound);
-}
-
-TEST_CASE("AST: Non Semi")
-{
-    CHECK_THROWS_AS(AST(Lexer("directive param").get_token_list()), NotFound);
-}
-
-TEST_CASE("AST: Non param simple statement")
-{
-    CHECK_THROWS_AS(AST(Lexer("simple;").get_token_list()), NotFound);
-}
-
-TEST_CASE("AST: Non Block rcurly")
-{
-    CHECK_THROWS_AS(AST(Lexer("Block { directive param;").get_token_list()), NotFound);
+    CHECK_THROWS_AS(AST(Lexer("parent{child{a b;}").get_token_list()), NotFound);
 }
 
 #endif

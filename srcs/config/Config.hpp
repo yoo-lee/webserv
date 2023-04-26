@@ -1,5 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+#include "Events.hpp"
+#include "Http.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include <fstream>
@@ -8,12 +10,11 @@
 #include <string>
 #include <vector>
 
-#include "Http.hpp"
-
 class Config
 {
   private:
   public:
+    Events events;
     HTTP http;
     Config(std::string file_path);
     Config(const char *file_path);

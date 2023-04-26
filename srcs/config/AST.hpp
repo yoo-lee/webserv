@@ -1,6 +1,5 @@
 #ifndef AST_H
 #define AST_H
-// #include "ASTNode.hpp"
 #include "SyntaxError.hpp"
 #include "Token.hpp"
 #include <ostream>
@@ -35,6 +34,9 @@ WS: [ \t\n\r\f]+ -> skip;
 #include "BlockStatement.hpp"
 #include "NotFound.hpp"
 #include "Statement.hpp"
+
+// TODO: ASTではなくなった。もっと適切な名前に変更する。
+// TODO: 700byteぐらいleakしているのでその修正
 class AST
 {
   private:
@@ -57,6 +59,7 @@ class AST
     ~AST();
     void print_tree();
     std::vector<Statement *> get_root() const;
+    Statement *operator[](std::string directive) const;
 };
 
 #endif /* AST_H */

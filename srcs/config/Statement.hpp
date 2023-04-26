@@ -12,8 +12,9 @@ class Statement
   public:
     Statement(std::string directive, std::vector<std::string> params);
     Statement(std::string directive, std::string param);
+    Statement(std::string directive);
     Statement(const Statement &statement);
-    ~Statement();
+    virtual ~Statement();
 
     std::string get_directive() const;
     std::vector<std::string> get_params() const;

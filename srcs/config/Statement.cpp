@@ -1,4 +1,5 @@
 #include "Statement.hpp"
+#include "BlockStatement.hpp"
 #include <string>
 #include <vector>
 
@@ -15,6 +16,10 @@ Statement::Statement(std::string directive, std::string param) : _directive(dire
     _params.push_back(param);
 }
 
+Statement::Statement(std::string directive) : _directive(directive)
+{
+}
+
 Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params)
 {
 }
@@ -27,9 +32,7 @@ void Statement::print(std::ostream &os, std::string indent) const
 {
     os << indent << "directive: '" << _directive << "' , params: [ ";
     for (size_t i = 0; i < _params.size(); i++)
-    {
         os << "'" << _params[i] << "' ";
-    }
     os << "]";
 }
 

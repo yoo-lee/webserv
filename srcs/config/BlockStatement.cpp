@@ -11,6 +11,11 @@ BlockStatement::BlockStatement(std::string directive, std::vector<std::string> p
 {
 }
 
+BlockStatement::BlockStatement(std::string directive, std::vector<Statement *> child_statements)
+    : Statement(directive), _child_statements(child_statements)
+{
+}
+
 BlockStatement::BlockStatement(const BlockStatement &b) : Statement(b)
 {
     for (size_t i = 0; i < b._child_statements.size(); i++)
@@ -18,13 +23,11 @@ BlockStatement::BlockStatement(const BlockStatement &b) : Statement(b)
         _child_statements.push_back(new Statement(*b._child_statements[i]));
     }
 }
-
+// #include <iostream>
 BlockStatement::~BlockStatement()
 {
     for (size_t i = 0; i < _child_statements.size(); i++)
-    {
         delete _child_statements[i];
-    }
 }
 
 void BlockStatement::print(std::ostream &os, std::string indent) const
@@ -56,6 +59,16 @@ std::ostream &operator<<(std::ostream &os, const BlockStatement &statement)
 {
     statement.print(os, "");
     return os;
+}
+
+Statement *BlockStatement::operator[](std::string directive) const
+{
+    for (size_t i = 0; i < _child_statements.size(); i++)
+    {
+        if (_child_statements[i]->get_directive() == directive)
+            return _child_statements[i];
+    }
+    throw std::out_of_range("out of range");
 }
 
 #ifdef UNIT_TEST
@@ -106,6 +119,36 @@ TEST_CASE("BlockStatement copy constructor")
     CHECK(b2.get_child_statements()[1] != s2);
     CHECK(&(b.get_child_statements()[0]) != &(b2.get_child_statements()[0]));
     CHECK(&(b.get_child_statements()[1]) != &(b2.get_child_statements()[1]));
+}
+
+TEST_CASE("BlockStatement nested")
+{
+    std::vector<Statement *> grandchild;
+    Statement *s1 = new Statement("directive1", "value1");
+    grandchild.push_back(s1);
+    BlockStatement *child = new BlockStatement("directive2", std::vector<std::string>(), grandchild);
+    std::vector<Statement *> children;
+    children.push_back(child);
+
+    BlockStatement b("directive", children);
+}
+
+TEST_CASE("BlockStatement []")
+{
+    std::vector<std::string> params;
+    params.push_back("param1");
+    params.push_back("param2");
+
+    std::vector<Statement *> child_statements;
+    Statement *s1 = new Statement("directive1", "value1");
+    Statement *s2 = new Statement("directive2", "value2");
+    child_statements.push_back(s1);
+    child_statements.push_back(s2);
+
+    BlockStatement b("directive", params, child_statements);
+    CHECK(b["directive1"] == s1);
+    CHECK(b["directive2"] == s2);
+    CHECK_THROWS_AS(b["directive3"], std::out_of_range);
 }
 
 #endif

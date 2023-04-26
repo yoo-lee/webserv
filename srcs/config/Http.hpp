@@ -1,16 +1,18 @@
 #ifndef HTTP_H
 #define HTTP_H
+#include "BlockStatement.hpp"
 #include "Server.hpp"
 #include <string>
+#include <vector>
 class HTTP
 {
   private:
   public:
     std::string include;
     std::string default_type;
-    const Server server;
+    std::vector<Server *> server;
     HTTP();
-    HTTP(std::string include, std::string default_type, Server server);
+    HTTP(BlockStatement http_directive);
     ~HTTP();
 };
 
@@ -18,9 +20,10 @@ HTTP::HTTP()
 {
 }
 
-HTTP::HTTP(std::string include, std::string default_type, Server server)
-    : include(include), default_type(default_type), server(server)
+HTTP::HTTP(BlockStatement http_directive)
 {
+    if (http_directive.get_directive() != "http")
+        throw std::runtime_error("invalid http directive");
 }
 
 HTTP::~HTTP()
