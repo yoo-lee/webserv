@@ -29,25 +29,28 @@ AST::AST(std::vector<Token> tokens) : _tokens(tokens)
 Statement *AST::statement()
 {
     std::stack<Token> buf;
-    try
+    while (true)
     {
-        Statement *node = try_simple_statement(buf);
-        decide(buf);
-        return node;
-    }
-    catch (NotFound &e)
-    {
-        backtrace(buf);
-    }
-    try
-    {
-        BlockStatement *node = try_block_statement(buf);
-        decide(buf);
-        return node;
-    }
-    catch (NotFound &e)
-    {
-        backtrace(buf);
+        try
+        {
+            Statement *node = try_simple_statement(buf);
+            decide(buf);
+            return node;
+        }
+        catch (NotFound &e)
+        {
+            backtrace(buf);
+        }
+        try
+        {
+            BlockStatement *node = try_block_statement(buf);
+            decide(buf);
+            return node;
+        }
+        catch (NotFound &e)
+        {
+            backtrace(buf);
+        }
     }
     throw NotFound("statement not found");
 }
@@ -173,396 +176,63 @@ std::vector<Statement *> AST::get_root() const
 #include "Lexer.hpp"
 TEST_CASE("AST: Simple")
 {
-    AST ast1(Lexer("block param { simple statement; }").get_token_list());
-    ast1.print_tree();
+    AST ast(Lexer("directive param;").get_token_list());
+    CHECK(ast.get_root().size() == 1);
+    CHECK(ast.get_root()[0]->get_directive() == "directive");
+    CHECK(ast.get_root()[0]->get_params().size() == 1);
+    CHECK(ast.get_root()[0]->get_params()[0] == "param");
 }
-/* --------------内部構造を大きく変えたので動きません--------------
-// テストケースに失敗した場合にどこで失敗したかを
-// わかりやすくするためにわざと共通化していない
-TEST_CASE("AST::Simple")
+
+TEST_CASE("AST: Multi Simple")
 {
-    TerminalASTNode *id;
-    AST ast(Lexer("simple statement;").get_token_list());
-    // ast.print_tree();
-    NonTerminalASTNode root = ast.get_root();
-    REQUIRE(root.get_type() == ASTNode::PROGRAM);
-    REQUIRE(root.get_children().size() == 1);
-
-    NonTerminalASTNode *statement = dynamic_cast<NonTerminalASTNode *>(root.get_children()[0]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(simple_statement != 0);
-    REQUIRE(simple_statement->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement->get_children().size() == 3);
-
-    NonTerminalASTNode *directive = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-
-    id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "simple");
-
-    NonTerminalASTNode *parameters = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[1]);
-    REQUIRE(parameters != 0);
-    REQUIRE(parameters->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters->get_children().size() == 1);
-    NonTerminalASTNode *parameter = dynamic_cast<NonTerminalASTNode *>(parameters->get_children()[0]);
-    REQUIRE(parameter != 0);
-    REQUIRE(parameter->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(parameter->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "statement");
-
-    TerminalASTNode *semi = dynamic_cast<TerminalASTNode *>(simple_statement->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
+    AST ast(Lexer("directive param; directive param;").get_token_list());
+    CHECK(ast.get_root().size() == 2);
+    CHECK(ast.get_root()[0]->get_directive() == "directive");
+    CHECK(ast.get_root()[0]->get_params().size() == 1);
+    CHECK(ast.get_root()[0]->get_params()[0] == "param");
+    CHECK(ast.get_root()[1]->get_directive() == "directive");
+    CHECK(ast.get_root()[1]->get_params().size() == 1);
+    CHECK(ast.get_root()[1]->get_params()[0] == "param");
 }
 
-TEST_CASE("AST::Block")
+TEST_CASE("AST: Multi Param Simple")
 {
-    TerminalASTNode *id;
-    AST ast = AST(Lexer("block { simple statement; }").get_token_list());
-    NonTerminalASTNode root = ast.get_root();
-    REQUIRE(root.get_type() == ASTNode::PROGRAM);
-    REQUIRE(root.get_children().size() == 1);
-
-    NonTerminalASTNode *statement = dynamic_cast<NonTerminalASTNode *>(root.get_children()[0]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *block = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(block != 0);
-    REQUIRE(block->get_type() == ASTNode::BLOCK_STATEMENT);
-    REQUIRE(block->get_children().size() == 4);
-
-    TerminalASTNode *lcurly = dynamic_cast<TerminalASTNode *>(block->get_children()[1]);
-    REQUIRE(lcurly != 0);
-    REQUIRE(lcurly->get_type() == ASTNode::LCURLY);
-    REQUIRE(lcurly->get_value() == "{");
-
-    NonTerminalASTNode *statement_in_block = dynamic_cast<NonTerminalASTNode *>(block->get_children()[2]);
-    REQUIRE(statement_in_block != 0);
-    REQUIRE(statement_in_block->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement_in_block->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement = dynamic_cast<NonTerminalASTNode *>(statement_in_block->get_children()[0]);
-    REQUIRE(simple_statement != 0);
-    REQUIRE(simple_statement->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement->get_children().size() == 3);
-
-    NonTerminalASTNode *directive = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "simple");
-
-    NonTerminalASTNode *parameters = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[1]);
-    REQUIRE(parameters != 0);
-    REQUIRE(parameters->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters->get_children().size() == 1);
-    NonTerminalASTNode *parameter = dynamic_cast<NonTerminalASTNode *>(parameters->get_children()[0]);
-    REQUIRE(parameter != 0);
-    REQUIRE(parameter->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(parameter->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "statement");
-
-    TerminalASTNode *semi = dynamic_cast<TerminalASTNode *>(simple_statement->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
-
-    TerminalASTNode *rcurly = dynamic_cast<TerminalASTNode *>(block->get_children()[3]);
-    REQUIRE(rcurly != 0);
-    REQUIRE(rcurly->get_type() == ASTNode::RCURLY);
-    REQUIRE(rcurly->get_value() == "}");
+    AST ast(Lexer("directive p1 p2 p3 p4;").get_token_list());
+    CHECK(ast.get_root().size() == 1);
+    CHECK(ast.get_root()[0]->get_directive() == "directive");
+    CHECK(ast.get_root()[0]->get_params().size() == 4);
+    CHECK(ast.get_root()[0]->get_params()[0] == "p1");
+    CHECK(ast.get_root()[0]->get_params()[1] == "p2");
+    CHECK(ast.get_root()[0]->get_params()[2] == "p3");
+    CHECK(ast.get_root()[0]->get_params()[3] == "p4");
 }
 
-TEST_CASE("AST::Multi statement in block statement")
+TEST_CASE("AST: Block")
 {
-    TerminalASTNode *id;
-    AST ast = AST(Lexer("block { simple1 statement1; simple2 statement2; }").get_token_list());
-    NonTerminalASTNode root = ast.get_root();
-    REQUIRE(root.get_type() == ASTNode::PROGRAM);
-    REQUIRE(root.get_children().size() == 1);
-
-    NonTerminalASTNode *statement = dynamic_cast<NonTerminalASTNode *>(root.get_children()[0]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *block = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(block != 0);
-    REQUIRE(block->get_type() == ASTNode::BLOCK_STATEMENT);
-    REQUIRE(block->get_children().size() == 5);
-
-    TerminalASTNode *lcurly = dynamic_cast<TerminalASTNode *>(block->get_children()[1]);
-    REQUIRE(lcurly != 0);
-    REQUIRE(lcurly->get_type() == ASTNode::LCURLY);
-    REQUIRE(lcurly->get_value() == "{");
-
-    NonTerminalASTNode *statement_in_block1 = dynamic_cast<NonTerminalASTNode *>(block->get_children()[2]);
-    REQUIRE(statement_in_block1 != 0);
-    REQUIRE(statement_in_block1->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement_in_block1->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement1 = dynamic_cast<NonTerminalASTNode *>(statement_in_block1->get_children()[0]);
-    REQUIRE(simple_statement1 != 0);
-    REQUIRE(simple_statement1->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement1->get_children().size() == 3);
-
-    NonTerminalASTNode *directive1 = dynamic_cast<NonTerminalASTNode *>(simple_statement1->get_children()[0]);
-    REQUIRE(directive1 != 0);
-    REQUIRE(directive1->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive1->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(directive1->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "simple1");
-
-    NonTerminalASTNode *parameters1 = dynamic_cast<NonTerminalASTNode *>(simple_statement1->get_children()[1]);
-    REQUIRE(parameters1 != 0);
-    REQUIRE(parameters1->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters1->get_children().size() == 1);
-    NonTerminalASTNode *parameter1 = dynamic_cast<NonTerminalASTNode *>(parameters1->get_children()[0]);
-    REQUIRE(parameter1 != 0);
-    REQUIRE(parameter1->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter1->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(parameter1->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "statement1");
-
-    TerminalASTNode *semi = dynamic_cast<TerminalASTNode *>(simple_statement1->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
-
-    NonTerminalASTNode *statement_in_block2 = dynamic_cast<NonTerminalASTNode *>(block->get_children()[3]);
-    REQUIRE(statement_in_block2 != 0);
-    REQUIRE(statement_in_block2->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement_in_block2->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement2 = dynamic_cast<NonTerminalASTNode *>(statement_in_block2->get_children()[0]);
-    REQUIRE(simple_statement2 != 0);
-    REQUIRE(simple_statement2->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement2->get_children().size() == 3);
-
-    NonTerminalASTNode *directive2 = dynamic_cast<NonTerminalASTNode *>(simple_statement2->get_children()[0]);
-    REQUIRE(directive2 != 0);
-    REQUIRE(directive2->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive2->get_children().size() == 1);
-    id = dynamic_cast<TerminalASTNode *>(directive2->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "simple2");
-
-    NonTerminalASTNode *parameters2 = dynamic_cast<NonTerminalASTNode *>(simple_statement2->get_children()[1]);
-    REQUIRE(parameters2 != 0);
-    REQUIRE(parameters2->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters2->get_children().size() == 1);
-    NonTerminalASTNode *parameter2 = dynamic_cast<NonTerminalASTNode *>(parameters2->get_children()[0]);
-    REQUIRE(parameter2 != 0);
-    REQUIRE(parameter2->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter2->get_children().size() == 1);
-
-    id = dynamic_cast<TerminalASTNode *>(parameter2->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "statement2");
-
-    semi = dynamic_cast<TerminalASTNode *>(simple_statement2->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
-
-    TerminalASTNode *rcurly = dynamic_cast<TerminalASTNode *>(block->get_children()[4]);
-    REQUIRE(rcurly != 0);
-    REQUIRE(rcurly->get_type() == ASTNode::RCURLY);
-    REQUIRE(rcurly->get_value() == "}");
+    AST ast(Lexer("Block { directive param;}").get_token_list());
+    CHECK(ast.get_root().size() == 1);
+    CHECK(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    CHECK(bs->get_directive() == "Block");
+    CHECK(bs->get_params().size() == 0);
+    CHECK(bs->get_child_statements().size() == 1);
+    CHECK(bs->get_child_statements()[0]->get_directive() == "directive");
+    CHECK(bs->get_child_statements()[0]->get_params().size() == 1);
+    CHECK(bs->get_child_statements()[0]->get_params()[0] == "param");
 }
 
-TEST_CASE("AST: Nested block")
+TEST_CASE("AST: Block with param")
 {
-    AST ast(Lexer("key1 { key2 { key3 value; } }").get_token_list());
-    // ast.print_tree();
-    NonTerminalASTNode *root = ast.get_root();
-    REQUIRE(root != 0);
-    REQUIRE(root->get_type() == ASTNode::PROGRAM);
-    REQUIRE(root->get_children().size() == 1);
-
-    NonTerminalASTNode *statement = dynamic_cast<NonTerminalASTNode *>(root->get_children()[0]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *block_statement = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(block_statement != 0);
-    REQUIRE(block_statement->get_type() == ASTNode::BLOCK_STATEMENT);
-    REQUIRE(block_statement->get_children().size() == 4);
-
-    NonTerminalASTNode *directive = dynamic_cast<NonTerminalASTNode *>(block_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-
-    TerminalASTNode *id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "key1");
-
-    TerminalASTNode *lcurly = dynamic_cast<TerminalASTNode *>(block_statement->get_children()[1]);
-    REQUIRE(lcurly != 0);
-    REQUIRE(lcurly->get_type() == ASTNode::LCURLY);
-    REQUIRE(lcurly->get_value() == "{");
-
-    TerminalASTNode *rcurly = dynamic_cast<TerminalASTNode *>(block_statement->get_children()[3]);
-    REQUIRE(rcurly != 0);
-    REQUIRE(rcurly->get_type() == ASTNode::RCURLY);
-    REQUIRE(rcurly->get_value() == "}");
-
-    statement = dynamic_cast<NonTerminalASTNode *>(block_statement->get_children()[2]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    block_statement = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(block_statement != 0);
-    REQUIRE(block_statement->get_type() == ASTNode::BLOCK_STATEMENT);
-    REQUIRE(block_statement->get_children().size() == 4);
-
-    directive = dynamic_cast<NonTerminalASTNode *>(block_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-
-    id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "key2");
-
-    lcurly = dynamic_cast<TerminalASTNode *>(block_statement->get_children()[1]);
-    REQUIRE(lcurly != 0);
-    REQUIRE(lcurly->get_type() == ASTNode::LCURLY);
-    REQUIRE(lcurly->get_value() == "{");
-
-    rcurly = dynamic_cast<TerminalASTNode *>(block_statement->get_children()[3]);
-    REQUIRE(rcurly != 0);
-    REQUIRE(rcurly->get_type() == ASTNode::RCURLY);
-    REQUIRE(rcurly->get_value() == "}");
-
-    statement = dynamic_cast<NonTerminalASTNode *>(block_statement->get_children()[2]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(simple_statement != 0);
-    REQUIRE(simple_statement->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement->get_children().size() == 3);
-
-    directive = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-
-    id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "key3");
-
-    NonTerminalASTNode *parameters = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[1]);
-    REQUIRE(parameters != 0);
-    REQUIRE(parameters->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters->get_children().size() == 1);
-
-    NonTerminalASTNode *parameter = dynamic_cast<NonTerminalASTNode *>(parameters->get_children()[0]);
-    REQUIRE(parameter != 0);
-    REQUIRE(parameter->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter->get_children().size() == 1);
-
-    TerminalASTNode *value = dynamic_cast<TerminalASTNode *>(parameter->get_children()[0]);
-    REQUIRE(value != 0);
-    REQUIRE(value->get_type() == ASTNode::ID);
-    REQUIRE(value->get_value() == "value");
-
-    TerminalASTNode *semi = dynamic_cast<TerminalASTNode *>(simple_statement->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
+    AST ast(Lexer("Block param { directive param;}").get_token_list());
+    CHECK(ast.get_root().size() == 1);
+    CHECK(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    CHECK(bs->get_directive() == "Block");
+    CHECK(bs->get_params().size() == 0);
+    CHECK(bs->get_child_statements().size() == 1);
+    CHECK(bs->get_child_statements()[0]->get_directive() == "directive");
+    CHECK(bs->get_child_statements()[0]->get_params().size() == 1);
+    CHECK(bs->get_child_statements()[0]->get_params()[0] == "param");
 }
 
-TEST_CASE("AST: Multi parameter simple statement")
-{
-    AST ast(Lexer("key param1 param2;").get_token_list());
-    NonTerminalASTNode root = ast.get_root();
-    REQUIRE(root.get_type() == ASTNode::PROGRAM);
-    REQUIRE(root.get_children().size() == 1);
-
-    NonTerminalASTNode *statement = dynamic_cast<NonTerminalASTNode *>(root.get_children()[0]);
-    REQUIRE(statement != 0);
-    REQUIRE(statement->get_type() == ASTNode::STATEMENT);
-    REQUIRE(statement->get_children().size() == 1);
-
-    NonTerminalASTNode *simple_statement = dynamic_cast<NonTerminalASTNode *>(statement->get_children()[0]);
-    REQUIRE(simple_statement != 0);
-    REQUIRE(simple_statement->get_type() == ASTNode::SIMPLE_STATEMENT);
-    REQUIRE(simple_statement->get_children().size() == 3);
-
-    NonTerminalASTNode *directive = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[0]);
-    REQUIRE(directive != 0);
-    REQUIRE(directive->get_type() == ASTNode::DIRECTIVE);
-    REQUIRE(directive->get_children().size() == 1);
-
-    TerminalASTNode *id = dynamic_cast<TerminalASTNode *>(directive->get_children()[0]);
-    REQUIRE(id != 0);
-    REQUIRE(id->get_type() == ASTNode::ID);
-    REQUIRE(id->get_value() == "key");
-
-    NonTerminalASTNode *parameters = dynamic_cast<NonTerminalASTNode *>(simple_statement->get_children()[1]);
-    REQUIRE(parameters != 0);
-    REQUIRE(parameters->get_type() == ASTNode::PARAMETERS);
-    REQUIRE(parameters->get_children().size() == 2);
-
-    NonTerminalASTNode *parameter = dynamic_cast<NonTerminalASTNode *>(parameters->get_children()[0]);
-    REQUIRE(parameter != 0);
-    REQUIRE(parameter->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter->get_children().size() == 1);
-
-    TerminalASTNode *param1 = dynamic_cast<TerminalASTNode *>(parameter->get_children()[0]);
-    REQUIRE(param1 != 0);
-    REQUIRE(param1->get_type() == ASTNode::ID);
-    REQUIRE(param1->get_value() == "param1");
-
-    parameter = dynamic_cast<NonTerminalASTNode *>(parameters->get_children()[1]);
-    REQUIRE(parameter != 0);
-    REQUIRE(parameter->get_type() == ASTNode::PARAMETER);
-    REQUIRE(parameter->get_children().size() == 1);
-
-    TerminalASTNode *param2 = dynamic_cast<TerminalASTNode *>(parameter->get_children()[0]);
-    REQUIRE(param2 != 0);
-    REQUIRE(param2->get_type() == ASTNode::ID);
-    REQUIRE(param2->get_value() == "param2");
-
-    TerminalASTNode *semi = dynamic_cast<TerminalASTNode *>(simple_statement->get_children()[2]);
-    REQUIRE(semi != 0);
-    REQUIRE(semi->get_type() == ASTNode::SEMI);
-    REQUIRE(semi->get_value() == ";");
-}
- */
 #endif

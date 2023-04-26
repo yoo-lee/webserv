@@ -19,6 +19,8 @@ class Statement
     std::vector<std::string> get_params() const;
 
     virtual void print(std::ostream &os) const;
+    virtual bool operator==(const Statement &other) const;
+    virtual bool operator!=(const Statement &other) const;
 };
 
 std::ostream &operator<<(std::ostream &os, const Statement &statement);

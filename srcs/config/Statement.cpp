@@ -39,6 +39,23 @@ std::ostream &operator<<(std::ostream &os, const Statement &statement)
     return os;
 }
 
+bool Statement::operator==(const Statement &other) const
+{
+    if (_directive != other._directive)
+        return false;
+    if (_params.size() != other._params.size())
+        return false;
+    for (size_t i = 0; i < _params.size(); i++)
+        if (_params[i] != other._params[i])
+            return false;
+    return true;
+}
+
+bool Statement::operator!=(const Statement &other) const
+{
+    return !(*this == other);
+}
+
 std::string Statement::get_directive() const
 {
     return _directive;
