@@ -23,9 +23,9 @@ Statement::~Statement()
 {
 }
 
-void Statement::print(std::ostream &os) const
+void Statement::print(std::ostream &os, std::string indent) const
 {
-    os << "directive: '" << _directive << "' , params: [ ";
+    os << indent << "directive: '" << _directive << "' , params: [ ";
     for (size_t i = 0; i < _params.size(); i++)
     {
         os << "'" << _params[i] << "' ";
@@ -35,7 +35,7 @@ void Statement::print(std::ostream &os) const
 
 std::ostream &operator<<(std::ostream &os, const Statement &statement)
 {
-    statement.print(os);
+    statement.print(os, "");
     return os;
 }
 

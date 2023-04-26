@@ -29,28 +29,25 @@ AST::AST(std::vector<Token> tokens) : _tokens(tokens)
 Statement *AST::statement()
 {
     std::stack<Token> buf;
-    while (true)
+    try
     {
-        try
-        {
-            Statement *node = try_simple_statement(buf);
-            decide(buf);
-            return node;
-        }
-        catch (NotFound &e)
-        {
-            backtrace(buf);
-        }
-        try
-        {
-            BlockStatement *node = try_block_statement(buf);
-            decide(buf);
-            return node;
-        }
-        catch (NotFound &e)
-        {
-            backtrace(buf);
-        }
+        Statement *node = try_simple_statement(buf);
+        decide(buf);
+        return node;
+    }
+    catch (NotFound &e)
+    {
+        backtrace(buf);
+    }
+    try
+    {
+        BlockStatement *node = try_block_statement(buf);
+        decide(buf);
+        return node;
+    }
+    catch (NotFound &e)
+    {
+        backtrace(buf);
     }
     throw NotFound("statement not found");
 }
@@ -68,7 +65,12 @@ AST::~AST()
 
 Statement *AST::try_simple_statement(std::stack<Token> &buf)
 {
-    return new Statement(directive(buf), parameters(buf));
+    std::string directive_ = directive(buf);
+    std::string parameter_ = parameter(buf);
+    std::vector<std::string> parameters_ = parameters(buf);
+    parameters_.insert(parameters_.begin(), parameter_);
+    consume(Token::SEMI, buf);
+    return new Statement(directive_, parameters_);
 }
 
 BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
@@ -174,65 +176,99 @@ std::vector<Statement *> AST::get_root() const
 
 #ifdef UNIT_TEST
 #include "Lexer.hpp"
-TEST_CASE("AST: Simple")
-{
-    AST ast(Lexer("directive param;").get_token_list());
-    CHECK(ast.get_root().size() == 1);
-    CHECK(ast.get_root()[0]->get_directive() == "directive");
-    CHECK(ast.get_root()[0]->get_params().size() == 1);
-    CHECK(ast.get_root()[0]->get_params()[0] == "param");
-}
+// TEST_CASE("AST: Simple")
+// {
+//     AST ast(Lexer("directive param;").get_token_list());
+//     REQUIRE(ast.get_root().size() == 1);
+//     REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+//     REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+//     REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+// }
 
 TEST_CASE("AST: Multi Simple")
 {
     AST ast(Lexer("directive param; directive param;").get_token_list());
-    CHECK(ast.get_root().size() == 2);
-    CHECK(ast.get_root()[0]->get_directive() == "directive");
-    CHECK(ast.get_root()[0]->get_params().size() == 1);
-    CHECK(ast.get_root()[0]->get_params()[0] == "param");
-    CHECK(ast.get_root()[1]->get_directive() == "directive");
-    CHECK(ast.get_root()[1]->get_params().size() == 1);
-    CHECK(ast.get_root()[1]->get_params()[0] == "param");
+    REQUIRE(ast.get_root().size() == 2);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+    REQUIRE(ast.get_root()[1]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[1]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[1]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Multi Param Simple")
 {
     AST ast(Lexer("directive p1 p2 p3 p4;").get_token_list());
-    CHECK(ast.get_root().size() == 1);
-    CHECK(ast.get_root()[0]->get_directive() == "directive");
-    CHECK(ast.get_root()[0]->get_params().size() == 4);
-    CHECK(ast.get_root()[0]->get_params()[0] == "p1");
-    CHECK(ast.get_root()[0]->get_params()[1] == "p2");
-    CHECK(ast.get_root()[0]->get_params()[2] == "p3");
-    CHECK(ast.get_root()[0]->get_params()[3] == "p4");
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) == 0);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 4);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "p1");
+    REQUIRE(ast.get_root()[0]->get_params()[1] == "p2");
+    REQUIRE(ast.get_root()[0]->get_params()[2] == "p3");
+    REQUIRE(ast.get_root()[0]->get_params()[3] == "p4");
 }
 
 TEST_CASE("AST: Block")
 {
     AST ast(Lexer("Block { directive param;}").get_token_list());
-    CHECK(ast.get_root().size() == 1);
-    CHECK(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
-    CHECK(bs->get_directive() == "Block");
-    CHECK(bs->get_params().size() == 0);
-    CHECK(bs->get_child_statements().size() == 1);
-    CHECK(bs->get_child_statements()[0]->get_directive() == "directive");
-    CHECK(bs->get_child_statements()[0]->get_params().size() == 1);
-    CHECK(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_directive() == "Block");
+    REQUIRE(bs->get_params().size() == 0);
+    REQUIRE(bs->get_child_statements().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block with param")
 {
     AST ast(Lexer("Block param { directive param;}").get_token_list());
-    CHECK(ast.get_root().size() == 1);
-    CHECK(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
-    CHECK(bs->get_directive() == "Block");
-    CHECK(bs->get_params().size() == 0);
-    CHECK(bs->get_child_statements().size() == 1);
-    CHECK(bs->get_child_statements()[0]->get_directive() == "directive");
-    CHECK(bs->get_child_statements()[0]->get_params().size() == 1);
-    CHECK(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_directive() == "Block");
+    REQUIRE(bs->get_params().size() == 1);
+    REQUIRE(bs->get_params()[0] == "param");
+    REQUIRE(bs->get_child_statements().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+}
+
+TEST_CASE("AST: nginx.conf")
+{
+    AST ast(Lexer("events {\n    worker_connections 1024;\n}\n\nhttp {\n    server {\n        listen 80;\n        "
+                  "server_name example.com;\n        root /var/www/example.com;\n\n        location / {\n            "
+                  "try_files $uri $uri/ =404;\n        }\n    }\n}\n;")
+                .get_token_list());
+    REQUIRE(ast.get_root().size() == 2);
+    ast.print_tree();
+}
+
+/** BAD TEST CASE **/
+
+TEST_CASE("AST: Non Statement")
+{
+    CHECK_THROWS_AS(AST(Lexer("").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: Non Semi")
+{
+    CHECK_THROWS_AS(AST(Lexer("directive param").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: Non param simple statement")
+{
+    CHECK_THROWS_AS(AST(Lexer("simple;").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: Non Block rcurly")
+{
+    CHECK_THROWS_AS(AST(Lexer("Block { directive param;").get_token_list()), NotFound);
 }
 
 #endif

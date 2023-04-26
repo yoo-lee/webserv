@@ -27,22 +27,24 @@ BlockStatement::~BlockStatement()
     }
 }
 
-void BlockStatement::print(std::ostream &os) const
+void BlockStatement::print(std::ostream &os, std::string indent) const
 {
-    Statement::print(os);
-    os << "{\n";
+    Statement::print(os, indent);
+    os << indent << "{\n";
     for (size_t i = 0; i < _child_statements.size(); i++)
     {
         if (_child_statements[i] == 0)
-            os << "\t"
-               << "NULL"
+            os << indent << "NULL"
                << "\n";
         else if (dynamic_cast<BlockStatement *>(_child_statements[i]))
-            os << "\t" << *dynamic_cast<BlockStatement *>(_child_statements[i]) << "\n";
+        {
+            dynamic_cast<BlockStatement *>(_child_statements[i])->print(os, indent + "  ");
+            os << "\n";
+        }
         else
-            os << "\t" << *_child_statements[i] << "\n";
+            os << indent << "  " << *_child_statements[i] << "\n";
     }
-    os << "}";
+    os << indent << "}";
 }
 
 std::vector<Statement *> BlockStatement::get_child_statements() const
@@ -52,7 +54,7 @@ std::vector<Statement *> BlockStatement::get_child_statements() const
 
 std::ostream &operator<<(std::ostream &os, const BlockStatement &statement)
 {
-    statement.print(os);
+    statement.print(os, "");
     return os;
 }
 

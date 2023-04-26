@@ -18,7 +18,7 @@ class Statement
     std::string get_directive() const;
     std::vector<std::string> get_params() const;
 
-    virtual void print(std::ostream &os) const;
+    virtual void print(std::ostream &os, std::string indent) const;
     virtual bool operator==(const Statement &other) const;
     virtual bool operator!=(const Statement &other) const;
 };

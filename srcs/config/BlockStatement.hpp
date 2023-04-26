@@ -14,7 +14,7 @@ class BlockStatement : public Statement
     BlockStatement(const BlockStatement &b);
     ~BlockStatement();
 
-    void print(std::ostream &os) const;
+    void print(std::ostream &os, std::string indent) const;
     friend std::ostream &operator<<(std::ostream &os, const BlockStatement &statement);
     std::vector<Statement *> get_child_statements() const;
 };
