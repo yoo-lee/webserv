@@ -38,7 +38,6 @@ Statement *AST::statement()
     std::stack<Token> buf;
     try
     {
-        std::vector<ASTNode *> children;
         Statement *node = try_simple_statement(buf);
         decide(buf);
         return new Statement(*node);
@@ -49,7 +48,6 @@ Statement *AST::statement()
     }
     try
     {
-        std::vector<ASTNode *> children;
         Statement *node = try_block_statement(buf);
         decide(buf);
         return new Statement(*node);
@@ -171,7 +169,6 @@ std::vector<Statement *> AST::get_root() const
 }
 
 #ifdef UNIT_TEST
-#include "ASTNode.hpp"
 #include "Lexer.hpp"
 TEST_CASE("AST: Simple")
 {

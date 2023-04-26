@@ -1,6 +1,5 @@
 #ifndef STATEMENT_H
 #define STATEMENT_H
-#include "ASTNode.hpp"
 #include <ostream>
 #include <string>
 #include <vector>

@@ -1,6 +1,6 @@
 #ifndef AST_H
 #define AST_H
-#include "ASTNode.hpp"
+// #include "ASTNode.hpp"
 #include "SyntaxError.hpp"
 #include "Token.hpp"
 #include <ostream>
