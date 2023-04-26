@@ -11,26 +11,20 @@ AST::AST() : _root()
 {
 }
 
-AST::AST(std::vector<Token> tokens) : _tokens(tokens), _root(program())
+AST::AST(std::vector<Token> tokens) : _tokens(tokens)
 {
-}
-
-std::vector<Statement *> AST::program()
-{
-    std::vector<Statement *> children;
-    children.push_back(statement());
+    _root.push_back(statement());
     while (true)
     {
         try
         {
-            children.push_back(statement());
+            _root.push_back(statement());
         }
         catch (NotFound &e)
         {
             break;
         }
     }
-    return children;
 }
 
 Statement *AST::statement()
@@ -38,9 +32,9 @@ Statement *AST::statement()
     std::stack<Token> buf;
     try
     {
-        Statement *node = try_simple_statement(buf);
+        SimpleStatement *node = try_simple_statement(buf);
         decide(buf);
-        return new Statement(*node);
+        return node;
     }
     catch (NotFound &e)
     {
@@ -48,9 +42,9 @@ Statement *AST::statement()
     }
     try
     {
-        Statement *node = try_block_statement(buf);
+        BlockStatement *node = try_block_statement(buf);
         decide(buf);
-        return new Statement(*node);
+        return node;
     }
     catch (NotFound &e)
     {
@@ -62,15 +56,20 @@ Statement *AST::statement()
 AST::~AST()
 {
     for (size_t i = 0; i < _root.size(); i++)
-        delete _root[i];
+    {
+        if (dynamic_cast<SimpleStatement *>(_root[i]))
+            delete dynamic_cast<SimpleStatement *>(_root[i]);
+        else
+            delete dynamic_cast<BlockStatement *>(_root[i]);
+    }
 }
 
-Statement *AST::try_simple_statement(std::stack<Token> &buf)
+SimpleStatement *AST::try_simple_statement(std::stack<Token> &buf)
 {
     return new SimpleStatement(directive(buf), parameters(buf), consume(Token::SEMI, buf));
 }
 
-Statement *AST::try_block_statement(std::stack<Token> &buf)
+BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
 {
     std::string directive_ = directive(buf);
     std::vector<std::string> parameters_ = parameters(buf);
@@ -95,7 +94,6 @@ Statement *AST::try_block_statement(std::stack<Token> &buf)
 std::vector<std::string> AST::parameters(std::stack<Token> &buf)
 {
     std::vector<std::string> children;
-    children.push_back(parameter(buf));
     while (true)
     {
         try
@@ -157,9 +155,10 @@ void AST::decide(std::stack<Token> &buf)
 
 void AST::print_tree()
 {
+
     for (size_t i = 0; i < _root.size(); i++)
     {
-        std::cout << _root[i] << std::endl;
+        std::cout << (*(dynamic_cast<SimpleStatement *>(_root[i]))) << std::endl;
     }
 }
 
@@ -172,7 +171,8 @@ std::vector<Statement *> AST::get_root() const
 #include "Lexer.hpp"
 TEST_CASE("AST: Simple")
 {
-    AST ast(Lexer("simple statement;").get_token_list());
+    AST ast1(Lexer("block{simple statement;}").get_token_list());
+    ast1.print_tree();
 }
 /* --------------内部構造を大きく変えたので動きません--------------
 // テストケースに失敗した場合にどこで失敗したかを

@@ -34,7 +34,11 @@ void BlockStatement::print(std::ostream &os) const
     os << "{\n";
     for (size_t i = 0; i < _child_statements.size(); i++)
     {
-        if (dynamic_cast<SimpleStatement *>(_child_statements[i]))
+        if (_child_statements[i] == 0)
+            os << "\t"
+               << "NULL"
+               << "\n";
+        else if (dynamic_cast<SimpleStatement *>(_child_statements[i]))
             os << "\t" << *dynamic_cast<SimpleStatement *>(_child_statements[i]) << ";\n";
         else
             os << "\t" << *dynamic_cast<BlockStatement *>(_child_statements[i]) << "\n";

@@ -14,7 +14,7 @@ run:
 tr: test run
 
 %.o: %.cpp
-	${CXX} -std=c++11 -g3  -D UNIT_TEST -c $< -o $@
+	${CXX} -std=c++11 -g3 -D UNIT_TEST -c $< -o $@
 
 re : ${SRCS}
 	- rm test
@@ -22,7 +22,7 @@ re : ${SRCS}
 	# ./test
 
 utest: ${UNIT_OBJS}
-	${CXX} ${UNIT_OBJS} -std=c++11 -g3 -fsanitize=leak -o test
+	${CXX} ${UNIT_OBJS} -std=c++11 -fsanitize=address -o test
 
 clean:
 	- rm *.o
