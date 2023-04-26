@@ -1,2 +1,3 @@
 .antlr/
 test
+*.o

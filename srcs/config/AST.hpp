@@ -1,9 +1,7 @@
 #ifndef AST_H
 #define AST_H
 #include "ASTNode.hpp"
-#include "NonTerminalASTNode.hpp"
 #include "SyntaxError.hpp"
-#include "TerminalASTNode.hpp"
 #include "Token.hpp"
 #include <ostream>
 #include <queue>
@@ -35,29 +33,29 @@ ID: [a-zA-Z_][a-zA-Z_0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
  */
 #include "NotFound.hpp"
+#include "Statement.hpp"
 class AST
 {
   private:
     std::vector<Token> _tokens;
-    NonTerminalASTNode *_root;
-    NonTerminalASTNode *program();
-    NonTerminalASTNode *statement();
-    NonTerminalASTNode *try_simple_statement(std::stack<Token> &buf);
-    NonTerminalASTNode *try_block_statement(std::stack<Token> &buf);
-    NonTerminalASTNode *directive(std::stack<Token> &buf);
-    NonTerminalASTNode *parameters(std::stack<Token> &buf);
-    NonTerminalASTNode *parameter(std::stack<Token> &buf);
-    TerminalASTNode *consume(Token::Type type, std::stack<Token> &buf);
+    std::vector<Statement *> _root;
+    std::vector<Statement *> program();
+    Statement *statement();
+    Statement *try_simple_statement(std::stack<Token> &buf);
+    Statement *try_block_statement(std::stack<Token> &buf);
+    std::string directive(std::stack<Token> &buf);
+    std::vector<std::string> parameters(std::stack<Token> &buf);
+    std::string parameter(std::stack<Token> &buf);
+    std::string consume(Token::Type type, std::stack<Token> &buf);
     void backtrace(std::stack<Token> &buf);
     void decide(std::stack<Token> &buf);
 
   public:
     AST();
     AST(std::vector<Token> tokens);
+    ~AST();
     void print_tree();
-    NonTerminalASTNode *get_root() const;
-    bool operator==(const AST &other) const;
-    bool operator!=(const AST &other) const;
+    std::vector<Statement *> get_root() const;
 };
 
 #endif /* AST_H */

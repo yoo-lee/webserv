@@ -32,7 +32,6 @@ Config::Config(const char *file_path)
         throw std::runtime_error("file not found");
     std::string file_text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     Parser parser(file_text);
-    ASTNode *root = parser.get_root();
 }
 
 #endif /* CONFIG_H */
