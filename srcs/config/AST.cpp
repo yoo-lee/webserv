@@ -6,21 +6,19 @@
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
-AST::AST() : _root()
+AST::AST()
+  : _root()
 {
 }
 
-AST::AST(std::vector<Token> tokens) : _tokens(tokens)
+AST::AST(std::vector<Token> tokens)
+  : _tokens(tokens)
 {
     _root.push_back(statement());
-    while (true)
-    {
-        try
-        {
+    while (true) {
+        try {
             _root.push_back(statement());
-        }
-        catch (NotFound &e)
-        {
+        } catch (NotFound& e) {
             break;
         }
     }
@@ -28,27 +26,22 @@ AST::AST(std::vector<Token> tokens) : _tokens(tokens)
         throw NotFound("unexpected token " + _tokens[0].get_str());
 }
 
-Statement *AST::statement()
+Statement*
+AST::statement()
 {
     std::stack<Token> buf;
-    try
-    {
-        Statement *node = try_simple_statement(buf);
+    try {
+        Statement* node = try_simple_statement(buf);
         decide(buf);
         return node;
-    }
-    catch (NotFound &e)
-    {
+    } catch (NotFound& e) {
         backtrace(buf);
     }
-    try
-    {
-        BlockStatement *node = try_block_statement(buf);
+    try {
+        BlockStatement* node = try_block_statement(buf);
         decide(buf);
         return node;
-    }
-    catch (NotFound &e)
-    {
+    } catch (NotFound& e) {
         backtrace(buf);
     }
     throw NotFound("statement not found");
@@ -56,13 +49,13 @@ Statement *AST::statement()
 
 AST::~AST()
 {
-    for (size_t i = 0; i < _root.size(); i++)
-    {
+    for (size_t i = 0; i < _root.size(); i++) {
         delete _root[i];
     }
 }
 
-Statement *AST::try_simple_statement(std::stack<Token> &buf)
+Statement*
+AST::try_simple_statement(std::stack<Token>& buf)
 {
     std::string directive_ = directive(buf);
     std::string parameter_ = parameter(buf);
@@ -72,30 +65,24 @@ Statement *AST::try_simple_statement(std::stack<Token> &buf)
     return new Statement(directive_, parameters_);
 }
 
-BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
+BlockStatement*
+AST::try_block_statement(std::stack<Token>& buf)
 {
     std::string directive_ = directive(buf);
     std::vector<std::string> parameters_ = parameters(buf);
     consume(Token::LCURLY, buf);
-    std::vector<Statement *> statements;
+    std::vector<Statement*> statements;
     statements.push_back(statement());
-    while (true)
-    {
-        try
-        {
+    while (true) {
+        try {
             statements.push_back(statement());
-        }
-        catch (NotFound &e)
-        {
+        } catch (NotFound& e) {
             break;
         }
     }
-    try
-    {
+    try {
         consume(Token::RCURLY, buf);
-    }
-    catch (NotFound &nf)
-    {
+    } catch (NotFound& nf) {
         for (size_t i = 0; i < statements.size(); i++)
             delete statements[i];
         throw NotFound("RCURLY not found");
@@ -103,25 +90,23 @@ BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
     return new BlockStatement(directive_, parameters_, statements);
 }
 
-std::vector<std::string> AST::parameters(std::stack<Token> &buf)
+std::vector<std::string>
+AST::parameters(std::stack<Token>& buf)
 {
     std::vector<std::string> children;
-    while (true)
-    {
-        try
-        {
+    while (true) {
+        try {
             std::string node = parameter(buf);
             children.push_back(node);
-        }
-        catch (NotFound &e)
-        {
+        } catch (NotFound& e) {
             break;
         }
     }
     return children;
 }
 
-std::string AST::parameter(std::stack<Token> &buf)
+std::string
+AST::parameter(std::stack<Token>& buf)
 {
     Token current_token = _tokens.front();
     if (current_token.get_type() == Token::ID)
@@ -133,12 +118,14 @@ std::string AST::parameter(std::stack<Token> &buf)
     throw NotFound("parameter not found");
 }
 
-std::string AST::directive(std::stack<Token> &buf)
+std::string
+AST::directive(std::stack<Token>& buf)
 {
     return consume(Token::ID, buf);
 }
 
-std::string AST::consume(Token::Type type, std::stack<Token> &buf)
+std::string
+AST::consume(Token::Type type, std::stack<Token>& buf)
 {
     if (_tokens.empty())
         throw NotFound("Unexpected end of file");
@@ -150,42 +137,44 @@ std::string AST::consume(Token::Type type, std::stack<Token> &buf)
     return current_token.get_str();
 }
 
-void AST::backtrace(std::stack<Token> &buf)
+void
+AST::backtrace(std::stack<Token>& buf)
 {
-    while (buf.size() != 0)
-    {
+    while (buf.size() != 0) {
         _tokens.insert(_tokens.begin(), buf.top());
         buf.pop();
     }
 }
 
-void AST::decide(std::stack<Token> &buf)
+void
+AST::decide(std::stack<Token>& buf)
 {
     while (buf.size() != 0)
         buf.pop();
 }
 
-void AST::print_tree()
+void
+AST::print_tree()
 {
 
-    for (size_t i = 0; i < _root.size(); i++)
-    {
-        if (dynamic_cast<BlockStatement *>(_root[i]))
-            std::cout << (*(dynamic_cast<BlockStatement *>(_root[i]))) << std::endl;
+    for (size_t i = 0; i < _root.size(); i++) {
+        if (dynamic_cast<BlockStatement*>(_root[i]))
+            std::cout << (*(dynamic_cast<BlockStatement*>(_root[i]))) << std::endl;
         else
-            std::cout << (*(dynamic_cast<Statement *>(_root[i]))) << std::endl;
+            std::cout << (*(dynamic_cast<Statement*>(_root[i]))) << std::endl;
     }
 }
 
-std::vector<Statement *> AST::get_root() const
+std::vector<Statement*>
+AST::get_root() const
 {
     return _root;
 }
 
-Statement *AST::operator[](std::string directive) const
+Statement*
+AST::operator[](std::string directive) const
 {
-    for (size_t i = 0; i < _root.size(); i++)
-    {
+    for (size_t i = 0; i < _root.size(); i++) {
         if (_root[i]->get_directive() == directive)
             return _root[i];
     }
@@ -246,7 +235,7 @@ TEST_CASE("AST: Multi Param Simple")
 {
     AST ast(Lexer("directive p1 p2 p3 p4;").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) == 0);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) == 0);
     REQUIRE(ast.get_root()[0]->get_directive() == "directive");
     REQUIRE(ast.get_root()[0]->get_params().size() == 4);
     REQUIRE(ast.get_root()[0]->get_params()[0] == "p1");
@@ -259,8 +248,8 @@ TEST_CASE("AST: Block")
 {
     AST ast(Lexer("Block { directive param;}").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    BlockStatement* bs = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
     REQUIRE(bs->get_child_statements().size() == 1);
@@ -273,8 +262,8 @@ TEST_CASE("AST: Block before comment")
 {
     AST ast(Lexer("Block { directive param;} # comment").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    BlockStatement* bs = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
     REQUIRE(bs->get_child_statements().size() == 1);
@@ -287,8 +276,8 @@ TEST_CASE("AST: Block after comment")
 {
     AST ast(Lexer("# comment \nBlock { directive param;}").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    BlockStatement* bs = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
     REQUIRE(bs->get_child_statements().size() == 1);
@@ -301,8 +290,8 @@ TEST_CASE("AST: Block with param")
 {
     AST ast(Lexer("Block param { directive param;}").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    BlockStatement* bs = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 1);
     REQUIRE(bs->get_params()[0] == "param");
@@ -316,10 +305,10 @@ TEST_CASE("AST: Multi Block")
 {
     AST ast(Lexer("block1{a b;}block2{a b;}").get_token_list());
     REQUIRE(ast.get_root().size() == 2);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[1]) != 0);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[1]) != 0);
 
-    BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    BlockStatement* bs1 = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "block1");
     REQUIRE(bs1->get_params().size() == 0);
     REQUIRE(bs1->get_child_statements().size() == 1);
@@ -327,7 +316,7 @@ TEST_CASE("AST: Multi Block")
     REQUIRE(bs1->get_child_statements()[0]->get_params().size() == 1);
     REQUIRE(bs1->get_child_statements()[0]->get_params()[0] == "b");
 
-    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(ast.get_root()[1]);
+    BlockStatement* bs2 = dynamic_cast<BlockStatement*>(ast.get_root()[1]);
     REQUIRE(bs2->get_directive() == "block2");
     REQUIRE(bs2->get_params().size() == 0);
     REQUIRE(bs2->get_child_statements().size() == 1);
@@ -340,13 +329,13 @@ TEST_CASE("AST: Nested block statement")
 {
     AST ast(Lexer("parent{child{a b;}}").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
-    BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(ast.get_root()[0]) != 0);
+    BlockStatement* bs1 = dynamic_cast<BlockStatement*>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "parent");
     REQUIRE(bs1->get_params().size() == 0);
     REQUIRE(bs1->get_child_statements().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]) != 0);
-    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]);
+    REQUIRE(dynamic_cast<BlockStatement*>(bs1->get_child_statements()[0]) != 0);
+    BlockStatement* bs2 = dynamic_cast<BlockStatement*>(bs1->get_child_statements()[0]);
     REQUIRE(bs2->get_directive() == "child");
     REQUIRE(bs2->get_params().size() == 0);
     REQUIRE(bs2->get_child_statements().size() == 1);
@@ -372,7 +361,7 @@ TEST_CASE("AST: nginx.conf")
                   "        }\n"
                   "    }\n"
                   "}\n")
-                .get_token_list());
+              .get_token_list());
     REQUIRE(ast.get_root().size() == 2);
     // ast.print_tree();
 }
@@ -401,7 +390,7 @@ TEST_CASE("AST: subject.nginx.conf")
                   "        }\n"
                   "    }\n"
                   "}\n")
-                .get_token_list());
+              .get_token_list());
     REQUIRE(ast.get_root().size() == 1);
     // ast.print_tree();
 }
