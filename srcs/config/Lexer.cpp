@@ -53,14 +53,18 @@ Lexer::~Lexer()
 
 Token::Type Lexer::get_state(char c) const
 {
+    if (_state == Token::COMMENT && c != '\n')
+        return Token::COMMENT;
     switch (c)
     {
+    case '\n':
     case ' ':
     case '\t':
-    case '\n':
     case '\r':
     case '\f':
         return Token::WHITE_SPACE;
+    case '#':
+        return Token::COMMENT;
     case '{':
         return Token::LCURLY;
     case '}':
@@ -123,6 +127,13 @@ std::vector<Token> Lexer::get_token_list() const
     return _token_list;
 }
 
+std::ostream &operator<<(std::ostream &os, const Lexer &lexer)
+{
+    for (size_t i = 0; i < lexer._token_list.size(); i++)
+        os << lexer._token_list[i] << std::endl;
+    return os;
+}
+
 #ifdef UNIT_TEST
 TEST_CASE("Lexer Basic Char Test")
 {
@@ -180,6 +191,36 @@ TEST_CASE("Lexer Complex Block Statement Test")
     CHECK(tl[10] == Token(";", Token::SEMI));
     CHECK(tl[11] == Token("}", Token::RCURLY));
     CHECK(tl[12] == Token("}", Token::RCURLY));
+}
+
+TEST_CASE("Lexer Comment Test")
+{
+    Lexer l("# test test \n d p ;");
+    std::vector<Token> tl = l.get_token_list();
+    REQUIRE(tl.size() == 3);
+    CHECK(tl[0] == Token("d", Token::ID));
+    CHECK(tl[1] == Token("p", Token::ID));
+    CHECK(tl[2] == Token(";", Token::SEMI));
+}
+
+TEST_CASE("Lexer Comment Test")
+{
+    Lexer l("d p ; # test test");
+    std::vector<Token> tl = l.get_token_list();
+    REQUIRE(tl.size() == 3);
+    CHECK(tl[0] == Token("d", Token::ID));
+    CHECK(tl[1] == Token("p", Token::ID));
+    CHECK(tl[2] == Token(";", Token::SEMI));
+}
+
+TEST_CASE("Lexer Comment Test")
+{
+    Lexer l("# test test;\nd p ; # test test");
+    std::vector<Token> tl = l.get_token_list();
+    REQUIRE(tl.size() == 3);
+    CHECK(tl[0] == Token("d", Token::ID));
+    CHECK(tl[1] == Token("p", Token::ID));
+    CHECK(tl[2] == Token(";", Token::SEMI));
 }
 
 TEST_CASE("Lexer practical Test1")

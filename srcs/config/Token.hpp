@@ -17,6 +17,7 @@ class Token
         INT,
         ID,
         WHITE_SPACE,
+        COMMENT,
         NONE
     };
     Token();

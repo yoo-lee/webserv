@@ -3,6 +3,7 @@
 #include "Token.hpp"
 #include <ctype.h>
 #include <iostream>
+#include <ostream>
 #include <vector>
 class Lexer
 {
@@ -16,6 +17,7 @@ class Lexer
     char consume();
     void tokenize();
     std::string extract_str(Token::Type quote_type);
+    friend std::ostream &operator<<(std::ostream &os, const Lexer &lexer);
 
   public:
     Lexer(std::string text);

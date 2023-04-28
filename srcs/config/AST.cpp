@@ -24,6 +24,8 @@ AST::AST(std::vector<Token> tokens) : _tokens(tokens)
             break;
         }
     }
+    if (_tokens.size() != 0)
+        throw NotFound("unexpected token " + _tokens[0].get_str());
 }
 
 Statement *AST::statement()
@@ -201,6 +203,33 @@ TEST_CASE("AST: Simple")
     REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
 }
 
+TEST_CASE("AST: Simple before comment")
+{
+    AST ast(Lexer("directive param; # comment").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+}
+
+TEST_CASE("AST: Simple after comment")
+{
+    AST ast(Lexer("# comment \n directive param;").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+}
+
+TEST_CASE("AST: Simple between comment")
+{
+    AST ast(Lexer("# comment \n directive param; # comment").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_directive() == "directive");
+    REQUIRE(ast.get_root()[0]->get_params().size() == 1);
+    REQUIRE(ast.get_root()[0]->get_params()[0] == "param");
+}
+
 TEST_CASE("AST: Multi Simple")
 {
     AST ast(Lexer("directive param; directive param;").get_token_list());
@@ -229,6 +258,34 @@ TEST_CASE("AST: Multi Param Simple")
 TEST_CASE("AST: Block")
 {
     AST ast(Lexer("Block { directive param;}").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(bs->get_directive() == "Block");
+    REQUIRE(bs->get_params().size() == 0);
+    REQUIRE(bs->get_child_statements().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+}
+
+TEST_CASE("AST: Block before comment")
+{
+    AST ast(Lexer("Block { directive param;} # comment").get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
+    BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
+    REQUIRE(bs->get_directive() == "Block");
+    REQUIRE(bs->get_params().size() == 0);
+    REQUIRE(bs->get_child_statements().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+}
+
+TEST_CASE("AST: Block after comment")
+{
+    AST ast(Lexer("# comment \nBlock { directive param;}").get_token_list());
     REQUIRE(ast.get_root().size() == 1);
     REQUIRE(dynamic_cast<BlockStatement *>(ast.get_root()[0]) != 0);
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
@@ -317,7 +374,36 @@ TEST_CASE("AST: nginx.conf")
                   "}\n")
                 .get_token_list());
     REQUIRE(ast.get_root().size() == 2);
-    ast.print_tree();
+    // ast.print_tree();
+}
+#include <fstream>
+#include <iostream>
+TEST_CASE("subject.nginx.conf")
+{
+    AST ast(Lexer("http {\n"
+                  "    client_max_body_size 10;\n"
+                  "    server {\n"
+                  "        listen 80 default_server;\n"
+                  "        server_name example.com; # not required\n"
+                  "        location PATH {\n"
+                  "            autoindex on;\n"
+                  "            error_page 500 ./error.html;\n"
+                  "            index ./index.html;\n"
+                  "            limit_except POST {\n"
+                  "                deny all;\n"
+                  "            }\n"
+                  "        }\n"
+                  "        location PATH {\n"
+                  "            root ./wordpress;\n"
+                  "        }\n"
+                  "        location ~* \\.php$ {\n"
+                  "            cgi_pass /bin/php-cgi;\n"
+                  "        }\n"
+                  "    }\n"
+                  "}\n")
+                .get_token_list());
+    REQUIRE(ast.get_root().size() == 1);
+    // ast.print_tree();
 }
 
 /** BAD TEST CASE **/
@@ -325,6 +411,16 @@ TEST_CASE("AST: nginx.conf")
 TEST_CASE("AST: Nested non lcurly")
 {
     CHECK_THROWS_AS(AST(Lexer("parent{child{a b;}").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: Nested non rcurly")
+{
+    CHECK_THROWS_AS(AST(Lexer("parent{child{a b;}").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: random string")
+{
+    CHECK_THROWS_AS(AST(Lexer("j;a903]+{kfjda;}").get_token_list()), NotFound);
 }
 
 #endif
