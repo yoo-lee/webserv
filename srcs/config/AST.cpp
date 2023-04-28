@@ -378,7 +378,7 @@ TEST_CASE("AST: nginx.conf")
 }
 #include <fstream>
 #include <iostream>
-TEST_CASE("subject.nginx.conf")
+TEST_CASE("AST: subject.nginx.conf")
 {
     AST ast(Lexer("http {\n"
                   "    client_max_body_size 10;\n"

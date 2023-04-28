@@ -55,20 +55,39 @@ std::vector<Statement *> BlockStatement::get_child_statements() const
     return _child_statements;
 }
 
+std::vector<Statement *> BlockStatement::get_child_statements(std::string directive) const
+{
+    std::vector<Statement *> result;
+    for (size_t i = 0; i < _child_statements.size(); i++)
+    {
+        if (_child_statements[i]->get_directive() == directive)
+            result.push_back(_child_statements[i]);
+    }
+    return result;
+}
+
 std::ostream &operator<<(std::ostream &os, const BlockStatement &statement)
 {
     statement.print(os, "");
     return os;
 }
 
+// 複数要素があった場合、要素が見つからなかった場合、例外を投げる
 Statement *BlockStatement::operator[](std::string directive) const
 {
+    Statement *result = 0;
     for (size_t i = 0; i < _child_statements.size(); i++)
     {
         if (_child_statements[i]->get_directive() == directive)
-            return _child_statements[i];
+        {
+            if (result != 0)
+                throw std::out_of_range("multiple statements(" + directive + ") with same directive");
+            result = _child_statements[i];
+        }
     }
-    throw std::out_of_range("out of range");
+    if (result == 0)
+        throw std::out_of_range("no statement with directive: " + directive);
+    return result;
 }
 
 #ifdef UNIT_TEST

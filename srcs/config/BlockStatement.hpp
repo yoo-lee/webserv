@@ -18,6 +18,7 @@ class BlockStatement : public Statement
     void print(std::ostream &os, std::string indent) const;
     friend std::ostream &operator<<(std::ostream &os, const BlockStatement &statement);
     std::vector<Statement *> get_child_statements() const;
+    std::vector<Statement *> get_child_statements(std::string directive) const;
     Statement *operator[](std::string directive) const;
 };
 

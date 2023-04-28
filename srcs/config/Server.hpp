@@ -1,38 +1,29 @@
 #ifndef SERVER_H
 #define SERVER_H
 #include "Location.hpp"
+#include "SyntaxError.hpp"
 #include <string>
 #include <vector>
-
 class Server
 {
   private:
     /* data */
   public:
-    const int listen;
-    const std::string server_name;
-    const std::vector<Location> location;
-    const std::vector<std::string> error_page;
+    int listen;
+    bool is_default_server;
+    std::string server_name;
+    std::vector<Location> location;
 
-    Server();
-    Server(int listen, std::string server_name, std::vector<Location> location, std::vector<std::string> error_page);
+    Server(BlockStatement *server_directive);
     Server(Server *server);
     ~Server();
 };
 
-Server::Server() : listen(0)
+Server::Server(BlockStatement *server_directive)
 {
-}
-
-Server::Server(int listen, std::string server_name, std::vector<Location> location, std::vector<std::string> error_page)
-    : listen(listen), server_name(server_name), location(location), error_page(error_page)
-{
-}
-
-Server::Server(Server *server)
-    : listen(server->listen), server_name(server->server_name), location(server->location),
-      error_page(server->error_page)
-{
+    if (server_directive["listen"]->get_params().size() > 2)
+        throw SyntaxError("invalid listen directive");
+    listen = std::stoi(server_directive["listen"]->get_params()[0]);
 }
 
 Server::~Server()
