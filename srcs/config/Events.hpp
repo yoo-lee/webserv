@@ -11,16 +11,10 @@ class Events
     ~Events();
 };
 
-Events::Events() : worker_connections(1024)
-{
-}
+Events::Events() : worker_connections(1024) {}
 
-Events::Events(size_t worker_connections) : worker_connections(worker_connections)
-{
-}
+Events::Events(size_t worker_connections) : worker_connections(worker_connections) {}
 
-Events::~Events()
-{
-}
+Events::~Events() {}
 
 #endif /* EVENTS_H */

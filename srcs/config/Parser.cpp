@@ -9,9 +9,7 @@ Parser::Parser(std::string file_text)
     _tree = AST(tokens);
 }
 
-Parser::~Parser()
-{
-}
+Parser::~Parser() {}
 
 void Parser::print()
 {
@@ -23,10 +21,7 @@ std::vector<Statement *> Parser::get_root()
     return _tree.get_root();
 };
 
-HTTP Parser::get_https() const
-{
-
-}
+HTTP Parser::get_https() const {}
 
 #ifdef TEST
 int main()

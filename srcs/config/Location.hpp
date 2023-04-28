@@ -16,21 +16,16 @@ class Location
     ~Location();
 };
 
-Location::Location()
-{
-}
+Location::Location() {}
 
 Location::Location(std::vector<std::string> urls, std::map<std::string, std::string> properties)
-    : urls(urls), properties(properties)
+    : urls(urls),
+      properties(properties)
 {
 }
 
-Location::Location(Location *location) : urls(location->urls), properties(location->properties)
-{
-}
+Location::Location(Location *location) : urls(location->urls), properties(location->properties) {}
 
-Location::~Location()
-{
-}
+Location::~Location() {}
 
 #endif /* LOCATION_H */

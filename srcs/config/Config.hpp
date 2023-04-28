@@ -21,9 +21,7 @@ class Config
     ~Config(){};
 };
 
-Config::Config(std::string file_text)
-{
-}
+Config::Config(std::string file_text) {}
 
 Config::Config(const char *file_path)
 {

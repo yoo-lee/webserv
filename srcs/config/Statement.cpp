@@ -7,26 +7,18 @@
 #include "doctest.h"
 #endif
 
-Statement::Statement(std::string directive, std::vector<std::string> params) : _directive(directive), _params(params)
-{
-}
+Statement::Statement(std::string directive, std::vector<std::string> params) : _directive(directive), _params(params) {}
 
 Statement::Statement(std::string directive, std::string param) : _directive(directive)
 {
     _params.push_back(param);
 }
 
-Statement::Statement(std::string directive) : _directive(directive)
-{
-}
+Statement::Statement(std::string directive) : _directive(directive) {}
 
-Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params)
-{
-}
+Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params) {}
 
-Statement::~Statement()
-{
-}
+Statement::~Statement() {}
 
 void Statement::print(std::ostream &os, std::string indent) const
 {

@@ -14,20 +14,18 @@ class Server
     std::string server_name;
     std::vector<Location> location;
 
-    Server(BlockStatement *server_directive);
-    Server(Server *server);
+    Server(BlockStatement* server_directive);
+    Server(Server* server);
     ~Server();
 };
 
-Server::Server(BlockStatement *server_directive)
+Server::Server(BlockStatement* server_directive)
 {
     if (server_directive["listen"]->get_params().size() > 2)
         throw SyntaxError("invalid listen directive");
     listen = std::stoi(server_directive["listen"]->get_params()[0]);
 }
 
-Server::~Server()
-{
-}
+Server::~Server() {}
 
 #endif /* SERVER_H */

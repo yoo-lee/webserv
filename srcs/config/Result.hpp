@@ -1,7 +1,8 @@
 #ifndef RESULT_H
 #define RESULT_H
 
-template <typename T, typename E> class Result
+template <typename T, typename E>
+class Result
 {
   private:
     T _ok;
@@ -14,12 +15,11 @@ template <typename T, typename E> class Result
     E Err();
     ~Result();
 };
-template <typename T, typename E> Result::Result<T, E>(/* args */)
+template <typename T, typename E>
+Result::Result<T, E>(/* args */)
 {
 }
 
-Result::~Result()
-{
-}
+Result::~Result() {}
 
 #endif /* RESULT_H */

@@ -7,12 +7,14 @@
 
 BlockStatement::BlockStatement(std::string directive, std::vector<std::string> params,
                                std::vector<Statement *> child_statements)
-    : Statement(directive, params), _child_statements(child_statements)
+    : Statement(directive, params),
+      _child_statements(child_statements)
 {
 }
 
 BlockStatement::BlockStatement(std::string directive, std::vector<Statement *> child_statements)
-    : Statement(directive), _child_statements(child_statements)
+    : Statement(directive),
+      _child_statements(child_statements)
 {
 }
 

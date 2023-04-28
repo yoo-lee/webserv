@@ -1,5 +1,5 @@
-#ifndef BLOCK_STATEMENT_H
-#define BLOCK_STATEMENT_H
+#ifndef BLOCKSTATEMENT_H
+#define BLOCKSTATEMENT_H
 #include "Statement.hpp"
 #include <string>
 #include <vector>
@@ -22,4 +22,4 @@ class BlockStatement : public Statement
     Statement *operator[](std::string directive) const;
 };
 
-#endif /* BLOCK_STATEMENT_H */
+#endif /* BLOCKSTATEMENT_H */

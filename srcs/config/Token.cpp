@@ -6,17 +6,11 @@
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
-Token::Token()
-{
-}
+Token::Token() {}
 
-Token::Token(std::string str, Token::Type type) : _type(type), _str(str)
-{
-}
+Token::Token(std::string str, Token::Type type) : _type(type), _str(str) {}
 
-Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1))
-{
-}
+Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1)) {}
 
 Token::Token(const Token &token)
 {
@@ -49,9 +43,7 @@ std::ostream &operator<<(std::ostream &os, const Token &token)
     return os;
 }
 
-Token::~Token()
-{
-}
+Token::~Token() {}
 
 bool Token::operator==(const Token &rhs) const
 {

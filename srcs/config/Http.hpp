@@ -16,9 +16,7 @@ class HTTP
     ~HTTP();
 };
 
-HTTP::HTTP()
-{
-}
+HTTP::HTTP() {}
 
 HTTP::HTTP(BlockStatement http_directive)
 {
@@ -34,8 +32,6 @@ HTTP::HTTP(BlockStatement http_directive)
     }
 }
 
-HTTP::~HTTP()
-{
-}
+HTTP::~HTTP() {}
 
 #endif /* HTTP_H */

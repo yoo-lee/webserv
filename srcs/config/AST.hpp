@@ -41,25 +41,25 @@ class AST
 {
   private:
     std::vector<Token> _tokens;
-    std::vector<Statement*> _root;
-    std::vector<Statement*> program();
-    Statement* statement();
-    Statement* try_simple_statement(std::stack<Token>& buf);
-    BlockStatement* try_block_statement(std::stack<Token>& buf);
-    std::string directive(std::stack<Token>& buf);
-    std::vector<std::string> parameters(std::stack<Token>& buf);
-    std::string parameter(std::stack<Token>& buf);
-    std::string consume(Token::Type type, std::stack<Token>& buf);
-    void backtrace(std::stack<Token>& buf);
-    void decide(std::stack<Token>& buf);
+    std::vector<Statement *> _root;
+    std::vector<Statement *> program();
+    Statement *statement();
+    Statement *try_simple_statement(std::stack<Token> &buf);
+    BlockStatement *try_block_statement(std::stack<Token> &buf);
+    std::string directive(std::stack<Token> &buf);
+    std::vector<std::string> parameters(std::stack<Token> &buf);
+    std::string parameter(std::stack<Token> &buf);
+    std::string consume(Token::Type type, std::stack<Token> &buf);
+    void backtrace(std::stack<Token> &buf);
+    void decide(std::stack<Token> &buf);
 
   public:
     AST();
     AST(std::vector<Token> tokens);
     ~AST();
     void print_tree();
-    std::vector<Statement*> get_root() const;
-    Statement* operator[](std::string directive) const;
+    std::vector<Statement *> get_root() const;
+    Statement *operator[](std::string directive) const;
 };
 
 #endif /* AST_H */
