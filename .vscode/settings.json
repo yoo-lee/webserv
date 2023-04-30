@@ -3,5 +3,7 @@
         "*.c": "c",
         ".*lintrc": "json",
         "iostream": "cpp"
-    }
+		
+	},
+	"editor.definitionLinkOpensInPeek": true
 }

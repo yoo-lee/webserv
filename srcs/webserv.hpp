@@ -14,6 +14,7 @@ class Webserv
         Webserv& operator=(const Webserv &sockets);
         ~Webserv();
         void communication();
+
     private:
         int epfd;
         void init_socket();

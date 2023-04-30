@@ -44,7 +44,7 @@ void Webserv::init_socket()
 {
     try{
         Socket *sock = new Socket();
-	    this->sockets.push_back(sock);
+        this->sockets.push_back(sock);
     }catch(std::exception &e) {
         close_all();
         throw std::exception();
@@ -112,31 +112,37 @@ void Webserv::communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return ;
         }
-		
         for (int i = 0; i < nfds; i++)
         {
             Socket *socket = find_socket(event[i].data.fd);
             Request *req = socket->recv();
+            //Request req(fd);
             req->print_request();
 
             char buf[1024]{0};
             int size = req->read_buf(buf);
-            while(size > 0)
-            {
+            while(size > 0){
                 cout << "body test: size=" << size << endl << "body:" << string(buf) << endl;
                 size = req->read_buf(buf);
             }
+            
 
-            Response response(*req); // Create a Response object using the received Request
-            response.buildResponse(); // Build the HTTP response
+            //todo  do something with data
 
-            // send response
-            int res = send(event[i].data.fd, response.getRes().c_str(), response.getLen(), 0);
-            if (res == -1)
-			{
-                cout << "Send Error:" << strerror(errno) << endl;
-            }
+            //test
+            //string test = string(data);
+            //cout << "test:" << endl << test << endl;
+
+            //todo send something
+            std::string r_data = "HTTP/1.1 200 OK\n\ntest5";
+            //std::string r_data = "HTTP/1.1 204 No Content";
+            //cout <<"r_data=" << r_data << endl;
+            socket->send(r_data);
+            //socket->read_all();
+            //delete data;
+			Response response(request); // Create a Response object using the received Request
+                response.buildResponse(); // Build the HTTP response
+                send(new_sock, response.getRes().c_str(), response.getLen(), 0);
         }
     }
 }
-

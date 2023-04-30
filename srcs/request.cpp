@@ -13,6 +13,9 @@ using std::cout;
 using std::endl;
 using std::map;
 
+Request::Request(): fd(0), buf_size(0)
+{;}
+
 Request::Request(int fd_) : fd(fd_), buf_size(0)
 {
     this->parse();
@@ -44,6 +47,7 @@ METHOD Request::identify_method(string method)
     }
     return (NG);
 }
+
 
 std::string Request::identify_method(METHOD method)
 {
@@ -118,6 +122,11 @@ void Request::parse()
 const METHOD Request::get_method()
 {
     return (this->method);
+}
+
+const std::string Request::get_method_string()
+{
+	return(identify_method(this->method));
 }
 
 const string &Request::get_uri()
