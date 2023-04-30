@@ -102,6 +102,13 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
 {
     if (event->events & EPOLLIN){
         Request *req = socket->recv();
+        if (!req){
+            event->events = EPOLLOUT;
+            if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
+                cout << "error;connected_communication No.2" << endl;
+            }
+            return;
+        }
         if (req->get_method() == NG){
             cout << "error;connected_communication No.1" << endl;
             return ;
@@ -110,11 +117,20 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         // Test (will remove)
         req->print_request();
         // Body Test
-        cout << "Body(only string):" << endl;
+        //cout << "Body(only string):" << endl;
         char buf[1024];
         int size = req->read_buf(buf);
+        size_t file_size= 0;
+        int cnt = 0;
         while(size > 0){
-            cout << buf << endl;
+            cnt++;
+            req->add_loaded_body_size(size);
+            file_size += size;
+            //cout << "while No.1 body size:" << size << endl;
+            //for(int i=0;i<size;i++){
+                //cout << "body [" << i << "]:" << buf[i] << endl;
+            //}
+            //cout << buf << endl;
             size = req->read_buf(buf);
         }
 
@@ -124,6 +140,8 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         if (read_all == false)
             return ;
 
+        if(req->get_content_length() > req->get_loaded_body_size())
+            return ;
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
             cout << "error;connected_communication No.2" << endl;

@@ -34,6 +34,10 @@ class Request
         int read_buf(char *buf);
         std::string get_domain();
         std::string get_ip_address();
+        size_t get_content_length();
+        size_t get_loaded_body_size();
+        std::string get_transfer_encoding();
+        void add_loaded_body_size(size_t size);
     private:
         void parse();
         std::string search_header(std::string);
@@ -41,6 +45,7 @@ class Request
         const int fd;
         //int _body_size;
         int _content_length;
+        size_t _loaded_body_size;
         std::string _transfer_encoding;
         //char* _body;
         char buf[BUF_MAX];

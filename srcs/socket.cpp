@@ -149,9 +149,30 @@ Request *Socket::recv()
 {
     if (this->req != NULL)
         delete this->req;
-    this->req = new Request(this->fd);
+    try{
+        this->req = new Request(this->fd);
+    }catch(std::exception &e){
+        this->req = NULL;
+        cout << e.what() << endl; 
+        //std::string r_data = "HTTP/1.1 400 NG\n";
+        //this->send(r_data);
+        //return (NULL);
+    }
     return (this->req);
 }
+
+/*
+bool Socket::send_err(std::string& data)
+{
+
+    char last = '\0';
+    write(this->fd, data.c_str(), data.size());
+    write(this->fd, &last, 1);
+    return (true);
+}
+*/
+
+
 
 bool Socket::send(std::string& data)
 {

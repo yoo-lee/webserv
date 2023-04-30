@@ -9,7 +9,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-GetNextLine::GetNextLine(int fd_) : fd(fd_), sp(NULL), pos(0)
+GetNextLine::GetNextLine(int fd_) : _buf_body_pos(NULL), _buf_body_size(0), buf_size(0), fd(fd_), sp(NULL), pos(0)
 {
     this->read_line();
 }
@@ -24,11 +24,12 @@ int GetNextLine::read(char *buf, int size)
     return recv(this->fd, buf, size, MSG_DONTWAIT);
 }
 
+#include <stdio.h>
 void GetNextLine::read_line()
 {
     int size = this->read(this->_buf, BUF_MAX);
     if (size < 0){
-        cout << "recv error" << endl;
+        cout << "read_line() test No.0 escape loop() recv error" << endl;
         return ;
     }
     this->buf_size = size;
@@ -39,12 +40,25 @@ void GetNextLine::read_line()
         //usleep(10);
         //cnt++;
     //}
+
+    this->_buf_body_pos = Utility::strnstr(this->_buf, "\r\n\r\n", size);
+    //cout << "buf body pos=" << &this->_buf_body_pos << endl;
+    //cout << "buf pos=" << &this->_buf << endl;
+    if (this->_buf_body_pos)
+    {
+        *this->_buf_body_pos = '\0';
+        this->_buf_body_pos += 4;
+        this->_buf_body_size = size - (this->_buf_body_pos - this->_buf);
+    }
     string str = string(this->_buf);
     if (sp == NULL){
         this->sp = new Split(str, "\r\n");
     }else{
         this->sp->concat(str, "\r\n");
     }
+    //if (this->_buf_body_pos == NULL){
+        //this->read_line();
+    //}
 }
 
 size_t GetNextLine::size()
@@ -54,9 +68,27 @@ size_t GetNextLine::size()
     return (this->sp->size());
 }
 
-
 int GetNextLine::get_extra_buf(char *buf)
 {
+    ssize_t tmp = 0;
+    if (this->_buf_body_size > 0)
+    {
+        Utility::memcpy(buf, this->_buf_body_pos, this->_buf_body_size);
+        buf[0] = '0';
+        buf[1] = '1';
+        buf[2] = '2';
+        buf[3] = '3';
+        buf[4] = '4';
+        //printf("address=%p\n", this->_buf_body_pos);
+        //printf("address1=%p\n", &(this->_buf_body_pos[0]));
+        //printf("address2=%p\n", &(this->_buf[0]));
+        //cout << "No.2 gnl buf body address 1=" << &(this->_buf_body_pos[0]) << endl;
+        tmp = this->_buf_body_size;
+        //tmp = 5;
+        this->_buf_body_size = 0;
+    }
+    return (tmp);
+    /*
     ssize_t i = 0;
     for(size_t j=0; j < this->sp->size();j++){
         i += ((ssize_t)(*(this->sp))[j].size());
@@ -72,13 +104,16 @@ int GetNextLine::get_extra_buf(char *buf)
         }
         i++;
     }
+    */
     return (0);
 }
 
 string &GetNextLine::getline()
 {
     if (this->sp == NULL || this->sp->size() == this->pos+1){
-        this->read_line();
+        if (this->_buf_body_pos == NULL){
+            this->read_line();
+        }
     }
     if (this->sp == NULL){
         return (this->last_str);

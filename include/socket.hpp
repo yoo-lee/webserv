@@ -43,6 +43,7 @@ class Socket
         Request *req;
         struct epoll_event ev;
         s_clientinfo clientinfo;
+        bool send_err(std::string err);
         //struct sockaddr_in hint;
 };
 

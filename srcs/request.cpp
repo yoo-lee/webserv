@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _content_length(0), _gnl(this->fd) , method(NG),  err_line("")
+Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line("")
 {
     this->parse();
 }
@@ -139,7 +139,6 @@ void Request::parse()
         value = Utility::delete_space(value);
         this->headers.insert(make_pair(header, value));
     }
-
     string size_str = this->search_header("content-length");
     int size = -1;
     if (size_str != ""){
@@ -195,6 +194,26 @@ string Request::get_domain()
 {
     //todo
     return ("test.com");
+}
+
+size_t Request::get_content_length()
+{
+    return (this->_content_length);
+}
+
+string Request::get_transfer_encoding()
+{
+    return (this->_transfer_encoding);
+}
+
+size_t Request::get_loaded_body_size()
+{
+    return (this->_loaded_body_size);
+}
+
+void Request::add_loaded_body_size(size_t size)
+{
+    this->_loaded_body_size += size;
 }
 
 string Request::search_header(string header)
