@@ -17,7 +17,7 @@ void Split::split(std::string &str, std::string delimiter)
         pos = str.find(delimiter, offset);
         if (pos == string::npos){
             string last = str.substr(offset);
-            if (last != delimiter && last.size() != 0)
+            //if (last != delimiter && last.size() != 0)
                 this->vec.push_back(str.substr(offset));
             break;
         }

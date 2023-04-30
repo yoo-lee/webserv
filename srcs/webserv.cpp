@@ -8,6 +8,10 @@
 #include <iostream>
 #include <string.h>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <unistd.h>
+#include <errno.h>
 
 #define NEVENTS 16
 using std::cout;
@@ -16,22 +20,23 @@ using std::string;
 
 Webserv::Webserv() : epfd(0)
 {
-    init_socket();
+    std::vector<std::string> vec;
+    vec.push_back("80");
+    init_socket(vec);
 }
 
 Webserv::Webserv(const std::vector<std::string> ports)
 {
-    init_socket();
+    init_socket(ports);
 }
-
 
 Webserv::~Webserv()
 {
     close_all();
 }
-Webserv::Webserv(const Webserv &socket) : epfd(0)
+Webserv::Webserv(const Webserv &webserv) : epfd(0)
 {
-    init_socket();
+    (void)webserv;
 }
 Webserv& Webserv::operator=(const Webserv &socket)
 {
@@ -40,17 +45,24 @@ Webserv& Webserv::operator=(const Webserv &socket)
     return (*this);
 }
 
-void Webserv::init_socket()
+void Webserv::init_socket(std::vector<std::string> vec)
 {
     try{
+<<<<<<< HEAD
         Socket *sock = new Socket();
 	    this->sockets.push_back(sock);
+=======
+        for (size_t i=0; i < vec.size(); i++)
+        {
+            Socket *sock = new Socket(vec[i]);
+            this->sockets.push_back(sock);
+        }
+>>>>>>> bd767ba0f6f83d8f5bbee155152c301c313eab95
     }catch(std::exception &e) {
         close_all();
         throw std::exception();
     }
 }
-
 
 void Webserv::close_all()
 {
@@ -68,7 +80,8 @@ bool Webserv::init_epoll()
     }
     for(size_t i=0; i < this->sockets.size();i++)
     {
-        struct epoll_event ev{0};
+        struct epoll_event ev;
+        memset(&ev, 0, sizeof(struct epoll_event));
         Socket *socket = this->sockets[i];
 
         ev.events = EPOLLIN;
@@ -81,7 +94,7 @@ bool Webserv::init_epoll()
     return (true);
 }
 
-Socket* Webserv::find_socket(int socket_fd)
+Socket* Webserv::find_listen_socket(int socket_fd)
 {
     for (size_t i=0;i< this->sockets.size(); i++)
     {
@@ -89,21 +102,103 @@ Socket* Webserv::find_socket(int socket_fd)
             return (this->sockets[i]);
         }
     }
-    return (this->sockets[0]);
+    return (NULL);
+}
+
+void Webserv::connected_communication(int fd, struct epoll_event *event, Socket *socket)
+{
+    if (event->events & EPOLLIN){
+        Request *req = socket->recv();
+        if (!req){
+            event->events = EPOLLOUT;
+            if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
+                cout << "error;connected_communication No.2" << endl;
+            }
+            return;
+        }
+        if (req->get_method() == NG){
+            cout << "error;connected_communication No.1" << endl;
+            return ;
+        }
+
+        // Test (will remove)
+        req->print_request();
+        // Body Test
+        //cout << "Body(only string):" << endl;
+        char buf[1024];
+        int size = req->read_buf(buf);
+        size_t file_size= 0;
+        int cnt = 0;
+        while(size > 0){
+            cnt++;
+            req->add_loaded_body_size(size);
+            file_size += size;
+            //cout << "while No.1 body size:" << size << endl;
+            //for(int i=0;i<size;i++){
+                //cout << "body [" << i << "]:" << buf[i] << endl;
+            //}
+            //cout << buf << endl;
+            size = req->read_buf(buf);
+        }
+
+        //todo. do something in server
+        //CGI cgi(*req);
+        bool read_all = true;
+        if (read_all == false)
+            return ;
+
+        if(req->get_content_length() > req->get_loaded_body_size())
+            return ;
+        event->events = EPOLLOUT;
+        if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
+            cout << "error;connected_communication No.2" << endl;
+        }
+    }else if (event->events & EPOLLOUT){
+        //std::string r_data = "HTTP/1.1 200 OK\r\ntext/plain;charset=UTF-8\r\nContent-Length:3\n\ntest5\r\n";
+        std::string r_data = "HTTP/1.1 200 OK\n\
+Date: Sun, 23 Apr 2023 13:14:41 GMT\n\
+Server: Apache/2.4.52 (Ubuntu)\n\
+Last-Modified: Sun, 23 Apr 2023 13:08:28 GMT\n\
+ETag: \"5-5fa00961c5691\"\n\
+Accept-Ranges: bytes\n\
+Content-Type: text/html\n\
+Content-Length: 4\n\
+\n\
+test\
+";
+        socket->send(r_data);
+
+        //todo
+        bool write_all = true;
+        if (write_all == false)
+            return ;
+
+        event->events = EPOLLIN;
+        if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
+            cout << "error;connected_communication No.3" << endl;
+        }
+        //close(fd);
+    }
 }
 
 void Webserv::communication()
 {
-    //int epfd;
     size_t size = this->sockets.size();
-    struct epoll_event event[size];
+    struct epoll_event sock_event[size];
+    struct epoll_event server_event;
 
-    if(init_epoll() == false){
+    memset(&(sock_event[0]), 0, sizeof(struct epoll_event) * size);
+    memset(&server_event, 0, sizeof(struct epoll_event));
+
+    std::vector<int> sock_fds;
+    std::map<int, Socket*> map_socks;
+
+    if(this->init_epoll() == false){
         return ;
     }
     while(1)
     {
-        int nfds = epoll_wait(this->epfd, event, size, -1);
+        int nfds = epoll_wait(this->epfd, sock_event, size, -1);
         if (nfds == 0) {
             continue;
         }
@@ -115,6 +210,7 @@ void Webserv::communication()
 		
         for (int i = 0; i < nfds; i++)
         {
+<<<<<<< HEAD
             Socket *socket = find_socket(event[i].data.fd);
             Request *req = socket->recv();
             req->print_request();
@@ -136,6 +232,31 @@ void Webserv::communication()
 			{
                 cout << "Send Error:" << strerror(errno) << endl;
             }
+=======
+            std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
+            if (tmp_fd != sock_fds.end())
+            {
+                Socket *socket = map_socks.at(*tmp_fd);
+                connected_communication(*tmp_fd, &(sock_event[i]), socket);
+                continue;
+            }
+            Socket *socket = find_listen_socket(sock_event[i].data.fd);
+            if (socket)
+            {
+                int fd = socket->accept_request();
+                sock_fds.push_back(fd);
+                memset(&server_event, 0, sizeof(server_event));
+                server_event.events = EPOLLIN;
+                server_event.data.fd = fd;
+                map_socks.insert(std::make_pair(fd, socket));
+                if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
+                {
+                    cout << "epoll_ctl error No.1" << endl;
+                    continue;
+                }
+                //close(fd);
+            }
+>>>>>>> bd767ba0f6f83d8f5bbee155152c301c313eab95
         }
     }
 }
