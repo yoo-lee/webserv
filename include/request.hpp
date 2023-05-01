@@ -34,8 +34,8 @@ class Request
         int read_buf(char *buf);
         std::string get_domain();
         std::string get_ip_address();
-        size_t get_content_length();
-        size_t get_loaded_body_size();
+        ssize_t get_content_length();
+        ssize_t get_loaded_body_size();
         std::string get_transfer_encoding();
         void add_loaded_body_size(size_t size);
     private:
@@ -44,8 +44,8 @@ class Request
         const static int BUF_MAX = 1024;
         const int fd;
         //int _body_size;
-        int _content_length;
-        size_t _loaded_body_size;
+        ssize_t _content_length;
+        ssize_t _loaded_body_size;
         std::string _transfer_encoding;
         //char* _body;
         char buf[BUF_MAX];
@@ -61,6 +61,8 @@ class Request
         std::string err_line;
         std::string domain;
         std::string ip;
+        const static int timeout = 1000;
+        int timeout_cnt;
 };
 
 #endif

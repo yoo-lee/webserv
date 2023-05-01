@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line("")
+Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), timeout_cnt(0);
 {
     this->parse();
 }
@@ -140,12 +140,17 @@ void Request::parse()
         this->headers.insert(make_pair(header, value));
     }
     string size_str = this->search_header("content-length");
-    int size = -1;
+    cout << "size_str=" << size_str << endl;;
+    ssize_t size = -1;
+    if (size_str.size() > 10){
+        cout << "Error: exceed BODY SIZE MAX" << endl;
+    }
     if (size_str != ""){
         std::stringstream ss;
         ss << size_str;
         ss >> size;
     }
+    cout << "size=" << size << endl;;
     this->_content_length = size;
     this->_transfer_encoding = this->search_header("transfer-encoding");
 }
@@ -196,7 +201,7 @@ string Request::get_domain()
     return ("test.com");
 }
 
-size_t Request::get_content_length()
+ssize_t Request::get_content_length()
 {
     return (this->_content_length);
 }
@@ -206,7 +211,7 @@ string Request::get_transfer_encoding()
     return (this->_transfer_encoding);
 }
 
-size_t Request::get_loaded_body_size()
+ssize_t Request::get_loaded_body_size()
 {
     return (this->_loaded_body_size);
 }

@@ -130,7 +130,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             //for(int i=0;i<size;i++){
                 //cout << "body [" << i << "]:" << buf[i] << endl;
             //}
-            //cout << buf << endl;
+            cout << buf << endl;
             size = req->read_buf(buf);
         }
 
@@ -140,6 +140,8 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         if (read_all == false)
             return ;
 
+        cout << "req->get_content_length()=" << req->get_content_length() << endl;
+        cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
         if(req->get_content_length() > req->get_loaded_body_size())
             return ;
         event->events = EPOLLOUT;

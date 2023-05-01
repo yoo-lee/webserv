@@ -13,9 +13,16 @@ using std::endl;
 //std::string base_path = "/home/sano/work/42/webserv/github/webserv/srcs/dir";
 std::string base_path = "srcs/dir";
 
+void server(Webserv& webserv)
+{
+    try{
+        webserv.communication();
+    }catch(std::exception &e){
+        cout << e.what() << endl;
+    }
+}
+
 int main(int argc, char const* argv[]) {
-
-
 
 
     (void)argc;
@@ -39,8 +46,11 @@ int main(int argc, char const* argv[]) {
     ports.push_back("11115");
     // ソケットの初期設定
     Webserv webserv = Webserv(ports);
-    webserv.communication();
     // イベントループ開始
+    while(1)
+    {
+        server(webserv);
+    }
     // 終了時処理
     return 0;
 }

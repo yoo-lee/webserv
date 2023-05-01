@@ -1,6 +1,7 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 #include <vector>
+#include <climits>
 #include "tcp_socket.hpp"
 
 class Webserv
@@ -23,6 +24,7 @@ class Webserv
         void connected_communication(int fd, struct epoll_event *event, Socket *socket);
         std::vector<Socket*> sockets;
         Socket* find_listen_socket(int socket_fd);
+        const static unsigned int BODY_MAX = INT_MAX;
         //struct epoll_event ev;
 };
 #endif
