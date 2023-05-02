@@ -8,7 +8,7 @@
 #include "doctest.h"
 #endif
 
-Lexer::Lexer(std::string text) : _text(text), _state(Token::COMMA), _token_list(std::vector<Token>())
+Lexer::Lexer(const std::string &text) : _text(text), _state(Token::COMMA), _token_list(std::vector<Token>())
 {
     while (_text.length() != 0 && _state != Token::NONE)
     {

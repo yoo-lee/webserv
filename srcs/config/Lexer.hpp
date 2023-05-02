@@ -20,7 +20,7 @@ class Lexer
     friend std::ostream &operator<<(std::ostream &os, const Lexer &lexer);
 
   public:
-    Lexer(std::string text);
+    Lexer(const std::string &text);
     ~Lexer();
     std::vector<Token> get_token_list() const;
 };
