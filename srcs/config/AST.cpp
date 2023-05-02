@@ -1,6 +1,9 @@
+
+
 #include "AST.hpp"
 #include "BlockStatement.hpp"
 #include "NotFound.hpp"
+#include "SimpleStatement.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 #ifdef UNIT_TEST
@@ -8,7 +11,7 @@
 #endif
 AST::AST() : _root() {}
 
-AST::AST(std::vector<Token> tokens) : _tokens(tokens)
+AST::AST(const std::vector<Token> &tokens) : _tokens(tokens)
 {
     _root.push_back(statement());
     while (true)
@@ -67,7 +70,7 @@ Statement *AST::try_simple_statement(std::stack<Token> &buf)
     std::vector<std::string> parameters_ = parameters(buf);
     parameters_.insert(parameters_.begin(), parameter_);
     consume(Token::SEMI, buf);
-    return new Statement(directive_, parameters_);
+    return new SimpleStatement(directive_, parameters_);
 }
 
 BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
@@ -261,10 +264,10 @@ TEST_CASE("AST: Block")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child_statements().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_child().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block before comment")
@@ -275,10 +278,10 @@ TEST_CASE("AST: Block before comment")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child_statements().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_child().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block after comment")
@@ -289,10 +292,10 @@ TEST_CASE("AST: Block after comment")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child_statements().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_child().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block with param")
@@ -304,10 +307,10 @@ TEST_CASE("AST: Block with param")
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 1);
     REQUIRE(bs->get_params()[0] == "param");
-    REQUIRE(bs->get_child_statements().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child_statements()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_child().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Multi Block")
@@ -320,18 +323,18 @@ TEST_CASE("AST: Multi Block")
     BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "block1");
     REQUIRE(bs1->get_params().size() == 0);
-    REQUIRE(bs1->get_child_statements().size() == 1);
-    REQUIRE(bs1->get_child_statements()[0]->get_directive() == "a");
-    REQUIRE(bs1->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs1->get_child_statements()[0]->get_params()[0] == "b");
+    REQUIRE(bs1->get_child().size() == 1);
+    REQUIRE(bs1->get_child()[0]->get_directive() == "a");
+    REQUIRE(bs1->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs1->get_child()[0]->get_params()[0] == "b");
 
     BlockStatement *bs2 = dynamic_cast<BlockStatement *>(ast.get_root()[1]);
     REQUIRE(bs2->get_directive() == "block2");
     REQUIRE(bs2->get_params().size() == 0);
-    REQUIRE(bs2->get_child_statements().size() == 1);
-    REQUIRE(bs2->get_child_statements()[0]->get_directive() == "a");
-    REQUIRE(bs2->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs2->get_child_statements()[0]->get_params()[0] == "b");
+    REQUIRE(bs2->get_child().size() == 1);
+    REQUIRE(bs2->get_child()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_child()[0]->get_params()[0] == "b");
 }
 
 TEST_CASE("AST: Nested block statement")
@@ -342,15 +345,15 @@ TEST_CASE("AST: Nested block statement")
     BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "parent");
     REQUIRE(bs1->get_params().size() == 0);
-    REQUIRE(bs1->get_child_statements().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]) != 0);
-    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_child_statements()[0]);
+    REQUIRE(bs1->get_child().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_child()[0]) != 0);
+    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_child()[0]);
     REQUIRE(bs2->get_directive() == "child");
     REQUIRE(bs2->get_params().size() == 0);
-    REQUIRE(bs2->get_child_statements().size() == 1);
-    REQUIRE(bs2->get_child_statements()[0]->get_directive() == "a");
-    REQUIRE(bs2->get_child_statements()[0]->get_params().size() == 1);
-    REQUIRE(bs2->get_child_statements()[0]->get_params()[0] == "b");
+    REQUIRE(bs2->get_child().size() == 1);
+    REQUIRE(bs2->get_child()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_child()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_child()[0]->get_params()[0] == "b");
 }
 
 TEST_CASE("AST: nginx.conf")

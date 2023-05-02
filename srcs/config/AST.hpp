@@ -55,7 +55,7 @@ class AST
 
   public:
     AST();
-    AST(std::vector<Token> tokens);
+    AST(const std::vector<Token> &tokens);
     ~AST();
     void print_tree();
     std::vector<Statement *> get_root() const;
