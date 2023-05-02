@@ -1,4 +1,5 @@
 #include "BlockStatement.hpp"
+#include "SimpleStatement.hpp"
 #include <string>
 #include <vector>
 #ifdef UNIT_TEST
@@ -22,7 +23,24 @@ BlockStatement::BlockStatement(const BlockStatement &b) : Statement(b)
 {
     for (size_t i = 0; i < b._child_statements.size(); i++)
     {
-        _child_statements.push_back(new Statement(*b._child_statements[i]));
+        if (dynamic_cast<SimpleStatement *>(b._child_statements[i]))
+            _child_statements.push_back(new SimpleStatement(b._child_statements[i]));
+        else
+            _child_statements.push_back(new BlockStatement(b._child_statements[i]));
+    }
+}
+
+BlockStatement::BlockStatement(Statement *s) : Statement(*s)
+{
+    if (dynamic_cast<BlockStatement *>(s))
+        throw SyntaxError("invalid block statement");
+    BlockStatement *b = dynamic_cast<BlockStatement *>(s);
+    for (size_t i = 0; i < b->_child_statements.size(); i++)
+    {
+        if (dynamic_cast<SimpleStatement *>(b->_child_statements[i]))
+            _child_statements.push_back(new SimpleStatement(b->_child_statements[i]));
+        else
+            _child_statements.push_back(new BlockStatement(b->_child_statements[i]));
     }
 }
 // #include <iostream>
@@ -52,12 +70,12 @@ void BlockStatement::print(std::ostream &os, std::string indent) const
     os << indent << "}";
 }
 
-std::vector<Statement *> BlockStatement::get_child_statements() const
+std::vector<Statement *> BlockStatement::get_child() const
 {
     return _child_statements;
 }
 
-std::vector<Statement *> BlockStatement::get_child_statements(std::string directive) const
+std::vector<Statement *> BlockStatement::get_children(std::string directive) const
 {
     std::vector<Statement *> result;
     for (size_t i = 0; i < _child_statements.size(); i++)
@@ -100,8 +118,8 @@ TEST_CASE("BlockStatement constructor")
     params.push_back("param2");
 
     std::vector<Statement *> child_statements;
-    Statement *s1 = new Statement("directive1", "value1");
-    Statement *s2 = new Statement("directive2", "value2");
+    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
+    SimpleStatement *s2 = new SimpleStatement("directive2", "value2");
     child_statements.push_back(s1);
     child_statements.push_back(s2);
 
@@ -110,9 +128,9 @@ TEST_CASE("BlockStatement constructor")
     CHECK(b.get_params().size() == 2);
     CHECK(b.get_params()[0] == "param1");
     CHECK(b.get_params()[1] == "param2");
-    CHECK(b.get_child_statements().size() == 2);
-    CHECK(b.get_child_statements()[0] == s1);
-    CHECK(b.get_child_statements()[1] == s2);
+    CHECK(b.get_children().size() == 2);
+    CHECK(b.get_children()[0] == s1);
+    CHECK(b.get_children()[1] == s2);
 }
 
 TEST_CASE("BlockStatement copy constructor")
@@ -122,8 +140,8 @@ TEST_CASE("BlockStatement copy constructor")
     params.push_back("param2");
 
     std::vector<Statement *> child_statements;
-    Statement *s1 = new Statement("directive1", "value1");
-    Statement *s2 = new Statement("directive2", "value2");
+    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
+    SimpleStatement *s2 = new SimpleStatement("directive2", "value2");
     child_statements.push_back(s1);
     child_statements.push_back(s2);
 
@@ -135,17 +153,17 @@ TEST_CASE("BlockStatement copy constructor")
     CHECK(b2.get_params()[1] == "param2");
     CHECK(&(b.get_params()[0]) != &(b2.get_params()[0]));
     CHECK(&(b.get_params()[1]) != &(b2.get_params()[1]));
-    CHECK(b2.get_child_statements().size() == 2);
-    CHECK(b2.get_child_statements()[0] != s1);
-    CHECK(b2.get_child_statements()[1] != s2);
-    CHECK(&(b.get_child_statements()[0]) != &(b2.get_child_statements()[0]));
-    CHECK(&(b.get_child_statements()[1]) != &(b2.get_child_statements()[1]));
+    CHECK(b2.get_children().size() == 2);
+    CHECK(b2.get_children()[0] != s1);
+    CHECK(b2.get_children()[1] != s2);
+    CHECK(&(b.get_children()[0]) != &(b2.get_children()[0]));
+    CHECK(&(b.get_children()[1]) != &(b2.get_children()[1]));
 }
 
 TEST_CASE("BlockStatement nested")
 {
     std::vector<Statement *> grandchild;
-    Statement *s1 = new Statement("directive1", "value1");
+    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
     grandchild.push_back(s1);
     BlockStatement *child = new BlockStatement("directive2", std::vector<std::string>(), grandchild);
     std::vector<Statement *> children;
@@ -161,8 +179,8 @@ TEST_CASE("BlockStatement []")
     params.push_back("param2");
 
     std::vector<Statement *> child_statements;
-    Statement *s1 = new Statement("directive1", "value1");
-    Statement *s2 = new Statement("directive2", "value2");
+    SimpleStatement *s1 = new SimpleStatement("directive1", "value1");
+    SimpleStatement *s2 = new SimpleStatement("directive2", "value2");
     child_statements.push_back(s1);
     child_statements.push_back(s2);
 
