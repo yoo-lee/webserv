@@ -1,5 +1,6 @@
 #include "utility.hpp"
 #include <iostream>
+#include <sstream>
 
 using std::string;
 using std::cout;
@@ -88,4 +89,5 @@ char	*Utility::strnstr(const char *haystack, const char *needle, size_t len)
 	}
 	return (process(haystack, needle, len));
 }
+
 

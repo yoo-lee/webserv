@@ -15,6 +15,7 @@ enum E_METHOD{
     TRACE,
     CONNECT,
     NG,
+    INVALID,
 };
 
 typedef enum E_METHOD METHOD;
@@ -22,13 +23,15 @@ typedef enum E_METHOD METHOD;
 class Request
 {
     public:
+        Request();
         Request(int fd);
         ~Request();
-        METHOD get_method();
         const std::string &get_path();
         const std::string &get_uri(); // will remove
         const std::string &get_version();
         const std::string &get_body_size();
+		METHOD get_method();
+		const std::string get_method_string();
         const std::map<std::string, std::string> &get_headers();
         void print_request();
         int read_buf(char *buf);
@@ -41,6 +44,8 @@ class Request
         bool analyze();
         bool get_loaded_body();
         bool is_cgi();
+		static std::string identify_method(METHOD method);
+        static METHOD identify_method(std::string method);
     private:
         void parse();
         std::string search_header(std::string);
@@ -54,8 +59,6 @@ class Request
         char buf[BUF_MAX];
         GetNextLine _gnl;
         std::map<std::string, std::string> headers;
-        std::string identify_method(METHOD method);
-        METHOD identify_method(std::string method);
         METHOD method;
         std::string uri; //will remove
         std::string path;

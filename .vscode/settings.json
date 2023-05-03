@@ -10,4 +10,5 @@
     },
     "C_Cpp.clang_format_style": "{ BasedOnStyle: Microsoft, IndentWidth: 4, ColumnLimit: 120, PackConstructorInitializers: CurrentLine, AlwaysBreakTemplateDeclarations: Yes, SplitEmptyFunction: true,AllowShortFunctionsOnASingleLine: Empty}",
     "C_Cpp.default.cppStandard": "c++98",
+	"editor.definitionLinkOpensInPeek": true
 }

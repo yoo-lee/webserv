@@ -160,6 +160,11 @@ METHOD Request::get_method()
     return (this->method);
 }
 
+const std::string Request::get_method_string()
+{
+	return(identify_method(this->method));
+}
+
 const string &Request::get_uri()
 {
     return (this->uri);

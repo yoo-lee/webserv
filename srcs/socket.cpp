@@ -26,6 +26,7 @@ void Socket::setAddrInfo(struct addrinfo &info)
     info.ai_socktype = SOCK_STREAM;
 }
 
+//bind
 void Socket::init()
 {
     this->sock_fd= makeSocket();
@@ -65,8 +66,9 @@ void Socket::init()
     //// NG in guacamole
     listen(this->sock_fd, _SOCKET_NUM);
 }
-
-Socket::Socket() : sock_fd(0), port("11111")
+//bind
+// バインド（bind）とは、ソケットにIPアドレスとポート番号を関連付けることです。
+Socket::Socket() : sock_fd(0), port("11112")
 {
     init();
 }

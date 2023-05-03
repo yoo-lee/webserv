@@ -103,7 +103,7 @@ Socket* Webserv::find_listen_socket(int socket_fd)
 void Webserv::connected_communication(int fd, struct epoll_event *event, Socket *socket)
 {
     if (event->events & EPOLLIN){
-        Request *req = socket->recv(fd);
+        Request *req = socket->recv();
         if (!req){
             event->events = EPOLLOUT;
             if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
@@ -116,7 +116,8 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
         }
 
-
+        // Test (will remove)
+        req->print_request();
         // Body Test
         //cout << "Body(only string):" << endl;
         char buf[1024];
@@ -131,36 +132,18 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             //for(int i=0;i<size;i++){
                 //cout << "body [" << i << "]:" << buf[i] << endl;
             //}
-            cout << buf << endl;
+            //cout << buf << endl;
             size = req->read_buf(buf);
         }
 
-
-        // Test (will remove)
-        req->print_request();
-        if (req->analyze() == false)
-        {
-            //make error Response;
-            return;
-        }
-        if (req->is_cgi())
-        {
-            //cig processing
-        }
-        else
-        {
-            //server processing except cgi
-        }
-
-
+        //todo. do something in server
+        //CGI cgi(*req);
         bool read_all = true;
         if (read_all == false)
             return ;
 
-        //cout << "req->get_content_length()=" << req->get_content_length() << endl;
-        //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
-        if(req->get_content_length() > req->get_loaded_body_size())
-            return ;
+        // if(req->get_content_length() > req->get_loaded_body_size())
+            // return ;
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
             cout << "error;connected_communication No.2" << endl;
@@ -177,8 +160,8 @@ Content-Type: text/html\n\
 Content-Length: 4\n\
 \n\
 test\
-";
-        socket->send(fd, r_data);
+";		
+        socket->send(r_data);
 
         //todo
         bool write_all = true;
@@ -244,8 +227,7 @@ void Webserv::communication()
                     continue;
                 }
                 //close(fd);
-			}
-			//send()
+            }
         }
     }
 }
