@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), timeout_cnt(0);
+Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), timeout_cnt(0)
 {
     this->parse();
 }
@@ -81,9 +81,11 @@ void Request::print_request()
     cout << "headers size:" << this->headers.size() << endl;;
     map<string, string>::iterator ite = this->headers.begin();
     map<string, string>::iterator end = this->headers.end();
+    int i = 0;
     for(; ite != end; ite++)
     {
         cout << (*ite).first << ":" << (*ite).second << endl;
+        i++;
     }
 }
 
@@ -140,7 +142,6 @@ void Request::parse()
         this->headers.insert(make_pair(header, value));
     }
     string size_str = this->search_header("content-length");
-    cout << "size_str=" << size_str << endl;;
     ssize_t size = -1;
     if (size_str.size() > 10){
         cout << "Error: exceed BODY SIZE MAX" << endl;
@@ -150,7 +151,6 @@ void Request::parse()
         ss << size_str;
         ss >> size;
     }
-    cout << "size=" << size << endl;;
     this->_content_length = size;
     this->_transfer_encoding = this->search_header("transfer-encoding");
 }

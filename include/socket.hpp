@@ -2,6 +2,7 @@
 #define SOCKET_HPP
 
 #include "request.hpp"
+//#include "response.hpp"
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string>
@@ -17,6 +18,7 @@ typedef struct clientinfo{
     int n;
     int state;
 }s_clientinfo;
+
 class Socket
 {
     public:
@@ -29,18 +31,23 @@ class Socket
         virtual void communication();
         void close_fd();
         int getSockFD();
-        Request *recv();
-        //Request *recv(int fd);
-        bool send(std::string& data);
+        //Request *recv();
+        Request *recv(int fd);
+        bool send(int fd, std::string& data);
         int accept_request();
     protected:
         int sock_fd;
-        int fd;
+        //int fd;
+        const static int _SOCKET_NUM = 10;
+        //list<int> _fd_list;
+        std::map <int, Request*> _req_map;
         std::string port;
         virtual void init();
         virtual int makeSocket();
         virtual void setAddrInfo(struct addrinfo &info);
         Request *req;
+        //std::map <int, Response*> res_map;
+        //Response *res;
         struct epoll_event ev;
         s_clientinfo clientinfo;
         bool send_err(std::string err);

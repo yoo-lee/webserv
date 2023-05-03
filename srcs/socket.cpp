@@ -63,7 +63,7 @@ void Socket::init()
 
     //// sysctl net.ipv4.tcp_max_syn_backlog
     //// NG in guacamole
-    listen(this->sock_fd, 16);
+    listen(this->sock_fd, _SOCKET_NUM);
 }
 
 Socket::Socket() : sock_fd(0), port("11111")
@@ -112,16 +112,18 @@ int Socket::accept_request()
     memset(&client, 0, sizeof(struct sockaddr_in));
     socklen_t len = sizeof(client);
 
-    this->fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
-    if (this->fd < 0)
+    int fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    if (fd < 0)
     {
         cout << "Error accept():" << strerror(errno) << endl;
         //return ();
     }
+    Request *req = NULL;
+    this->_req_map.insert(std::make_pair(fd, req));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
-    return (this->fd);
+    return (fd);
 }
 
 /*
@@ -145,12 +147,13 @@ Request *Socket::recv(int fd)
 }
 */
 
-Request *Socket::recv()
+Request *Socket::recv(int fd)
 {
     if (this->req != NULL)
         delete this->req;
     try{
-        this->req = new Request(this->fd);
+        this->req = new Request(fd);
+        this->_req_map[fd] = this->req;
     }catch(std::exception &e){
         this->req = NULL;
         cout << e.what() << endl; 
@@ -174,11 +177,11 @@ bool Socket::send_err(std::string& data)
 
 
 
-bool Socket::send(std::string& data)
+bool Socket::send(int fd, std::string& data)
 {
 
     char last = '\0';
-    write(this->fd, data.c_str(), data.size());
-    write(this->fd, &last, 1);
+    write(fd, data.c_str(), data.size());
+    write(fd, &last, 1);
     return (true);
 }

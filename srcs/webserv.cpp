@@ -101,7 +101,7 @@ Socket* Webserv::find_listen_socket(int socket_fd)
 void Webserv::connected_communication(int fd, struct epoll_event *event, Socket *socket)
 {
     if (event->events & EPOLLIN){
-        Request *req = socket->recv();
+        Request *req = socket->recv(fd);
         if (!req){
             event->events = EPOLLOUT;
             if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
@@ -140,8 +140,8 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         if (read_all == false)
             return ;
 
-        cout << "req->get_content_length()=" << req->get_content_length() << endl;
-        cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
+        //cout << "req->get_content_length()=" << req->get_content_length() << endl;
+        //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
         if(req->get_content_length() > req->get_loaded_body_size())
             return ;
         event->events = EPOLLOUT;
@@ -161,7 +161,7 @@ Content-Length: 4\n\
 \n\
 test\
 ";
-        socket->send(r_data);
+        socket->send(fd, r_data);
 
         //todo
         bool write_all = true;

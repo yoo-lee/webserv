@@ -110,7 +110,7 @@ int GetNextLine::get_extra_buf(char *buf)
 
 string &GetNextLine::getline()
 {
-    if (this->sp == NULL || this->sp->size() == this->pos+1){
+    if (this->sp == NULL || this->sp->size() == this->pos){
         if (this->_buf_body_pos == NULL){
             this->read_line();
         }
@@ -118,7 +118,7 @@ string &GetNextLine::getline()
     if (this->sp == NULL){
         return (this->last_str);
     }
-    if (this->sp->size() == this->pos+1){
+    if (this->sp->size() == this->pos){
         return (this->last_str);
     }
     return (*(this->sp))[this->pos++];
