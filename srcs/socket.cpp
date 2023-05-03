@@ -119,7 +119,7 @@ int Socket::accept_request()
         //return ();
     }
     Request *req = NULL;
-    this->_req_map.insert(std::make_pair(fd, req));
+    this->_fd_req_map.insert(std::make_pair(fd, req));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
@@ -149,11 +149,12 @@ Request *Socket::recv(int fd)
 
 Request *Socket::recv(int fd)
 {
-    if (this->req != NULL)
-        delete this->req;
+    Request *req = this->_fd_req_map[fd];
+    if (req != NULL)
+        return req;
     try{
         this->req = new Request(fd);
-        this->_req_map[fd] = this->req;
+        this->_fd_req_map[fd] = this->req;
     }catch(std::exception &e){
         this->req = NULL;
         cout << e.what() << endl; 

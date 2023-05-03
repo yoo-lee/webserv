@@ -40,7 +40,7 @@ class Socket
         //int fd;
         const static int _SOCKET_NUM = 10;
         //list<int> _fd_list;
-        std::map <int, Request*> _req_map;
+        std::map <int, Request*> _fd_req_map;
         std::string port;
         virtual void init();
         virtual int makeSocket();
