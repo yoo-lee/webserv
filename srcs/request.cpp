@@ -244,7 +244,12 @@ bool Request::analyze()
     return (true);
 }
 
-bool Request::is_cgi()
+bool Request::is_loaded_body()
 {
     return (true);
+}
+
+bool Request::is_cgi()
+{
+    return (false);
 }

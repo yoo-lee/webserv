@@ -30,8 +30,8 @@ class Request
         const std::string &get_uri(); // will remove
         const std::string &get_version();
         const std::string &get_body_size();
-		METHOD get_method();
-		const std::string get_method_string();
+        METHOD get_method();
+        const std::string get_method_string();
         const std::map<std::string, std::string> &get_headers();
         void print_request();
         int read_buf(char *buf);
@@ -42,9 +42,9 @@ class Request
         std::string get_transfer_encoding();
         void add_loaded_body_size(size_t size);
         bool analyze();
-        bool get_loaded_body();
+        bool is_loaded_body();
         bool is_cgi();
-		static std::string identify_method(METHOD method);
+        static std::string identify_method(METHOD method);
         static METHOD identify_method(std::string method);
     private:
         void parse();

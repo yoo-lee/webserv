@@ -2,7 +2,7 @@
 #define SOCKET_HPP
 
 #include "request.hpp"
-//#include "response.hpp"
+#include "response.hpp"
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string>
@@ -33,19 +33,22 @@ class Socket
         int getSockFD();
         //Request *recv();
         Request *recv(int fd);
-        bool send(int fd, std::string& data);
+        bool send(int fd);
         int accept_request();
+        void set_response(int fd, Response *res);
+        Response *get_response(int fd);
     protected:
         int sock_fd;
         //int fd;
         const static int _SOCKET_NUM = 10;
         //list<int> _fd_list;
         std::map <int, Request*> _fd_req_map;
+        std::map <int, Response*> _fd_res_map;
         std::string port;
         virtual void init();
         virtual int makeSocket();
         virtual void setAddrInfo(struct addrinfo &info);
-        Request *req;
+        //Request *req;
         //std::map <int, Response*> res_map;
         //Response *res;
         struct epoll_event ev;

@@ -131,7 +131,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             //for(int i=0;i<size;i++){
                 //cout << "body [" << i << "]:" << buf[i] << endl;
             //}
-            cout << buf << endl;
+            //cout << buf << endl;
             size = req->read_buf(buf);
         }
 
@@ -143,19 +143,28 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             //make error Response;
             return;
         }
+
+        //bool read_all = true;
+        if (req->is_loaded_body() == false)
+        {
+            return ;
+        }
+
+        Response *res;
         if (req->is_cgi())
         {
+            res = new Response(*req);
             //cig processing
         }
         else
         {
+            res = new Response(*req);
             //server processing except cgi
         }
+        socket->set_response(fd, res);
 
+        //socket
 
-        bool read_all = true;
-        if (read_all == false)
-            return ;
 
         //cout << "req->get_content_length()=" << req->get_content_length() << endl;
         //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
@@ -167,6 +176,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         }
     }else if (event->events & EPOLLOUT){
         //std::string r_data = "HTTP/1.1 200 OK\r\ntext/plain;charset=UTF-8\r\nContent-Length:3\n\ntest5\r\n";
+        /*
         std::string r_data = "HTTP/1.1 200 OK\n\
 Date: Sun, 23 Apr 2023 13:14:41 GMT\n\
 Server: Apache/2.4.52 (Ubuntu)\n\
@@ -178,7 +188,9 @@ Content-Length: 4\n\
 \n\
 test\
 ";
-        socket->send(fd, r_data);
+        */
+
+        socket->send(fd);
 
         //todo
         bool write_all = true;
@@ -219,7 +231,6 @@ void Webserv::communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return ;
         }
-		
         for (int i = 0; i < nfds; i++)
         {
             std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
@@ -240,12 +251,10 @@ void Webserv::communication()
                 map_socks.insert(std::make_pair(fd, socket));
                 if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
                 {
-                    cout << "epoll_ctl error No.1" << endl;
                     continue;
                 }
                 //close(fd);
-			}
-			//send()
+            }
         }
     }
 }

@@ -80,7 +80,7 @@ Socket::Socket(std::string port_) : sock_fd(0) ,port(port_)
 
 Socket::~Socket()
 {
-    delete this->req;
+    //delete this->req;
 }
 Socket::Socket(const Socket &sock_fdet) : sock_fd(sock_fdet.sock_fd), port(sock_fdet.port)
 {
@@ -121,7 +121,9 @@ int Socket::accept_request()
         //return ();
     }
     Request *req = NULL;
+    Response *res = NULL;
     this->_fd_req_map.insert(std::make_pair(fd, req));
+    this->_fd_res_map.insert(std::make_pair(fd, res));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
@@ -155,16 +157,17 @@ Request *Socket::recv(int fd)
     if (req != NULL)
         return req;
     try{
-        this->req = new Request(fd);
-        this->_fd_req_map[fd] = this->req;
+        req = new Request(fd);
+        this->_fd_req_map[fd] = req;
     }catch(std::exception &e){
-        this->req = NULL;
+        req = NULL;
+        this->_fd_req_map[fd] = req;
         cout << e.what() << endl; 
         //std::string r_data = "HTTP/1.1 400 NG\n";
         //this->send(r_data);
         //return (NULL);
     }
-    return (this->req);
+    return (req);
 }
 
 /*
@@ -180,11 +183,41 @@ bool Socket::send_err(std::string& data)
 
 
 
-bool Socket::send(int fd, std::string& data)
+bool Socket::send(int fd)
 {
 
+    Response *res = get_response(fd);
     char last = '\0';
-    write(fd, data.c_str(), data.size());
+    write(fd, res->getRes().c_str(), res->getRes().size());
     write(fd, &last, 1);
     return (true);
+}
+
+void Socket::set_response(int fd, Response *res)
+{
+    std::map<int, Response*>::iterator res_iter = this->_fd_res_map.find(fd);
+    if (res_iter == this->_fd_res_map.end())
+    {
+        this->_fd_res_map.insert(std::make_pair(fd, res));
+    }
+    else
+    {
+        Response *tmp = (*res_iter).second;
+        if (res != NULL)
+        {
+            delete tmp;
+        }
+        this->_fd_res_map[fd] = res;
+    }
+}
+
+Response *Socket::get_response(int fd)
+{
+    std::map<int, Response*>::iterator res_iter = this->_fd_res_map.find(fd);
+    if (res_iter == this->_fd_res_map.end())
+    {
+        cout << "NULL" << endl;
+        return (NULL);
+    }
+    return (this->_fd_res_map[fd]);
 }
