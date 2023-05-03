@@ -227,7 +227,8 @@ void Webserv::communication()
                     continue;
                 }
                 //close(fd);
-            }
+			}
+			send()
         }
     }
 }

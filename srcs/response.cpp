@@ -41,12 +41,14 @@ void Response::setStatus(int code) {
 // Build HTTP response
 void Response::buildResponse()
 {
+	//header 文字列で返す。
     // Set status line
     _res = "HTTP/1.1 " + std::to_string(_code) + " " + getStatusMessage(_code) + "\r\n";
 
     // Set response headers
     _res += "Content-Type: text/html\r\n";
     _res += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
+
 
 	//char＊ で渡す。
 	// file名

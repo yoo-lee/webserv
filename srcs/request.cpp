@@ -49,7 +49,6 @@ METHOD Request::identify_method(string method)
     return (NG);
 }
 
-
 std::string Request::identify_method(METHOD method)
 {
     if (method == GET){
