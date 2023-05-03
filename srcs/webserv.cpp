@@ -114,8 +114,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
         }
 
-        // Test (will remove)
-        req->print_request();
+
         // Body Test
         //cout << "Body(only string):" << endl;
         char buf[1024];
@@ -134,8 +133,24 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             size = req->read_buf(buf);
         }
 
-        //todo. do something in server
-        //CGI cgi(*req);
+
+        // Test (will remove)
+        req->print_request();
+        if (req->analyze() == false)
+        {
+            //make error Response;
+            return;
+        }
+        if (req->is_cgi())
+        {
+            //cig processing
+        }
+        else
+        {
+            //server processing except cgi
+        }
+
+
         bool read_all = true;
         if (read_all == false)
             return ;

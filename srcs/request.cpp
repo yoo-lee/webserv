@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), timeout_cnt(0)
+Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), _timeout_cnt(0), _loaded_body(false), _cgi(false)
 {
     this->parse();
 }
@@ -177,7 +177,6 @@ const map<string, string> &Request::get_headers()
 
 int Request::read_buf(char *buf)
 {
-
     int size = this->_gnl.get_extra_buf(buf);
     if (size > 0)
         return (size);
@@ -231,4 +230,16 @@ string Request::search_header(string header)
         return ("");
     }
     return (ite->second);
+}
+
+bool Request::analyze()
+{
+    _loaded_body = false;
+    _cgi = false;
+    return (true);
+}
+
+bool Request::is_cgi()
+{
+    return (true);
 }

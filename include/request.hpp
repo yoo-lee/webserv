@@ -38,6 +38,9 @@ class Request
         ssize_t get_loaded_body_size();
         std::string get_transfer_encoding();
         void add_loaded_body_size(size_t size);
+        bool analyze();
+        bool get_loaded_body();
+        bool is_cgi();
     private:
         void parse();
         std::string search_header(std::string);
@@ -61,8 +64,10 @@ class Request
         std::string err_line;
         std::string domain;
         std::string ip;
-        const static int timeout = 1000;
-        int timeout_cnt;
+        const static int _timeout = 1000;
+        int _timeout_cnt;
+        bool _loaded_body;
+        bool _cgi;
 };
 
 #endif
