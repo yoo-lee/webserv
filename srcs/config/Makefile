@@ -1,3 +1,5 @@
+OBJ_DIR = objs
+
 UNIT_TEST_SRCS = AST.cpp \
 				 Lexer.cpp \
 				 Token.cpp \
@@ -13,35 +15,26 @@ UNIT_TEST_SRCS = AST.cpp \
 				 utils.cpp \
 				 Config.cpp \
 				 Http.cpp
+
 SRCS = ${UNIT_TEST_SRCS}
-UNIT_OBJS = ${UNIT_TEST_SRCS:.cpp=.o}
-OBJS = ${SRCS:.cpp=.o}
+UNIT_OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${UNIT_TEST_SRCS:.cpp=.o}))
+OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${SRCS:.cpp=.o}))
 CXX = c++
 CXXFLAGS = -Wall -Wextra -std=c++98 -g3
 
-test: ${SRCS}
-	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
+utest: objs $(UNIT_OBJS)
+	$(CXX) $(UNIT_OBJS) -std=c++11 -o test
 
-run:
-	./test
-
-tr: test run
-
-%.o: %.cpp
-	${CXX} -std=c++11 -g3 -D UNIT_TEST -c $< -o $@
-
-re : ${SRCS}
-	- rm test
-	${CXX} ${SRCS} ${CXXFLAGS} -D TEST -o test
-	# ./test
-
-utest: ${UNIT_OBJS}
-	${CXX} ${UNIT_OBJS} -std=c++11 -o test
+$(OBJ_DIR)/%.o: %.cpp
+	$(CXX) -std=c++11 -g3 -D UNIT_TEST -c $< -o $@
 
 clean:
-	- rm *.o
+	- rm $(OBJ_DIR)/*.o
 
 fclean:
 	- rm test
 
-utr: utest run
+objs:
+	mkdir -p $(OBJ_DIR)
+
+utr: objs utest run
