@@ -88,7 +88,7 @@ void NonTerminalASTNode::print(std::string indent)
         _children[i]->print(indent + "  ");
 }
 
-std::vector<ASTNode *> NonTerminalASTNode::get_children() const
+std::vector<ASTNode *> NonTerminalASTNode::get_childrenren() const
 {
     return _children;
 };
@@ -109,13 +109,14 @@ bool NonTerminalASTNode::operator==(const ASTNode &other) const
         return false;
     if (_type != other.get_type())
         return false;
-    if (_children.size() != ((NonTerminalASTNode &)other).get_children().size())
+    if (_children.size() != ((NonTerminalASTNode &)other).get_childrenren().size())
         return false;
     for (std::size_t i = 0; i < _children.size(); ++i)
     {
         if (TerminalASTNode *a = dynamic_cast<TerminalASTNode *>(_children[i]))
         {
-            if (TerminalASTNode *b = dynamic_cast<TerminalASTNode *>(((NonTerminalASTNode &)other).get_children()[i]))
+            if (TerminalASTNode *b =
+                    dynamic_cast<TerminalASTNode *>(((NonTerminalASTNode &)other).get_childrenren()[i]))
             {
                 if (*a != *b)
                     return false;
@@ -126,7 +127,7 @@ bool NonTerminalASTNode::operator==(const ASTNode &other) const
         else if (NonTerminalASTNode *a = dynamic_cast<NonTerminalASTNode *>(_children[i]))
         {
             if (NonTerminalASTNode *b =
-                    dynamic_cast<NonTerminalASTNode *>(((NonTerminalASTNode &)other).get_children()[i]))
+                    dynamic_cast<NonTerminalASTNode *>(((NonTerminalASTNode &)other).get_childrenren()[i]))
             {
                 if (*a != *b)
                     return false;
@@ -153,7 +154,7 @@ ASTNode *NonTerminalASTNode::operator[](ASTNode::Type type)
 
 std::ostream &operator<<(std::ostream &os, const NonTerminalASTNode &node)
 {
-    os << ASTNode::ast_node_type_to_str(node.get_type()) << " : " << node.get_children().size() << std::endl;
+    os << ASTNode::ast_node_type_to_str(node.get_type()) << " : " << node.get_childrenren().size() << std::endl;
     return os;
 }
 
@@ -165,7 +166,7 @@ TEST_CASE("ASTNode")
         std::vector<ASTNode *> buf;
         NonTerminalASTNode node(ASTNode::PROGRAM, buf);
         CHECK(node.get_type() == ASTNode::PROGRAM);
-        CHECK(node.get_children() == buf);
+        CHECK(node.get_childrenren() == buf);
         CHECK_THROWS_AS(NonTerminalASTNode(ASTNode::ID, buf), InvalidValue);
         CHECK_THROWS_AS(NonTerminalASTNode(ASTNode::STRING, buf), InvalidValue);
         CHECK_THROWS_AS(NonTerminalASTNode(ASTNode::INT, buf), InvalidValue);

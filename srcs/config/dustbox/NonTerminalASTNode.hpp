@@ -15,7 +15,7 @@ class NonTerminalASTNode : public ASTNode
     NonTerminalASTNode(ASTNode *node);
     ~NonTerminalASTNode();
     void print(std::string indent);
-    std::vector<ASTNode *> get_children() const;
+    std::vector<ASTNode *> get_childrenren() const;
     std::vector<ASTNode *> get_non_terminal_children() const;
     bool operator==(const ASTNode &other) const;
     bool operator!=(const ASTNode &other) const;

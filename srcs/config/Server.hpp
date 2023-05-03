@@ -1,31 +1,27 @@
 #ifndef SERVER_H
 #define SERVER_H
+#include "BlockStatement.hpp"
 #include "Location.hpp"
 #include "SyntaxError.hpp"
+#include "utils.hpp"
 #include <string>
 #include <vector>
 class Server
 {
   private:
-    /* data */
+    static std::string get_server_name(BlockStatement const &server);
+    static int get_listen_port(BlockStatement const &server);
+
   public:
     int listen;
     bool is_default_server;
     std::string server_name;
-    std::vector<Location> location;
+    std::vector<Location *> location;
+    Location const &operator[](size_t index) const;
 
-    Server(BlockStatement* server_directive);
-    Server(Server* server);
+    Server(Statement *server);
+    Server(Server *server);
     ~Server();
 };
-
-Server::Server(BlockStatement* server_directive)
-{
-    if (server_directive["listen"]->get_params().size() > 2)
-        throw SyntaxError("invalid listen directive");
-    listen = std::stoi(server_directive["listen"]->get_params()[0]);
-}
-
-Server::~Server() {}
 
 #endif /* SERVER_H */

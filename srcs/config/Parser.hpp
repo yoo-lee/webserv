@@ -15,7 +15,6 @@ class Parser
     Parser(std::string file_text);
     ~Parser();
     void print();
-    std::vector<Statement *> get_root();
-    HTTP get_https() const;
+    std::vector<Statement *> const &get_root();
 };
 #endif /* PARSER_H */

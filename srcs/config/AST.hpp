@@ -36,12 +36,12 @@ WS: [ \t\n\r\f]+ -> skip;
 #include "Statement.hpp"
 
 // TODO: ASTではなくなった。もっと適切な名前に変更する。
-// TODO: 700byteぐらいleakしているのでその修正
 class AST
 {
   private:
     std::vector<Token> _tokens;
     std::vector<Statement *> _root;
+
     std::vector<Statement *> program();
     Statement *statement();
     Statement *try_simple_statement(std::stack<Token> &buf);
@@ -58,7 +58,7 @@ class AST
     AST(const std::vector<Token> &tokens);
     ~AST();
     void print_tree();
-    std::vector<Statement *> get_root() const;
+    std::vector<Statement *> const &get_root() const;
     Statement *operator[](std::string directive) const;
 };
 

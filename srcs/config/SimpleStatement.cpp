@@ -14,6 +14,11 @@ SimpleStatement::SimpleStatement(const SimpleStatement &s) : Statement(s) {}
 SimpleStatement::SimpleStatement(Statement *s) : Statement(*s) {}
 SimpleStatement::~SimpleStatement() {}
 
+Statement *SimpleStatement::clone() const
+{
+    return new SimpleStatement(*this);
+}
+
 #ifdef UNIT_TEST
 TEST_CASE("SimpleStatement constructor")
 {

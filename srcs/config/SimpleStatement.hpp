@@ -18,6 +18,7 @@ class SimpleStatement : public Statement
     SimpleStatement(const SimpleStatement &s);
     SimpleStatement(Statement *s);
     ~SimpleStatement();
+    virtual Statement *clone() const;
 };
 
 #endif /* SIMPLESTATEMENT_H */

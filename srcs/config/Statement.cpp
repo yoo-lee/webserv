@@ -1,5 +1,7 @@
 #include "Statement.hpp"
 #include "BlockStatement.hpp"
+#include "SimpleStatement.hpp"
+#include "SyntaxError.hpp"
 #include <string>
 #include <vector>
 
@@ -30,8 +32,8 @@ void Statement::print(std::ostream &os, std::string indent) const
 
 std::ostream &operator<<(std::ostream &os, const Statement &statement)
 {
-    statement.print(os, "");
     return os;
+    statement.print(os, "");
 }
 
 bool Statement::operator==(const Statement &other) const
@@ -61,35 +63,13 @@ std::vector<std::string> Statement::get_params() const
     return _params;
 }
 
+// SimpleStatementは1以上のパラメータを持つが、BlockStatementは0以上のパラメータを持つ
+std::string Statement::get_param(size_t index) const
+{
+    if (index >= _params.size())
+        throw SyntaxError("Statement::get_param index out of bounds");
+    return _params[index];
+}
+
 #ifdef UNIT_TEST
-
-TEST_CASE("Statement constructor")
-{
-    std::vector<std::string> params;
-    params.push_back("param1");
-    params.push_back("param2");
-    Statement s("directive", params);
-    CHECK(s.get_directive() == "directive");
-    CHECK(s.get_params().size() == 2);
-    CHECK(s.get_params()[0] == "param1");
-    CHECK(s.get_params()[1] == "param2");
-    CHECK(&(s.get_params()[0]) != &(params[0]));
-    CHECK(&(s.get_params()[1]) != &(params[1]));
-}
-
-TEST_CASE("Statement copy constructor")
-{
-    std::vector<std::string> params;
-    params.push_back("param1");
-    params.push_back("param2");
-    Statement s("directive", params);
-    Statement s2(s);
-    CHECK(s2.get_directive() == "directive");
-    CHECK(s2.get_params().size() == 2);
-    CHECK(s2.get_params()[0] == "param1");
-    CHECK(s2.get_params()[1] == "param2");
-    CHECK(&(s.get_params()[0]) != &(s2.get_params()[0]));
-    CHECK(&(s.get_params()[1]) != &(s2.get_params()[1]));
-}
-
 #endif

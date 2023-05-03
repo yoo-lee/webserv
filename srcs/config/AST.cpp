@@ -6,9 +6,11 @@
 #include "SimpleStatement.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
+
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
+
 AST::AST() : _root() {}
 
 AST::AST(const std::vector<Token> &tokens) : _tokens(tokens)
@@ -26,7 +28,7 @@ AST::AST(const std::vector<Token> &tokens) : _tokens(tokens)
         }
     }
     if (_tokens.size() != 0)
-        throw NotFound("unexpected token " + _tokens[0].get_str());
+        throw NotFound("AST: unexpected token " + _tokens[0].get_str());
 }
 
 Statement *AST::statement()
@@ -52,15 +54,13 @@ Statement *AST::statement()
     {
         backtrace(buf);
     }
-    throw NotFound("statement not found");
+    throw NotFound("AST: statement not found");
 }
 
 AST::~AST()
 {
     for (size_t i = 0; i < _root.size(); i++)
-    {
         delete _root[i];
-    }
 }
 
 Statement *AST::try_simple_statement(std::stack<Token> &buf)
@@ -99,7 +99,7 @@ BlockStatement *AST::try_block_statement(std::stack<Token> &buf)
     {
         for (size_t i = 0; i < statements.size(); i++)
             delete statements[i];
-        throw NotFound("RCURLY not found");
+        throw NotFound("AST: RCURLY not found");
     }
     return new BlockStatement(directive_, parameters_, statements);
 }
@@ -131,7 +131,7 @@ std::string AST::parameter(std::stack<Token> &buf)
         return consume(Token::STRING, buf);
     else if (current_token.get_type() == Token::INT)
         return consume(Token::INT, buf);
-    throw NotFound("parameter not found");
+    throw NotFound("AST: parameter not found");
 }
 
 std::string AST::directive(std::stack<Token> &buf)
@@ -142,10 +142,10 @@ std::string AST::directive(std::stack<Token> &buf)
 std::string AST::consume(Token::Type type, std::stack<Token> &buf)
 {
     if (_tokens.empty())
-        throw NotFound("Unexpected end of file");
+        throw NotFound("AST: Unexpected end of file");
     Token current_token = _tokens.front();
     if (current_token.get_type() != type)
-        throw NotFound("Unexpected token");
+        throw NotFound("AST: Unexpected token");
     buf.push(_tokens[0]);
     _tokens.erase(_tokens.begin());
     return current_token.get_str();
@@ -178,7 +178,7 @@ void AST::print_tree()
     }
 }
 
-std::vector<Statement *> AST::get_root() const
+std::vector<Statement *> const &AST::get_root() const
 {
     return _root;
 }
@@ -264,10 +264,10 @@ TEST_CASE("AST: Block")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_children().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block before comment")
@@ -278,10 +278,10 @@ TEST_CASE("AST: Block before comment")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_children().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block after comment")
@@ -292,10 +292,10 @@ TEST_CASE("AST: Block after comment")
     BlockStatement *bs = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 0);
-    REQUIRE(bs->get_child().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_children().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Block with param")
@@ -307,10 +307,10 @@ TEST_CASE("AST: Block with param")
     REQUIRE(bs->get_directive() == "Block");
     REQUIRE(bs->get_params().size() == 1);
     REQUIRE(bs->get_params()[0] == "param");
-    REQUIRE(bs->get_child().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_directive() == "directive");
-    REQUIRE(bs->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs->get_child()[0]->get_params()[0] == "param");
+    REQUIRE(bs->get_children().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_directive() == "directive");
+    REQUIRE(bs->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs->get_children()[0]->get_params()[0] == "param");
 }
 
 TEST_CASE("AST: Multi Block")
@@ -323,18 +323,18 @@ TEST_CASE("AST: Multi Block")
     BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "block1");
     REQUIRE(bs1->get_params().size() == 0);
-    REQUIRE(bs1->get_child().size() == 1);
-    REQUIRE(bs1->get_child()[0]->get_directive() == "a");
-    REQUIRE(bs1->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs1->get_child()[0]->get_params()[0] == "b");
+    REQUIRE(bs1->get_children().size() == 1);
+    REQUIRE(bs1->get_children()[0]->get_directive() == "a");
+    REQUIRE(bs1->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs1->get_children()[0]->get_params()[0] == "b");
 
     BlockStatement *bs2 = dynamic_cast<BlockStatement *>(ast.get_root()[1]);
     REQUIRE(bs2->get_directive() == "block2");
     REQUIRE(bs2->get_params().size() == 0);
-    REQUIRE(bs2->get_child().size() == 1);
-    REQUIRE(bs2->get_child()[0]->get_directive() == "a");
-    REQUIRE(bs2->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs2->get_child()[0]->get_params()[0] == "b");
+    REQUIRE(bs2->get_children().size() == 1);
+    REQUIRE(bs2->get_children()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_children()[0]->get_params()[0] == "b");
 }
 
 TEST_CASE("AST: Nested block statement")
@@ -345,15 +345,15 @@ TEST_CASE("AST: Nested block statement")
     BlockStatement *bs1 = dynamic_cast<BlockStatement *>(ast.get_root()[0]);
     REQUIRE(bs1->get_directive() == "parent");
     REQUIRE(bs1->get_params().size() == 0);
-    REQUIRE(bs1->get_child().size() == 1);
-    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_child()[0]) != 0);
-    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_child()[0]);
+    REQUIRE(bs1->get_children().size() == 1);
+    REQUIRE(dynamic_cast<BlockStatement *>(bs1->get_children()[0]) != 0);
+    BlockStatement *bs2 = dynamic_cast<BlockStatement *>(bs1->get_children()[0]);
     REQUIRE(bs2->get_directive() == "child");
     REQUIRE(bs2->get_params().size() == 0);
-    REQUIRE(bs2->get_child().size() == 1);
-    REQUIRE(bs2->get_child()[0]->get_directive() == "a");
-    REQUIRE(bs2->get_child()[0]->get_params().size() == 1);
-    REQUIRE(bs2->get_child()[0]->get_params()[0] == "b");
+    REQUIRE(bs2->get_children().size() == 1);
+    REQUIRE(bs2->get_children()[0]->get_directive() == "a");
+    REQUIRE(bs2->get_children()[0]->get_params().size() == 1);
+    REQUIRE(bs2->get_children()[0]->get_params()[0] == "b");
 }
 
 TEST_CASE("AST: nginx.conf")
@@ -422,6 +422,11 @@ TEST_CASE("AST: Nested non rcurly")
 TEST_CASE("AST: random string")
 {
     CHECK_THROWS_AS(AST(Lexer("j;a903]+{kfjda;}").get_token_list()), NotFound);
+}
+
+TEST_CASE("AST: Simple statement with no param")
+{
+    CHECK_THROWS_AS(AST(Lexer("Block param { directive ;}").get_token_list()), NotFound);
 }
 
 #endif

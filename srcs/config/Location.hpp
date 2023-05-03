@@ -1,9 +1,9 @@
 #ifndef LOCATION_H
 #define LOCATION_H
+#include "BlockStatement.hpp"
 #include <map>
 #include <string>
 #include <vector>
-
 class Location
 {
   private:
@@ -11,21 +11,10 @@ class Location
     std::vector<std::string> urls;
     std::map<std::string, std::string> properties;
     Location();
-    Location(std::vector<std::string> url, std::map<std::string, std::string> properties);
+    Location(BlockStatement const &location_directive);
     Location(Location *location);
     ~Location();
+    std::string operator[](size_t index) const;
 };
-
-Location::Location() {}
-
-Location::Location(std::vector<std::string> urls, std::map<std::string, std::string> properties)
-    : urls(urls),
-      properties(properties)
-{
-}
-
-Location::Location(Location *location) : urls(location->urls), properties(location->properties) {}
-
-Location::~Location() {}
 
 #endif /* LOCATION_H */

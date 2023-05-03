@@ -22,26 +22,16 @@ BlockStatement::BlockStatement(std::string directive, std::vector<Statement *> c
 BlockStatement::BlockStatement(const BlockStatement &b) : Statement(b)
 {
     for (size_t i = 0; i < b._child_statements.size(); i++)
-    {
-        if (dynamic_cast<SimpleStatement *>(b._child_statements[i]))
-            _child_statements.push_back(new SimpleStatement(b._child_statements[i]));
-        else
-            _child_statements.push_back(new BlockStatement(b._child_statements[i]));
-    }
+        _child_statements.push_back(b._child_statements[i]->clone());
 }
 
 BlockStatement::BlockStatement(Statement *s) : Statement(*s)
 {
     if (dynamic_cast<BlockStatement *>(s))
-        throw SyntaxError("invalid block statement");
+        throw SyntaxError("BlockStatement: Taken statement is not a BlockStatement");
     BlockStatement *b = dynamic_cast<BlockStatement *>(s);
     for (size_t i = 0; i < b->_child_statements.size(); i++)
-    {
-        if (dynamic_cast<SimpleStatement *>(b->_child_statements[i]))
-            _child_statements.push_back(new SimpleStatement(b->_child_statements[i]));
-        else
-            _child_statements.push_back(new BlockStatement(b->_child_statements[i]));
-    }
+        _child_statements.push_back((new SimpleStatement(b->_child_statements[i]))->clone());
 }
 // #include <iostream>
 BlockStatement::~BlockStatement()
@@ -70,7 +60,7 @@ void BlockStatement::print(std::ostream &os, std::string indent) const
     os << indent << "}";
 }
 
-std::vector<Statement *> BlockStatement::get_child() const
+std::vector<Statement *> BlockStatement::get_children() const
 {
     return _child_statements;
 }
@@ -101,13 +91,18 @@ Statement *BlockStatement::operator[](std::string directive) const
         if (_child_statements[i]->get_directive() == directive)
         {
             if (result != 0)
-                throw std::out_of_range("multiple statements(" + directive + ") with same directive");
+                throw std::out_of_range("BlockStatement[]: Multiple statements(" + directive + ") with same directive");
             result = _child_statements[i];
         }
     }
     if (result == 0)
-        throw std::out_of_range("no statement with directive: " + directive);
+        throw std::out_of_range("BlockStatement[]: No statement with directive: " + directive);
     return result;
+}
+
+Statement *BlockStatement::clone() const
+{
+    return new BlockStatement(*this);
 }
 
 #ifdef UNIT_TEST

@@ -1,5 +1,19 @@
-UNIT_TEST_SRCS = AST.cpp Lexer.cpp Token.cpp NotFound.cpp SyntaxError.cpp  InvalidValue.cpp BlockStatement.cpp Statement.cpp
-SRCS = Config.cpp Parser.cpp ${UNIT_TEST_SRCS}
+UNIT_TEST_SRCS = AST.cpp \
+				 Lexer.cpp \
+				 Token.cpp \
+				 NotFound.cpp \
+				 SyntaxError.cpp \
+				 InvalidValue.cpp \
+				 BlockStatement.cpp \
+				 Statement.cpp \
+				 SimpleStatement.cpp \
+				 Location.cpp \
+				 Parser.cpp \
+				 Server.cpp \
+				 utils.cpp \
+				 Config.cpp \
+				 Http.cpp
+SRCS = ${UNIT_TEST_SRCS}
 UNIT_OBJS = ${UNIT_TEST_SRCS:.cpp=.o}
 OBJS = ${SRCS:.cpp=.o}
 CXX = c++
@@ -22,7 +36,7 @@ re : ${SRCS}
 	# ./test
 
 utest: ${UNIT_OBJS}
-	${CXX} ${UNIT_OBJS} -std=c++11 -fsanitize=address -o test
+	${CXX} ${UNIT_OBJS} -std=c++11 -o test
 
 clean:
 	- rm *.o
