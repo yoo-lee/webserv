@@ -22,9 +22,10 @@ public:
 	std::string identify_method(METHOD method);
 
 	std::string methodToString(METHOD method);
-	bool send();
+    std::string get_file_path();
 
 private:
+    std::string file_path = "test_dir/send.html"
     Request _request;
     std::string _res;
     std::string _body;

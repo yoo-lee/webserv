@@ -26,12 +26,11 @@ class Request
         Request();
         Request(int fd);
         ~Request();
-        METHOD get_method();
         const std::string &get_path();
         const std::string &get_uri(); // will remove
         const std::string &get_version();
         const std::string &get_body_size();
-		const METHOD get_method();
+		METHOD get_method();
 		const std::string get_method_string();
         const std::map<std::string, std::string> &get_headers();
         void print_request();
