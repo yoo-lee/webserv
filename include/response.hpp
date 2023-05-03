@@ -3,8 +3,9 @@
 
 #include <string>
 #include "request.hpp"
+#include "socket_data.hpp"
 
-class Response {
+class Response : public SocketData{
 public:
 	Response();
     // コンストラクタ

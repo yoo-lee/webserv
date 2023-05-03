@@ -37,6 +37,11 @@ class Socket
         int accept_request();
         void set_response(int fd, Response *res);
         Response *get_response(int fd);
+        void erase_request(int fd);
+        void erase_response(int fd);
+        void increment_timeout(int timeout);
+        void increment_timeout(std::map<int, Request*> &map, int timeout);
+        void increment_timeout(std::map<int, Response*> &map, int timeout);
     protected:
         int sock_fd;
         //int fd;

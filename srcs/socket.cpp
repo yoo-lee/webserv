@@ -221,3 +221,57 @@ Response *Socket::get_response(int fd)
     }
     return (this->_fd_res_map[fd]);
 }
+
+void Socket::increment_timeout(std::map<int, Response*> &map, int time)
+{
+    SocketData *socket_data;
+    std::map<int, Response*>::iterator iter = map.begin();
+    std::map<int, Response*>::iterator end = map.end();
+
+    bool exceed;
+    for(; iter != end;iter++){
+        socket_data = iter->second;
+        exceed = socket_data->increment_timeout(time);
+        if (exceed){
+            map.erase(iter->first);
+            delete socket_data;
+        }
+    }
+}
+
+void Socket::increment_timeout(std::map<int, Request*> &map, int time)
+{
+    SocketData *socket_data;
+    std::map<int, Request*>::iterator iter = map.begin();
+    std::map<int, Request*>::iterator end = map.end();
+
+    bool exceed;
+    for(; iter != end;iter++){
+        socket_data = iter->second;
+        exceed = socket_data->increment_timeout(time);
+        if (exceed){
+            map.erase(iter->first);
+            delete socket_data;
+        }
+    }
+}
+
+void Socket::increment_timeout(int time)
+{
+    this->increment_timeout(_fd_req_map, time);
+    this->increment_timeout(_fd_res_map, time);
+}
+
+void Socket::erase_request(int fd)
+{
+    Request *tmp = _fd_req_map[fd];
+    delete tmp;
+    this->_fd_req_map.erase(fd);
+}
+
+void Socket::erase_response(int fd)
+{
+    Response *tmp = _fd_res_map[fd];
+    delete tmp;
+    this->_fd_res_map.erase(fd);
+}

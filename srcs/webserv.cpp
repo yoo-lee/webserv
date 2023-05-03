@@ -144,7 +144,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         }
 
         //bool read_all = true;
-        if (req->is_loaded_body() == false)
+        if (req->have_data_in_body() == false)
         {
             return ;
         }
@@ -169,6 +169,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
         if(req->get_content_length() > req->get_loaded_body_size())
             return ;
+        socket->erase_request(fd);
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
             cout << "error;connected_communication No.2" << endl;
@@ -180,10 +181,11 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
 
         //sock_fds.erase(fd);
-        this->_sockets.erase(fd);
+        this->_fd_sockets.erase(fd);
         if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
             cout << "error;connected_communication No.3" << endl;
         }
+        socket->erase_response(fd);
         //close(fd);
     }
 }
@@ -198,7 +200,7 @@ void Webserv::communication()
     memset(&server_event, 0, sizeof(struct epoll_event));
 
     //std::vector<int> sock_fds;
-    //std::map<int, Socket*> this->_sockets;
+    //std::map<int, Socket*> this->_fd_sockets;
 
     if(this->init_epoll() == false){
         return ;
@@ -206,9 +208,14 @@ void Webserv::communication()
     while(1)
     {
         int timeout = -1;
-
+        if (this->_fd_sockets.size() > 0){
+            timeout = 5;
+        }
         int nfds = epoll_wait(this->epfd, sock_event, size, timeout);
         if (nfds == 0) {
+            for(size_t i=0; i < this->sockets.size(); i++){
+                this->sockets[i]->increment_timeout(timeout);
+            }
             continue;
         }
         else if (nfds < 0)
@@ -218,8 +225,8 @@ void Webserv::communication()
         }
         for (int i = 0; i < nfds; i++)
         {
-            std::map<int, Socket*>::iterator tmp_fd = this->_sockets.find(sock_event[i].data.fd);
-            if (tmp_fd != this->_sockets.end())
+            std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
+            if (tmp_fd != this->_fd_sockets.end())
             {
                 Socket *socket = tmp_fd->second;
                 connected_communication(tmp_fd->first, &(sock_event[i]), socket);
@@ -233,7 +240,7 @@ void Webserv::communication()
                 memset(&server_event, 0, sizeof(server_event));
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
-                this->_sockets.insert(std::make_pair(fd, socket));
+                this->_fd_sockets.insert(std::make_pair(fd, socket));
                 if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
                 {
                     continue;

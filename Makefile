@@ -3,7 +3,7 @@ LIB		:= ./lib/
 OBJDIR	:= ./obj
 SRCDIR	:= ./srcs/
 
-SOCKET 	:= request.cpp response.cpp socket.cpp tcp_socket.cpp
+SOCKET 	:= socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
 CGI 	:= 
 SERVER 	:= webserv.cpp
 UTILITY := split.cpp get_next_line.cpp utility.cpp

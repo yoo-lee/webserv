@@ -16,7 +16,7 @@ using std::cout;
 using std::endl;
 using std::map;
 
-Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""), _timeout_cnt(0), _loaded_body(false), _cgi(false)
+Request::Request(int fd_) : fd(fd_), _content_length(0), _loaded_body_size(0), _gnl(this->fd) , method(NG),  err_line(""),  _data_in_body(false), _cgi(false)
 {
     this->parse();
 }
@@ -27,49 +27,6 @@ Request::~Request()
     //close(this->fd);
 }
 
-METHOD Request::identify_method(string method)
-{
-    if (method == "GET"){
-        return (GET);
-    }else if (method == "POST"){
-        return (POST);
-    }else if (method == "PUT"){
-        return (PUT);
-    }else if (method == "HEAD"){
-        return (HEAD);
-    }else if (method == "DELETE"){
-        return (DELETE);
-    }else if (method == "OPTIONS"){
-        return (OPTIONS);
-    }else if (method == "TRACE"){
-        return (TRACE);
-    }else if (method == "CONNECT"){
-        return (CONNECT);
-    }
-    return (NG);
-}
-
-std::string Request::identify_method(METHOD method)
-{
-    if (method == GET){
-        return ("GET");
-    }else if (method == POST){
-        return ("POST");
-    }else if (method == PUT){
-        return ("PUT");
-    }else if (method == HEAD){
-        return ("HEAD");
-    }else if (method == DELETE){
-        return ("DELETE");
-    }else if (method == OPTIONS){
-        return ("OPTIONS");
-    }else if (method == TRACE){
-        return ("TRACE");
-    }else if (method == CONNECT){
-        return ("CONNECT");
-    }
-    return ("NG");
-}
 
 void Request::print_request()
 {
@@ -239,17 +196,19 @@ string Request::search_header(string header)
 
 bool Request::analyze()
 {
-    _loaded_body = false;
+    _data_in_body = false;
     _cgi = false;
     return (true);
 }
 
-bool Request::is_loaded_body()
+bool Request::have_data_in_body()
 {
-    return (true);
+    _data_in_body = true;
+    return (_data_in_body);
 }
 
 bool Request::is_cgi()
 {
     return (false);
 }
+

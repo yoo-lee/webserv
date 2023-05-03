@@ -1,26 +1,14 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
+
 #include <map>
 #include <string>
 #include "split.hpp"
 #include "get_next_line.hpp"
+#include "socket_data.hpp"
 
-enum E_METHOD{
-    GET,
-    POST,
-    PUT,
-    HEAD,
-    DELETE,
-    OPTIONS,
-    TRACE,
-    CONNECT,
-    NG,
-    INVALID,
-};
 
-typedef enum E_METHOD METHOD;
-
-class Request
+class Request : public SocketData
 {
     public:
         Request();
@@ -42,14 +30,16 @@ class Request
         std::string get_transfer_encoding();
         void add_loaded_body_size(size_t size);
         bool analyze();
-        bool is_loaded_body();
+        bool have_data_in_body();
         bool is_cgi();
-        static std::string identify_method(METHOD method);
-        static METHOD identify_method(std::string method);
+        //static std::string identify_method(METHOD method);
+        //static METHOD identify_method(std::string method);
+        //bool increment_timeout(int time);
+        //void clear_timeout();
     private:
         void parse();
         std::string search_header(std::string);
-        const static int BUF_MAX = 1024;
+        const static int BUF_MAX = 1600;
         const int fd;
         //int _body_size;
         ssize_t _content_length;
@@ -67,9 +57,9 @@ class Request
         std::string err_line;
         std::string domain;
         std::string ip;
-        const static int _timeout = 1000;
-        int _timeout_cnt;
-        bool _loaded_body;
+        //const static int _timeout = 200;
+        //int _timeout_cnt;
+        bool _data_in_body;
         bool _cgi;
 };
 
