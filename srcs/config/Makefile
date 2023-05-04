@@ -14,7 +14,8 @@ UNIT_TEST_SRCS = AST.cpp \
 				 Server.cpp \
 				 utils.cpp \
 				 Config.cpp \
-				 Http.cpp
+				 Http.cpp \
+				 LimitExcept.cpp
 
 SRCS = ${UNIT_TEST_SRCS}
 UNIT_OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${UNIT_TEST_SRCS:.cpp=.o}))
@@ -23,10 +24,13 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -std=c++98 -g3
 
 utest: objs $(UNIT_OBJS)
-	$(CXX) $(UNIT_OBJS) -std=c++11 -o test
+	$(CXX) $(UNIT_OBJS) -std=c++11 -fsanitize=address -o test
 
 $(OBJ_DIR)/%.o: %.cpp
 	$(CXX) -std=c++11 -g3 -D UNIT_TEST -c $< -o $@
+
+run:
+	./test
 
 clean:
 	- rm $(OBJ_DIR)/*.o

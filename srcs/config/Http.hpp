@@ -14,7 +14,7 @@ class HTTP
     int client_max_body_size;
     std::vector<Server *> server;
     HTTP();
-    HTTP(Statement &directive);
+    HTTP(Statement *const directive);
     ~HTTP();
     Server const &operator[](size_t index);
     HTTP &operator=(HTTP const &other);

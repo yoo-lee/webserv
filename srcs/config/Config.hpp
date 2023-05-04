@@ -16,7 +16,8 @@ class Config
     HTTP http;
     Config(std::string file_text, bool is_file_text);
     Config(const char *file_path);
-    ~Config(){};
+    void init(std::string file_text);
+    ~Config();
 };
 
 #endif /* CONFIG_H */

@@ -15,13 +15,14 @@ int HTTP::get_client_max_body_size(BlockStatement &http_directive)
     }
 }
 
-HTTP::HTTP(Statement &directive)
+HTTP::HTTP(Statement *const directive)
 {
-    if (dynamic_cast<BlockStatement *>(&directive) == NULL)
-        throw SyntaxError("HTTP: Taken directive is not a block statement");
-    BlockStatement &http_directive = *(dynamic_cast<BlockStatement *>(&directive));
+    if (dynamic_cast<BlockStatement *>(directive) == NULL)
+        throw SyntaxError("HTTP: Taken directive is not a block statement.");
+    BlockStatement &http_directive = *(dynamic_cast<BlockStatement *>(directive));
     if (http_directive.get_directive() != "http")
-        throw SyntaxError("HTTP: Taken directive is not a http");
+        throw SyntaxError("HTTP: Taken directive is not a http. Taken directive is " + http_directive.get_directive() +
+                          ".");
     client_max_body_size = get_client_max_body_size(http_directive);
     std::vector<Statement *> server_directives = http_directive.get_children("server");
     for (size_t i = 0; i < server_directives.size(); i++)
