@@ -1,6 +1,10 @@
 #include "socket_data.hpp"
+#include <iostream>
+
 
 using std::string;
+using std::cout;
+using std::endl;
 
 SocketData::SocketData() : _timeout_cnt(0)
 {
@@ -56,13 +60,19 @@ std::string SocketData::identify_method(METHOD method)
     return ("NG");
 }
 
+#include <stdio.h>
 bool SocketData::increment_timeout(int time)
 {
-    _timeout_cnt += time;
+    cout << "increment_timeout No.1" << endl;
+    printf("_timeout_cnt=%d, time=%d\n", this->_timeout_cnt, time);
+    this->_timeout_cnt =this->_timeout_cnt + time;
+    cout << "increment_timeout No.2" << endl;
     if (_timeout_cnt > _timeout)
     {
+    cout << "increment_timeout No.3" << endl;
         return (true);
     }
+    cout << "increment_timeout No.4" << endl;
     return (false);
 }
 

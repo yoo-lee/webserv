@@ -120,10 +120,16 @@ int Socket::accept_request()
         cout << "Error accept():" << strerror(errno) << endl;
         //return ();
     }
-    Request *req = NULL;
-    Response *res = NULL;
-    this->_fd_req_map.insert(std::make_pair(fd, req));
-    this->_fd_res_map.insert(std::make_pair(fd, res));
+
+    FDManager *fd_m = new FDManager(fd);
+    //SocketData *tmp = fd_m;
+    //tmp->increment_timeout(1);
+    //tmp->increment_timeout(2);
+    //Request *req = NULL;
+    //Response *res = NULL;
+    this->_fd_map.insert(std::make_pair(fd, fd_m));
+    //this->_fd_req_map.insert(std::make_pair(fd, req));
+    //this->_fd_res_map.insert(std::make_pair(fd, res));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
@@ -153,15 +159,15 @@ Request *Socket::recv(int fd)
 
 Request *Socket::recv(int fd)
 {
-    Request *req = this->_fd_req_map[fd];
+    Request *req = this->_fd_map[fd]->get_req();
     if (req != NULL)
         return req;
     try{
         req = new Request(fd);
-        this->_fd_req_map[fd] = req;
+        this->_fd_map[fd]->insert(req);
     }catch(std::exception &e){
         req = NULL;
-        this->_fd_req_map[fd] = req;
+        this->_fd_map[fd]->insert(req);
         cout << e.what() << endl; 
         //std::string r_data = "HTTP/1.1 400 NG\n";
         //this->send(r_data);
@@ -195,7 +201,9 @@ bool Socket::send(int fd)
 
 void Socket::set_response(int fd, Response *res)
 {
-    std::map<int, Response*>::iterator res_iter = this->_fd_res_map.find(fd);
+    this->_fd_map[fd]->insert(res);
+    /*
+    //std::map<int, Response*>::iterator res_iter = this->_fd_map[fd].get_res();
     if (res_iter == this->_fd_res_map.end())
     {
         this->_fd_res_map.insert(std::make_pair(fd, res));
@@ -209,10 +217,13 @@ void Socket::set_response(int fd, Response *res)
         }
         this->_fd_res_map[fd] = res;
     }
+    */
 }
 
 Response *Socket::get_response(int fd)
 {
+    return (this->_fd_map[fd]->get_res());
+    /*
     std::map<int, Response*>::iterator res_iter = this->_fd_res_map.find(fd);
     if (res_iter == this->_fd_res_map.end())
     {
@@ -220,58 +231,135 @@ Response *Socket::get_response(int fd)
         return (NULL);
     }
     return (this->_fd_res_map[fd]);
+    */
 }
 
-void Socket::increment_timeout(std::map<int, Response*> &map, int time)
+/*
+void Socket::increment_timeout(std::map<int, SocketData*> &map, int time)
 {
-    SocketData *socket_data;
+
+}
+*/
+
+/*
+template < template < typename , typename> class Container>
+void Socket::increment_timeout(Container &map, int time)
+{
+    int fd;
+    SocketData *socket_data = map;
     std::map<int, Response*>::iterator iter = map.begin();
     std::map<int, Response*>::iterator end = map.end();
 
     bool exceed;
     for(; iter != end;iter++){
+        cout << "timeout No.4" << endl;
+        fd = iter->first;
         socket_data = iter->second;
         exceed = socket_data->increment_timeout(time);
         if (exceed){
+            cout << "timeout No.5" << endl;
             map.erase(iter->first);
             delete socket_data;
+            close(fd);
         }
     }
 }
+*/
 
-void Socket::increment_timeout(std::map<int, Request*> &map, int time)
+
+/*
+static void Socket::increment_timeout(std::map<int, Request*> &map, int time)
 {
+    int fd;
     SocketData *socket_data;
-    std::map<int, Request*>::iterator iter = map.begin();
-    std::map<int, Request*>::iterator end = map.end();
+    std::map<int, Request*>::iterator iter = map.begin(); std::map<int, Request*>::iterator end = map.end();
 
     bool exceed;
     for(; iter != end;iter++){
+        cout << "timeout No.2" << endl;
+        fd = iter->first;
         socket_data = iter->second;
         exceed = socket_data->increment_timeout(time);
         if (exceed){
+            cout << "timeout No.3" << endl;
             map.erase(iter->first);
             delete socket_data;
+            close(fd);
         }
     }
 }
+*/
 
-void Socket::increment_timeout(int time)
+std::vector<int> Socket::timeout(int time)
 {
-    this->increment_timeout(_fd_req_map, time);
-    this->increment_timeout(_fd_res_map, time);
+    std::map<int, FDManager*>::iterator iter = _fd_map.begin(); 
+    std::map<int, FDManager*>::iterator end = _fd_map.end();
+    cout << "_fd_map size=" << _fd_map.size() << endl;
+    std::vector<int> delete_fd;
+
+    FDManager *fd_m;
+    int fd;
+    bool timeout;
+    for(; iter != end; iter++)
+    {
+        cout << "timeout No.1:" << time << endl;
+        fd = iter->first;
+        fd_m = iter->second;
+        if (fd_m->get_req()){
+            cout << "timeout No.2 Request:" << time << endl;
+            timeout = increment_timeout(*fd_m->get_req(), time);
+        }else if (fd_m->get_res()){
+            cout << "timeout No.3 Response:" << time << endl;
+            timeout = increment_timeout(*fd_m->get_res(), time);
+        }else{
+            cout << "timeout No.4 other:" << time << endl;
+            printf("fd_m=%p\n", fd_m);
+            timeout = increment_timeout(*fd_m, time);
+        }
+        if (timeout){
+            cout << "delete_fd No.1" << endl;
+            delete_fd.push_back(fd);
+            cout << "delete_fd No.2" << endl;
+        }
+        cout << "timeout No.5 other:" << time << endl;
+    }
+    cout << "timeout No.1:" << time << endl;
+    return (delete_fd);
+    //increment_timeout(_fd_req_map, time);
+    //increment_timeout(_fd_res_map, time);
 }
 
 void Socket::erase_request(int fd)
 {
-    Request *tmp = _fd_req_map[fd];
-    delete tmp;
-    this->_fd_req_map.erase(fd);
+    this->_fd_map[fd]->delete_req();
 }
 
 void Socket::erase_response(int fd)
 {
-    Response *tmp = _fd_res_map[fd];
-    delete tmp;
-    this->_fd_res_map.erase(fd);
+    //Response *tmp = _fd_map[fd].get_res();
+    //delete tmp;
+    this->_fd_map[fd]->delete_res();
+}
+
+void Socket::delete_fd_map(int fd)
+{
+    cout << "delete_fd_map No.1 fd=" << fd << ",size=" << endl;
+    printf("map=%zu\n", (this->_fd_map.size()));
+    std::map <int, FDManager*>::iterator ite = this->_fd_map.begin();
+    std::map <int, FDManager*>::iterator end = this->_fd_map.end();
+    for (; ite != end; ite++){
+        cout << "fd=" << ite->first << endl;
+
+    }
+        //cout << "delete_fd_map No.1.5 fd=" << this->_fd_map[i].first << endl;
+
+    //}
+    FDManager* fd_m = this->_fd_map[fd];
+    cout << "delete_fd_map No.2" << endl;
+    fd_m->close_fd();
+    cout << "delete_fd_map No.3" << endl;
+    delete fd_m;
+    cout << "delete_fd_map No.4" << endl;
+    this->_fd_map.erase(fd);
+    cout << "delete_fd_map No.5" << endl;
 }

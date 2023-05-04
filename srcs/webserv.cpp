@@ -192,6 +192,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
 
 void Webserv::communication()
 {
+    Socket *sock;
     size_t size = this->sockets.size();
     struct epoll_event sock_event[size];
     struct epoll_event server_event;
@@ -207,14 +208,33 @@ void Webserv::communication()
     }
     while(1)
     {
-        int timeout = -1;
+        std::vector<int> tmp(10);
+        tmp[0] = 1;
+        tmp[1] = 2;
+        cout << tmp[0] << endl;
+        int time_sec = -1;
         if (this->_fd_sockets.size() > 0){
-            timeout = 5;
+            time_sec = 5;
         }
-        int nfds = epoll_wait(this->epfd, sock_event, size, timeout);
+        time_sec = 5;
+        int nfds = epoll_wait(this->epfd, sock_event, size, time_sec * 10);
         if (nfds == 0) {
             for(size_t i=0; i < this->sockets.size(); i++){
-                this->sockets[i]->increment_timeout(timeout);
+                sock = this->sockets[i];
+                std::vector<int> delete_fd = sock->timeout(time_sec);
+                cout << "timeout end No.1 delete fd size=" << delete_fd.size() << endl;
+                for(size_t i=0; i < delete_fd.size(); i++){
+                    int tmp_fd = delete_fd[i];
+                    cout << "timeout end No.2 fd=" << tmp_fd << endl;
+                    //Socket *sock = this->_fd_sockets[tmp_fd];
+                    cout << "timeout end No.3" << endl;
+                    sock->delete_fd_map(tmp_fd);
+                    cout << "timeout end No.4" << endl;
+                    this->_fd_sockets.erase(tmp_fd);
+                    cout << "timeout end No.5" << endl;
+                //cout << "timeout end No.3" << endl;
+                }
+                cout << "timeout end No.6" << endl;
             }
             continue;
         }
