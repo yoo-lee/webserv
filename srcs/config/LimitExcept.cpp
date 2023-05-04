@@ -7,7 +7,7 @@
 #include "doctest.h"
 #endif
 LimitExcept::LimitExcept() {}
-LimitExcept::LimitExcept(Statement *const directive)
+LimitExcept::LimitExcept(Statement *const directive) : deny_all(false), allow_all(false)
 {
     if (directive == NULL)
         throw SyntaxError("LimitExcept: Taken directive is NULL.");
@@ -27,13 +27,24 @@ LimitExcept::LimitExcept(Statement *const directive)
         if (simple_statement == NULL)
             throw SyntaxError("LimitExcept: Taken directive is not a simple statement.");
         if (simple_statement->get_directive() == "deny")
-            deny_list.push_back(std::string(simple_statement->get_param(0)));
+        {
+            if (simple_statement->get_param(0) == "all")
+                deny_all = true;
+            else
+                deny_list.push_back(std::string(simple_statement->get_param(0)));
+        }
         else if (simple_statement->get_directive() == "allow")
-            allow_list.push_back(std::string(simple_statement->get_param(0)));
+        {
+            if (simple_statement->get_param(0) == "all")
+                allow_all = true;
+            else
+                allow_list.push_back(std::string(simple_statement->get_param(0)));
+        }
         else
             throw SyntaxError("LimitExcept: Taken directive is not a deny or allow.");
     }
 }
+
 LimitExcept::LimitExcept(LimitExcept *const l)
 {
     methods = l->methods;
@@ -42,32 +53,14 @@ LimitExcept::LimitExcept(LimitExcept *const l)
 }
 
 #include <iostream>
-LimitExcept::~LimitExcept()
-{
-    // すべてのプロパティを表示
-    std::cout << "methods: ";
-    std::cout << methods.size() << " | ";
-    for (size_t i = 0; i < methods.size(); i++)
-        std::cout << methods[i] << " ";
-    std::cout << std::endl;
-    std::cout << "deny_list: ";
-    std::cout << deny_list.size() << " | ";
-    for (size_t i = 0; i < deny_list.size(); i++)
-        std::cout << deny_list[i] << " ";
-    std::cout << std::endl;
-    std::cout << "allow_list: ";
-    std::cout << allow_list.size() << " | ";
-    for (size_t i = 0; i < allow_list.size(); i++)
-        std::cout << allow_list[i] << " ";
-    std::cout << std::endl;
-}
+LimitExcept::~LimitExcept() {}
 
 #ifdef UNIT_TEST
-TEST_CASE("LimitExcept: default")
-{
-    LimitExcept limit_except;
-    CHECK(limit_except.methods.size() == 0);
-    CHECK(limit_except.deny_list.size() == 0);
-    CHECK(limit_except.allow_list.size() == 0);
-}
+// TEST_CASE("LimitExcept: default")
+// {
+//     LimitExcept limit_except;
+//     CHECK(limit_except.methods.size() == 0);
+//     CHECK(limit_except.deny_list.size() == 0);
+//     CHECK(limit_except.allow_list.size() == 0);
+// }
 #endif

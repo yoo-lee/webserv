@@ -30,7 +30,7 @@ int Server::get_listen_port(BlockStatement const &server)
     }
 }
 
-Server::Server(Statement *server)
+Server::Server(Statement *server) : is_default_server(false)
 {
     if (server == NULL)
         throw SyntaxError("Server: Taken directive is NULL");
@@ -41,6 +41,9 @@ Server::Server(Statement *server)
     BlockStatement server_directive = *(dynamic_cast<BlockStatement *>(server));
 
     listen = get_listen_port(server_directive);
+    if (server_directive["listen"]->get_params().size() == 2 &&
+        server_directive["listen"]->get_directive() == "default_server")
+        is_default_server = true;
     server_name = get_server_name(server_directive);
     for (size_t i = 0; i < server_directive.get_children("location").size(); i++)
         location.push_back(new Location(server_directive.get_children("location")[i]));
@@ -57,7 +60,6 @@ Server::~Server()
 {
     for (size_t i = 0; i < location.size(); i++)
         delete location[i];
-    location.clear();
 }
 
 #ifdef UNIT_TEST

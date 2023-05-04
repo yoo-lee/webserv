@@ -8,15 +8,19 @@
 class Location
 {
   private:
+    Location();
+
   public:
     std::vector<std::string> urls;
     std::map<std::string, std::vector<std::string> > properties;
     LimitExcept *limit_except;
-    Location();
+    std::string index;
+    bool autoindex;
+    std::map<std::string, std::string> error_page;
     Location(Statement *location_directive);
     Location(Location *location);
     ~Location();
-    std::string operator[](size_t index) const;
+    std::vector<std::string> operator[](std::string index);
 };
 
 #endif /* LOCATION_H */

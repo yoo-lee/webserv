@@ -33,7 +33,6 @@ HTTP::~HTTP()
 {
     for (size_t i = 0; i < server.size(); i++)
         delete server[i];
-    server.clear();
 }
 
 Server const &HTTP::operator[](size_t index)
