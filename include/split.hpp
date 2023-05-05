@@ -11,7 +11,7 @@ class Split
         //Split(int fd, std::string delimiter, std::string end);
         Split(std::string &str, std::string delimiter);
         //~Split();
-        typedef typename std::vector<std::string>::iterator iterator;
+        typedef std::vector<std::string>::iterator iterator;
         iterator begin();
         iterator end();
         size_t size();
