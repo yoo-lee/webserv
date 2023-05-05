@@ -10,11 +10,11 @@ SimpleStatement::SimpleStatement(string directive, vector<string> params) : Stat
 }
 SimpleStatement::SimpleStatement(string directive, string param) : Statement(directive, param) {}
 SimpleStatement::SimpleStatement(string directive) : Statement(directive) {}
-SimpleStatement::SimpleStatement(const SimpleStatement &s) : Statement(s) {}
-SimpleStatement::SimpleStatement(Statement const *s) : Statement(*s) {}
+SimpleStatement::SimpleStatement(const SimpleStatement& s) : Statement(s) {}
+SimpleStatement::SimpleStatement(Statement const* s) : Statement(*s) {}
 SimpleStatement::~SimpleStatement() {}
 
-Statement *SimpleStatement::clone() const
+Statement* SimpleStatement::clone() const
 {
     return new SimpleStatement(*this);
 }

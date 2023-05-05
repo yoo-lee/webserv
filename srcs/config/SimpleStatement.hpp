@@ -18,10 +18,10 @@ class SimpleStatement : public Statement
     SimpleStatement(string directive, vector<string> params);
     SimpleStatement(string directive, string param);
     SimpleStatement(string directive);
-    SimpleStatement(const SimpleStatement &s);
-    SimpleStatement(Statement const *s);
+    SimpleStatement(const SimpleStatement& s);
+    SimpleStatement(Statement const* s);
     ~SimpleStatement();
-    virtual Statement *clone() const;
+    virtual Statement* clone() const;
 };
 
 #endif /* SIMPLESTATEMENT_H */

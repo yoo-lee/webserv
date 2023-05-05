@@ -7,7 +7,7 @@
 class InvalidValue : public std::runtime_error
 {
   public:
-    InvalidValue(const std::string &message);
+    InvalidValue(const std::string& message);
 };
 
 #endif /* INVALID_VALUE_H */

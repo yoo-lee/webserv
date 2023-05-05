@@ -10,7 +10,7 @@ Config::Config(string file_text, bool is_file_text)
     init(file_text);
 }
 
-Config::Config(const char *file_path)
+Config::Config(const char* file_path)
 {
     ifstream ifs(file_path);
     if (!ifs)
@@ -22,7 +22,7 @@ Config::Config(const char *file_path)
 void Config::init(string file_text)
 {
     Parser parser(file_text);
-    vector<Statement const *> root = parser.get_root();
+    vector<Statement const*> root = parser.get_root();
     if (root.size() != 1)
         throw runtime_error("Invalid config file. May have no root or multiple roots.");
     http = new HTTP(root[0]);
