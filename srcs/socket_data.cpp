@@ -1,4 +1,5 @@
 #include "socket_data.hpp"
+#include "Config.hpp"
 #include <iostream>
 
 using std::cout;
@@ -71,4 +72,9 @@ bool SocketData::increment_timeout(int time)
 void SocketData::clear_timeout()
 {
     _timeout_cnt = 0;
+}
+
+void SocketData::set_config(Config const& config)
+{
+    this->_config = &config;
 }
