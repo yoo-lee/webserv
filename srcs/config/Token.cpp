@@ -15,7 +15,7 @@ Token::Token(string str, Token::Type type) : _type(type), _str(str) {}
 
 Token::Token(char c, Token::Type type) : _type(type), _str(string(&c, 1)) {}
 
-Token::Token(const Token &token)
+Token::Token(const Token& token)
 {
     _type = token.get_type();
     _str = token.get_str();
@@ -23,7 +23,7 @@ Token::Token(const Token &token)
 
 string Token::get_typename(Token::Type type)
 {
-    const char *type_name_list[] = {"COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING",  "LCURLY",
+    const char* type_name_list[] = {"COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING",  "LCURLY",
                                     "RCURLY", "INT",  "ID",     "WHITE_SPACE", "COMMENT", "NONE"};
     if (type <= Token::NONE && type >= 0)
         return type_name_list[type];
@@ -40,7 +40,7 @@ string Token::get_str() const
     return _str;
 }
 
-ostream &operator<<(ostream &os, const Token &token)
+ostream& operator<<(ostream& os, const Token& token)
 {
     os << token.get_str() << " : " << Token::get_typename(token.get_type());
     return os;
@@ -48,16 +48,16 @@ ostream &operator<<(ostream &os, const Token &token)
 
 Token::~Token() {}
 
-bool Token::operator==(const Token &rhs) const
+bool Token::operator==(const Token& rhs) const
 {
     return _type == rhs.get_type() && _str == rhs.get_str();
 }
-bool Token::operator!=(const Token &rhs) const
+bool Token::operator!=(const Token& rhs) const
 {
     return !(*this == rhs);
 }
 
-Token &Token::operator=(const Token &rhs)
+Token& Token::operator=(const Token& rhs)
 {
     _type = rhs._type;
     _str = rhs._str;

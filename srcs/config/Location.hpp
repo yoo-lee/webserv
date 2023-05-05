@@ -18,12 +18,12 @@ class Location
   public:
     vector<string> urls;
     map<string, vector<string> > properties;
-    LimitExcept const *limit_except;
+    LimitExcept const* limit_except;
     string index;
     bool autoindex;
     map<string, string> error_page;
-    Location(Statement const *location_directive);
-    Location(Location const *location);
+    Location(Statement const* location_directive);
+    Location(Location const* location);
     ~Location();
     vector<string> operator[](string index);
 };

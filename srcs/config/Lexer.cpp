@@ -14,14 +14,12 @@ using std::cout;
 using std::endl;
 using std::runtime_error;
 
-Lexer::Lexer(string const &text) : _text(text), _state(Token::COMMA), _token_list(vector<Token>())
+Lexer::Lexer(string const& text) : _text(text), _state(Token::COMMA), _token_list(vector<Token>())
 {
-    while (_text.length() != 0 && _state != Token::NONE)
-    {
+    while (_text.length() != 0 && _state != Token::NONE) {
         string buf = "";
         set_state();
-        switch (_state)
-        {
+        switch (_state) {
             char quote;
             Token::Type token_type;
         case Token::DQUOTE:
@@ -61,8 +59,7 @@ Token::Type Lexer::get_state(char c) const
 {
     if (_state == Token::COMMENT && c != '\n')
         return Token::COMMENT;
-    switch (c)
-    {
+    switch (c) {
     case '\n':
     case ' ':
     case '\t':
@@ -84,16 +81,14 @@ Token::Type Lexer::get_state(char c) const
     case '\'':
         return Token::SQUOTE;
     }
-    if (c >= '0' && c <= '9')
-    {
+    if (c >= '0' && c <= '9') {
         if (_state == Token::ID)
             return Token::ID;
         if (_state == Token::ID)
             return Token::ID;
         return Token::INT;
     }
-    if (isprint(c))
-    {
+    if (isprint(c)) {
         if (_state == Token::ID)
             return Token::ID;
         return Token::ID;
@@ -133,7 +128,7 @@ vector<Token> Lexer::get_token_list() const
     return _token_list;
 }
 
-ostream &operator<<(ostream &os, const Lexer &lexer)
+ostream& operator<<(ostream& os, const Lexer& lexer)
 {
     for (size_t i = 0; i < lexer._token_list.size(); i++)
         os << lexer._token_list[i] << endl;

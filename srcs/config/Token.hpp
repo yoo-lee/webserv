@@ -9,8 +9,7 @@ using std::string;
 class Token
 {
   public:
-    enum Type
-    {
+    enum Type {
         COMMA,
         SEMI,
         DQUOTE,
@@ -27,15 +26,15 @@ class Token
     Token();
     Token(string str, Type type);
     Token(char c, Type type);
-    Token(Token const &token);
+    Token(Token const& token);
     ~Token();
     Type get_type() const;
     static string get_typename(Token::Type type);
     string get_str() const;
-    friend ostream &operator<<(ostream &os, Token const &token);
-    bool operator==(Token const &rhs) const;
-    bool operator!=(Token const &rhs) const;
-    Token &operator=(Token const &rhs);
+    friend ostream& operator<<(ostream& os, Token const& token);
+    bool operator==(Token const& rhs) const;
+    bool operator!=(Token const& rhs) const;
+    Token& operator=(Token const& rhs);
 
   private:
     Type _type;

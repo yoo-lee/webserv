@@ -22,10 +22,10 @@ class Lexer
     char consume();
     void tokenize();
     string extract_str(Token::Type quote_type);
-    friend ostream &operator<<(ostream &os, const Lexer &lexer);
+    friend ostream& operator<<(ostream& os, const Lexer& lexer);
 
   public:
-    Lexer(string const &text);
+    Lexer(string const& text);
     ~Lexer();
     vector<Token> get_token_list() const;
 };

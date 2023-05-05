@@ -9,32 +9,28 @@
 
 Location::Location() {}
 
-LimitExcept *get_limit_except(vector<Statement const *> statements)
+LimitExcept* get_limit_except(vector<Statement const*> statements)
 {
-    for (size_t i = 0; i < statements.size(); i++)
-    {
+    for (size_t i = 0; i < statements.size(); i++) {
         if (statements[i]->get_directive() == "limit_except")
             return new LimitExcept(statements[i]);
     }
     return NULL;
 }
 
-string get_index(vector<Statement const *> statements)
+string get_index(vector<Statement const*> statements)
 {
-    for (size_t i = 0; i < statements.size(); i++)
-    {
+    for (size_t i = 0; i < statements.size(); i++) {
         if (statements[i]->get_directive() == "index")
             return statements[i]->get_params()[0];
     }
     return "index.html";
 }
 
-bool get_autoindex(vector<Statement const *> statements)
+bool get_autoindex(vector<Statement const*> statements)
 {
-    for (size_t i = 0; i < statements.size(); i++)
-    {
-        if (statements[i]->get_directive() == "autoindex")
-        {
+    for (size_t i = 0; i < statements.size(); i++) {
+        if (statements[i]->get_directive() == "autoindex") {
             if (statements[i]->get_params()[0] == "on")
                 return true;
             else if (statements[i]->get_params()[0] == "off")
@@ -46,13 +42,11 @@ bool get_autoindex(vector<Statement const *> statements)
     return false;
 }
 
-map<string, string> get_error_pages(vector<Statement const *> statements)
+map<string, string> get_error_pages(vector<Statement const*> statements)
 {
     map<string, string> error_page;
-    for (size_t i = 0; i < statements.size(); i++)
-    {
-        if (statements[i]->get_directive() == "error_page")
-        {
+    for (size_t i = 0; i < statements.size(); i++) {
+        if (statements[i]->get_directive() == "error_page") {
             vector<string> params = statements[i]->get_params();
             if (params.size() != 2)
                 throw SyntaxError("Location: Invalid error_page directive");
@@ -64,34 +58,32 @@ map<string, string> get_error_pages(vector<Statement const *> statements)
     return error_page;
 }
 
-Location::Location(Statement const *directive) : limit_except(0)
+Location::Location(Statement const* directive) : limit_except(0)
 {
     if (directive == NULL)
         throw SyntaxError("Location: Taken directive is NULL");
-    if (!dynamic_cast<BlockStatement const *>(directive))
+    if (!dynamic_cast<BlockStatement const*>(directive))
         throw SyntaxError("Location: Taken directive is not block statement");
     if (directive->get_directive() != "location")
         throw SyntaxError("Location: Taken directive is not location directive");
 
-    BlockStatement const *location_directive = dynamic_cast<BlockStatement const *>(directive);
+    BlockStatement const* location_directive = dynamic_cast<BlockStatement const*>(directive);
 
     urls = location_directive->get_params();
 
-    vector<Statement const *> location_statements = location_directive->get_children();
+    vector<Statement const*> location_statements = location_directive->get_children();
 
     limit_except = get_limit_except(location_statements);
     index = get_index(location_statements);
     autoindex = get_autoindex(location_statements);
     error_page = get_error_pages(location_statements);
 
-    for (size_t i = 0; i < location_statements.size(); i++)
-    {
+    for (size_t i = 0; i < location_statements.size(); i++) {
         if (location_statements[i]->get_directive() != "limit_except" &&
             location_statements[i]->get_directive() != "index" &&
             location_statements[i]->get_directive() != "autoindex" &&
-            location_statements[i]->get_directive() != "error_page")
-        {
-            if (dynamic_cast<BlockStatement const *>(location_statements[i]))
+            location_statements[i]->get_directive() != "error_page") {
+            if (dynamic_cast<BlockStatement const*>(location_statements[i]))
                 throw SyntaxError("Location: Detected Non limit_except BlockStatement. Only limit_except is allowed "
                                   "for block statements in the Location directive.");
             properties[location_statements[i]->get_directive()] = location_statements[i]->get_params();
@@ -99,7 +91,7 @@ Location::Location(Statement const *directive) : limit_except(0)
     }
 }
 
-Location::Location(Location const *location)
+Location::Location(Location const* location)
     : urls(location->urls),
       properties(location->properties),
       limit_except(NULL),
@@ -129,10 +121,10 @@ TEST_CASE("Location: constructor")
     params.push_back("/hello");
     params.push_back("/world");
 
-    vector<Statement const *> statements;
+    vector<Statement const*> statements;
     statements.push_back(new SimpleStatement("root", "/"));
     statements.push_back(new SimpleStatement("index", "index.html"));
-    BlockStatement const *location_directive = new BlockStatement("location", params, statements);
+    BlockStatement const* location_directive = new BlockStatement("location", params, statements);
     Location location(location_directive);
     CHECK(location.urls[0] == "/hello");
     CHECK(location.urls[1] == "/world");
@@ -148,11 +140,11 @@ TEST_CASE("Location: copy constructor")
     params.push_back("/hello");
     params.push_back("/world");
 
-    vector<Statement const *> statements;
+    vector<Statement const*> statements;
     statements.push_back(new SimpleStatement("root", "/"));
     statements.push_back(new SimpleStatement("index", "index.html"));
-    BlockStatement const *location_directive = new BlockStatement("location", params, statements);
-    Location *location = new Location(location_directive);
+    BlockStatement const* location_directive = new BlockStatement("location", params, statements);
+    Location* location = new Location(location_directive);
     Location location2(location);
     CHECK(location2.urls[0] == "/hello");
     CHECK(location2.urls[1] == "/world");
