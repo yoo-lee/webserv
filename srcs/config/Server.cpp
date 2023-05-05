@@ -51,9 +51,6 @@ Server::Server(Statement const *server) : is_default_server(false)
     BlockStatement server_directive = *(dynamic_cast<BlockStatement const *>(server));
 
     set_listen_port(server_directive);
-    if (server_directive["listen"]->get_params().size() == 2 &&
-        server_directive["listen"]->get_directive() == "default_server")
-        is_default_server = true;
     set_server_name(server_directive);
     for (size_t i = 0; i < server_directive.get_children("location").size(); i++)
         location.push_back(new Location(server_directive.get_children("location")[i]));
