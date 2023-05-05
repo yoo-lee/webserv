@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #define NEVENTS 16
 using std::cout;
@@ -116,10 +117,9 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             return ;
         }
 
-
         // Body Test
         //cout << "Body(only string):" << endl;
-        char buf[1024];
+        char buf[1600];
         int size = req->read_buf(buf);
         size_t file_size= 0;
         int cnt = 0;
@@ -127,11 +127,10 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             cnt++;
             req->add_loaded_body_size(size);
             file_size += size;
-            //cout << "while No.1 body size:" << size << endl;
             //for(int i=0;i<size;i++){
                 //cout << "body [" << i << "]:" << buf[i] << endl;
             //}
-            cout << buf << endl;
+            //cout << buf << endl;
             size = req->read_buf(buf);
         }
 
@@ -143,53 +142,65 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             //make error Response;
             return;
         }
+
+        //bool read_all = true;
+        if (req->have_data_in_body() == false)
+        {
+            return ;
+        }
+
+        Response *res;
         if (req->is_cgi())
         {
+            res = new Response(*req);
             //cig processing
         }
         else
         {
+            res = new Response(*req);
             //server processing except cgi
         }
+        socket->set_response(fd, res);
+
+        //socket
 
 
-        bool read_all = true;
-        if (read_all == false)
+        if(req->get_content_length() > req->get_loaded_body_size()){
+            cout << "connected_communication not change OUT" << endl;
             return ;
-
-        //cout << "req->get_content_length()=" << req->get_content_length() << endl;
-        //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
-        if(req->get_content_length() > req->get_loaded_body_size())
-            return ;
+        }
+        socket->erase_request(fd);
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
-            cout << "error;connected_communication No.2" << endl;
+            cout << strerror(errno) << endl;
         }
     }else if (event->events & EPOLLOUT){
-        //std::string r_data = "HTTP/1.1 200 OK\r\ntext/plain;charset=UTF-8\r\nContent-Length:3\n\ntest5\r\n";
-        std::string r_data = "HTTP/1.1 200 OK\n\
-Date: Sun, 23 Apr 2023 13:14:41 GMT\n\
-Server: Apache/2.4.52 (Ubuntu)\n\
-Last-Modified: Sun, 23 Apr 2023 13:08:28 GMT\n\
-ETag: \"5-5fa00961c5691\"\n\
-Accept-Ranges: bytes\n\
-Content-Type: text/html\n\
-Content-Length: 4\n\
-\n\
-test\
-";
-        socket->send(fd, r_data);
-
+        bool write_all = socket->send(fd);
         //todo
-        bool write_all = true;
         if (write_all == false)
             return ;
 
-        event->events = EPOLLIN;
+        //sock_fds.erase(fd);
+        this->_fd_sockets.erase(fd);
         if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
-            cout << "error;connected_communication No.3" << endl;
+            cout << "connected_communication not change IN" << endl;
         }
+        socket->erase_response(fd);
         //close(fd);
+    }
+}
+
+void Webserv::timeout(int time_sec)
+{
+    Socket *sock;
+    for(size_t i=0; i < this->sockets.size(); i++){
+        sock = this->sockets[i];
+        std::vector<int> delete_fd = sock->timeout(time_sec);
+        for(size_t i=0; i < delete_fd.size(); i++){
+            int tmp_fd = delete_fd[i];
+            sock->delete_fd_map(tmp_fd);
+            this->_fd_sockets.erase(tmp_fd);
+        }
     }
 }
 
@@ -202,16 +213,19 @@ void Webserv::communication()
     memset(&(sock_event[0]), 0, sizeof(struct epoll_event) * size);
     memset(&server_event, 0, sizeof(struct epoll_event));
 
-    std::vector<int> sock_fds;
-    std::map<int, Socket*> map_socks;
 
     if(this->init_epoll() == false){
         return ;
     }
     while(1)
     {
-        int nfds = epoll_wait(this->epfd, sock_event, size, -1);
+        int time_msec = -1;
+        if (this->_fd_sockets.size() > 0){
+            time_msec = 5;
+        }
+        int nfds = epoll_wait(this->epfd, sock_event, size, time_msec * 1000);
         if (nfds == 0) {
+            this->timeout(time_msec);
             continue;
         }
         else if (nfds < 0)
@@ -219,33 +233,28 @@ void Webserv::communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return ;
         }
-		
         for (int i = 0; i < nfds; i++)
         {
-            std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
-            if (tmp_fd != sock_fds.end())
+            std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
+            if (tmp_fd != this->_fd_sockets.end())
             {
-                Socket *socket = map_socks.at(*tmp_fd);
-                connected_communication(*tmp_fd, &(sock_event[i]), socket);
+                Socket *socket = tmp_fd->second;
+                connected_communication(tmp_fd->first, &(sock_event[i]), socket);
                 continue;
             }
             Socket *socket = find_listen_socket(sock_event[i].data.fd);
             if (socket)
             {
                 int fd = socket->accept_request();
-                sock_fds.push_back(fd);
                 memset(&server_event, 0, sizeof(server_event));
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
-                map_socks.insert(std::make_pair(fd, socket));
+                this->_fd_sockets.insert(std::make_pair(fd, socket));
                 if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
                 {
-                    cout << "epoll_ctl error No.1" << endl;
                     continue;
                 }
-                //close(fd);
-			}
-			//send()
+            }
         }
     }
 }

@@ -80,7 +80,7 @@ Socket::Socket(std::string port_) : sock_fd(0) ,port(port_)
 
 Socket::~Socket()
 {
-    delete this->req;
+    //delete this->req;
 }
 Socket::Socket(const Socket &sock_fdet) : sock_fd(sock_fdet.sock_fd), port(sock_fdet.port)
 {
@@ -120,71 +120,96 @@ int Socket::accept_request()
         cout << "Error accept():" << strerror(errno) << endl;
         //return ();
     }
-    Request *req = NULL;
-    this->_fd_req_map.insert(std::make_pair(fd, req));
+
+    FDManager *fd_m = new FDManager(fd);
+    this->_fd_map.insert(std::make_pair(fd, fd_m));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, cur_flags);
     return (fd);
 }
 
-/*
 Request *Socket::recv(int fd)
 {
-    struct sockaddr_in client;
-    socklen_t len = sizeof(client);
-
-    cout << "socket recv No.1 fd=" << this->sock_fd << endl;
-    this->fd= accept(fd,(struct sockaddr *)&client, &len);
-    cout << "socket recv No.2 fd=" << this->sock_fd << endl;
-    if (this->fd < 0)
-    {
-        cout << "Error accept():" << strerror(errno) << endl;
-        return (NULL);
-    }
-    if (this->req != NULL)
-        delete this->req;
-    this->req = new Request(this->fd);
-    return (this->req);
-}
-*/
-
-Request *Socket::recv(int fd)
-{
-    Request *req = this->_fd_req_map[fd];
+    Request *req = this->_fd_map[fd]->get_req();
     if (req != NULL)
         return req;
     try{
-        this->req = new Request(fd);
-        this->_fd_req_map[fd] = this->req;
+        req = new Request(fd);
+        this->_fd_map[fd]->insert(req);
     }catch(std::exception &e){
-        this->req = NULL;
+        req = NULL;
+        this->_fd_map[fd]->insert(req);
         cout << e.what() << endl; 
-        //std::string r_data = "HTTP/1.1 400 NG\n";
-        //this->send(r_data);
-        //return (NULL);
     }
-    return (this->req);
+    return (req);
 }
 
-/*
-bool Socket::send_err(std::string& data)
+bool Socket::send(int fd)
 {
 
+    Response *res = get_response(fd);
     char last = '\0';
-    write(this->fd, data.c_str(), data.size());
-    write(this->fd, &last, 1);
-    return (true);
-}
-*/
-
-
-
-bool Socket::send(int fd, std::string& data)
-{
-
-    char last = '\0';
-    write(fd, data.c_str(), data.size());
+    write(fd, res->getRes().c_str(), res->getRes().size());
     write(fd, &last, 1);
     return (true);
+}
+
+void Socket::set_response(int fd, Response *res)
+{
+    this->_fd_map[fd]->insert(res);
+}
+
+Response *Socket::get_response(int fd)
+{
+    return (this->_fd_map[fd]->get_res());
+}
+
+std::vector<int> Socket::timeout(int time)
+{
+    std::map<int, FDManager*>::iterator iter = _fd_map.begin(); 
+    std::map<int, FDManager*>::iterator end = _fd_map.end();
+    std::vector<int> delete_fd;
+
+    FDManager *fd_m;
+    int fd;
+    bool timeout;
+    for(; iter != end; iter++)
+    {
+        fd = iter->first;
+        fd_m = iter->second;
+        if (fd_m->get_req()){
+            timeout = increment_timeout(*fd_m->get_req(), time);
+        }else if (fd_m->get_res()){
+            timeout = increment_timeout(*fd_m->get_res(), time);
+        }else{
+            timeout = increment_timeout(*fd_m, time);
+        }
+        if (timeout){
+            delete_fd.push_back(fd);
+        }
+    }
+    return (delete_fd);
+    //increment_timeout(_fd_req_map, time);
+    //increment_timeout(_fd_res_map, time);
+}
+
+void Socket::erase_request(int fd)
+{
+    this->_fd_map[fd]->delete_req();
+}
+
+void Socket::erase_response(int fd)
+{
+    //Response *tmp = _fd_map[fd].get_res();
+    //delete tmp;
+    this->_fd_map[fd]->delete_res();
+}
+
+void Socket::delete_fd_map(int fd)
+{
+    FDManager* fd_m = this->_fd_map[fd];
+    fd_m->close_fd();
+    delete fd_m;
+    this->_fd_map.erase(fd);
 }

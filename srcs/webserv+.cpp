@@ -119,7 +119,6 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         // Test (will remove)
         req->print_request();
         // Body Test
-        //cout << "Body(only string):" << endl;
         char buf[1024];
         int size = req->read_buf(buf);
         size_t file_size= 0;

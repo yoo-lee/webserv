@@ -53,7 +53,7 @@ void Response::buildResponse()
 
     //tmp = Utility::to_string(_body.size());
     // Set response headers
-    //_res += "Content-Type: text/html\r\n";
+    _res += "Content-Type: text/html\r\n";
     _res += "Content-Length: " + Utility::to_string(_body.size()) + "\r\n";
 
 

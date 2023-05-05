@@ -15,7 +15,7 @@ class GetNextLine{
         size_t size();
         int get_extra_buf(char *buf);
     private:
-        const static int BUF_MAX = 1024;
+        const static int BUF_MAX = 1600;
         char *_buf_body_pos;
         ssize_t _buf_body_size;
         char _buf[BUF_MAX];

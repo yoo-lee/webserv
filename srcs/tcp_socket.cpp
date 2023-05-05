@@ -53,8 +53,6 @@ TCPSocket::~TCPSocket()
 }
 TCPSocket::TCPSocket(const TCPSocket &socket) : Socket(socket)
 {
-    cout << "TCP const No.3" << endl;
-    
     init();
 }
 TCPSocket& TCPSocket::operator=(const TCPSocket &sock_fdet)

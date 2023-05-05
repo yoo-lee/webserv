@@ -25,6 +25,9 @@ class Webserv
         std::vector<Socket*> sockets;
         Socket* find_listen_socket(int socket_fd);
         const static unsigned int BODY_MAX = INT_MAX;
+        std::map<int, Socket*> _fd_sockets;
+        void timeout(int time_sec);
+        //std::map <int, SocketData*> _fd_sockets;
         //struct epoll_event ev;
 };
 #endif
