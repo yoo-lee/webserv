@@ -31,6 +31,7 @@ class Request : public SocketData
     bool analyze();
     bool have_data_in_body();
     bool is_cgi();
+    bool is_cgi(string path) const;
     // static std::string identify_method(METHOD method);
     // static METHOD identify_method(std::string method);
     // bool increment_timeout(int time);

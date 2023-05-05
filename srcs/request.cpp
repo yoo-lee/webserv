@@ -215,3 +215,8 @@ bool Request::is_cgi()
 {
     return (false);
 }
+
+bool Request::is_cgi(string path) const
+{
+    return true;
+}
