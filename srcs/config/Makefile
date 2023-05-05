@@ -23,7 +23,7 @@ OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${SRCS:.cpp=.o}))
 CXX = c++
 CXXFLAGS = -Werror -Wall -Wextra -std=c++98 -g3
 
-complile_test: cp
+compile_test: cp
 cp: objs $(OBJS)
 	$(CXX) $(OBJS) main.cpp  $(CXXFLAGS) -fsanitize=address -o test
 
