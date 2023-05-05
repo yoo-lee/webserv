@@ -18,16 +18,23 @@ UNIT_TEST_SRCS = AST.cpp \
 				 LimitExcept.cpp
 
 SRCS = ${UNIT_TEST_SRCS}
-UNIT_OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${UNIT_TEST_SRCS:.cpp=.o}))
+UNIT_OBJS = $(addprefix $(OBJ_DIR)/unit_,$(notdir ${UNIT_TEST_SRCS:.cpp=.o}))
 OBJS = $(addprefix $(OBJ_DIR)/,$(notdir ${SRCS:.cpp=.o}))
 CXX = c++
-CXXFLAGS = -Wall -Wextra -std=c++98 -g3
+CXXFLAGS = -Werror -Wall -Wextra -std=c++98 -g3
+
+complile_test: cp
+cp: objs $(OBJS)
+	$(CXX) $(OBJS) main.cpp  $(CXXFLAGS) -fsanitize=address -o test
+
+$(OBJ_DIR)/%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 utest: objs $(UNIT_OBJS)
 	$(CXX) $(UNIT_OBJS) -std=c++11 -fsanitize=address -o test
 
-$(OBJ_DIR)/%.o: %.cpp
-	$(CXX) -std=c++11 -g3 -D UNIT_TEST -c $< -o $@
+$(OBJ_DIR)/unit_%.o: %.cpp
+	$(CXX) -std=c++11 -D UNIT_TEST -c $< -o $@
 
 run:
 	./test
