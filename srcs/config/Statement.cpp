@@ -18,11 +18,11 @@ Statement::Statement(string directive, string param) : _directive(directive)
 
 Statement::Statement(string directive) : _directive(directive) {}
 
-Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params) {}
+Statement::Statement(const Statement& s) : _directive(s._directive), _params(s._params) {}
 
 Statement::~Statement() {}
 
-void Statement::print(ostream &os, string indent) const
+void Statement::print(ostream& os, string indent) const
 {
     os << indent << "directive: '" << _directive << "' , params: [ ";
     for (size_t i = 0; i < _params.size(); i++)
@@ -30,13 +30,13 @@ void Statement::print(ostream &os, string indent) const
     os << "]";
 }
 
-ostream &operator<<(ostream &os, const Statement &statement)
+ostream& operator<<(ostream& os, const Statement& statement)
 {
     return os;
     statement.print(os, "");
 }
 
-bool Statement::operator==(const Statement &other) const
+bool Statement::operator==(const Statement& other) const
 {
     if (_directive != other._directive)
         return false;
@@ -48,7 +48,7 @@ bool Statement::operator==(const Statement &other) const
     return true;
 }
 
-bool Statement::operator!=(const Statement &other) const
+bool Statement::operator!=(const Statement& other) const
 {
     return !(*this == other);
 }
