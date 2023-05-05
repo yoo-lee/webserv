@@ -1,10 +1,10 @@
 
 #include "webserv.hpp"
-//#include "config.hpp"
 #include <string>
 #include <iostream>
 #include "split.hpp"
-
+#include <stdlib.h>
+#include "Config.hpp"
 
 using std::string;
 using std::vector;
@@ -23,29 +23,20 @@ void server(Webserv& webserv)
     }
 }
 
-int main(int argc, char const* argv[]) {
+int main(int argc, char const* argv[]) 
+{
 
     (void)argc;
     (void)argv;
-    /*
     if (argc != 2) {
         std::cout << "Error: Specify config file" << std::endl;
         return (EXIT_FAILURE);
     }
-    */
     // config読み込み
-    //Config config(std::string(argv[1]));
+    Config config(argv[1]);
 
-    //todo
-    std::vector<std::string> ports;
-
-    ports.push_back("11111");
-    ports.push_back("11112");
-    ports.push_back("11113");
-    ports.push_back("11114");
-    ports.push_back("11115");
     // ソケットの初期設定
-    Webserv webserv = Webserv(ports);
+    Webserv webserv = Webserv(config);
     // イベントループ開始
     while(1)
     {

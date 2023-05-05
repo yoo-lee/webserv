@@ -1,0 +1,4 @@
+.antlr/
+test
+*.o
+objs/

@@ -3,12 +3,14 @@
 #include <vector>
 #include <climits>
 #include "tcp_socket.hpp"
+#include "Config.hpp"
 
 class Webserv
 {
     public:
         Webserv();
         Webserv(const std::vector<std::string> ports);
+        Webserv(Config& config);
         //Webserv(size_t size);
         //Webserv(const Webserv &socket);
         Webserv(const Webserv &sockets);
@@ -16,6 +18,7 @@ class Webserv
         ~Webserv();
         void communication();
         bool change_epoll_config_to_write(int fd, int event);
+        const Config& get_config();
     private:
         int epfd;
         void init_socket(std::vector<std::string>);
@@ -27,6 +30,7 @@ class Webserv
         const static unsigned int BODY_MAX = INT_MAX;
         std::map<int, Socket*> _fd_sockets;
         void timeout(int time_sec);
+        const Config& _config;
         //std::map <int, SocketData*> _fd_sockets;
         //struct epoll_event ev;
 };

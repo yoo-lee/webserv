@@ -67,7 +67,17 @@
         "thread": "cpp",
         "complex": "cpp",
         "semaphore": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "cassert": "cpp",
+        "cerrno": "cpp",
+        "ciso646": "cpp",
+        "cstdbool": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     },
     "cSpell.words": [
         "DQUOTE",
@@ -79,7 +89,7 @@
         "editor.defaultFormatter": "ms-vscode.cpptools",
         "editor.formatOnSave": true
     },
-    "C_Cpp.clang_format_style": "{ BasedOnStyle: Microsoft, IndentWidth: 4, ColumnLimit: 120, PackConstructorInitializers: CurrentLine, AlwaysBreakTemplateDeclarations: Yes, SplitEmptyFunction: true,AllowShortFunctionsOnASingleLine: Empty}",
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: Microsoft, IndentWidth: 4, ColumnLimit: 120, PackConstructorInitializers: CurrentLine, AlwaysBreakTemplateDeclarations: Yes, SplitEmptyFunction: true,AllowShortFunctionsOnASingleLine: Empty, Standard: Cpp03}",
     "C_Cpp.default.cppStandard": "c++98",
-    "editor.definitionLinkOpensInPeek": true
+    "C_Cpp.dimInactiveRegions": false,
 }

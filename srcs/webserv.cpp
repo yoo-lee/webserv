@@ -3,6 +3,7 @@
 #include "tcp_socket.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include "utility.hpp"
 
 #include <sys/epoll.h>
 #include <iostream>
@@ -19,31 +20,60 @@ using std::cout;
 using std::endl;
 using std::string;
 
+/*
 Webserv::Webserv() : epfd(0)
 {
     std::vector<std::string> vec;
     vec.push_back("80");
     init_socket(vec);
+    _config = Config();
 }
 
-Webserv::Webserv(const std::vector<std::string> ports)
+Webserv::Webserv(const std::vector<std::string> ports)epfd(0)
 {
     init_socket(ports);
+}
+*/
+
+Webserv::Webserv(Config& config) : epfd(0), _config(config)
+{
+    std::vector<std::string> test;
+    size_t server_cnt = config.http->server.size();
+    cout << "server_cnt" << server_cnt << endl;
+    for(size_t i=0; i<server_cnt; i++){
+        int port = config.http->server[i]->listen;
+        cout << port << endl;
+        //std::string port = Utility::to_string(config.http->server[i]->listen);
+        test.push_back(Utility::to_string(port));
+    }
+    
+    test.push_back("11111");
+    test.push_back("11112");
+    test.push_back("11113");
+    init_socket(test);
 }
 
 Webserv::~Webserv()
 {
     close_all();
 }
+/*
 Webserv::Webserv(const Webserv &webserv) : epfd(0)
 {
     (void)webserv;
 }
+*/
 Webserv& Webserv::operator=(const Webserv &socket)
 {
     if (&socket == this)
         return (*this);
     return (*this);
+}
+
+
+const Config& Webserv::get_config()
+{
+    return (this->_config);
 }
 
 void Webserv::init_socket(std::vector<std::string> vec)
