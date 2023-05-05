@@ -35,6 +35,9 @@ class SocketData
   protected:
     const static int _timeout = 200;
     int _timeout_cnt;
+
+    Config const* _config;
+    void set_config(Config const& config);
 };
 
 #endif
