@@ -79,7 +79,7 @@ TEST_CASE("Server: constructor")
     Parser parser("server { listen 80; server_name localhost; }");
     vector<Statement const *> server_directive = parser.get_root();
     Server server(server_directive[0]);
-    CHECK(server.listen == 80);
+    CHECK(server.listen == "80");
     CHECK(server.server_name == "localhost");
 }
 
@@ -88,7 +88,7 @@ TEST_CASE("Server: constructor")
     Parser parser("server { listen 80; server_name localhost; location / { root /; } }");
     vector<Statement const *> server_directive = parser.get_root();
     Server server(server_directive[0]);
-    CHECK(server.listen == 80);
+    CHECK(server.listen == "80");
     CHECK(server.server_name == "localhost");
     CHECK(server.location.size() == 1);
     CHECK(server.location[0]->urls.size() == 1);
