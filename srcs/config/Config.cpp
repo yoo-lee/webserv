@@ -91,4 +91,9 @@ TEST_CASE("Config: Total test")
     CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
 }
 
+TEST_CASE("Config: empty")
+{
+    CHECK_THROWS_AS(Config config("", true), exception);
+}
+
 #endif /* UNIT_TEST */
