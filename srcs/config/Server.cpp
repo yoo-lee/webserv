@@ -6,25 +6,33 @@
 
 using std::exception;
 
-string Server::get_server_name(BlockStatement const &server)
+void Server::set_server_name(BlockStatement const &server)
 {
     try
     {
         Statement const *server_name_directive = server["server_name"];
-        return server_name_directive->get_param(0);
+        server_name = server_name_directive->get_param(0);
     }
     catch (const exception &e)
     {
-        return "";
+        server_name = "";
     }
 }
 
-int Server::get_listen_port(BlockStatement const &server)
+void Server::set_listen_port(BlockStatement const &server)
 {
     try
     {
         Statement const *listen_directive = server["listen"];
-        return my_stoi(listen_directive->get_param(0));
+        try
+        {
+            if (listen_directive->get_param(1) == "default_server")
+                is_default_server = true;
+        }
+        catch (const exception &e)
+        {
+        }
+        listen = listen_directive->get_param(0);
     }
     catch (const exception &e)
     {
@@ -42,11 +50,11 @@ Server::Server(Statement const *server) : is_default_server(false)
         throw SyntaxError("Server: Taken directive is not server directive");
     BlockStatement server_directive = *(dynamic_cast<BlockStatement const *>(server));
 
-    listen = get_listen_port(server_directive);
+    set_listen_port(server_directive);
     if (server_directive["listen"]->get_params().size() == 2 &&
         server_directive["listen"]->get_directive() == "default_server")
         is_default_server = true;
-    server_name = get_server_name(server_directive);
+    set_server_name(server_directive);
     for (size_t i = 0; i < server_directive.get_children("location").size(); i++)
         location.push_back(new Location(server_directive.get_children("location")[i]));
 }
