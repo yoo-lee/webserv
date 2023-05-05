@@ -13,11 +13,12 @@ using std::vector;
 class Server
 {
   private:
-    static string get_server_name(BlockStatement const &server);
-    static int get_listen_port(BlockStatement const &server);
+    void set_server_name(BlockStatement const &server);
+    void set_listen_port(BlockStatement const &server);
+    void validate_listen() const;
 
   public:
-    int listen;
+    std::string listen;
     bool is_default_server;
     string server_name;
     vector<Location *> location;

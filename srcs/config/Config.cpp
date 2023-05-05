@@ -40,7 +40,7 @@ TEST_CASE("Config: constructor test")
 {
     Config config("http { client_max_body_size 90;server { listen 80;} }", true);
     CHECK(config.http->client_max_body_size == 90);
-    CHECK(config.http->server[0]->listen == 80);
+    CHECK(config.http->server[0]->listen == "80");
     CHECK(config.http->server[0]->server_name == "");
     CHECK(config.http->server[0]->location.size() == 0);
 }
@@ -76,7 +76,7 @@ TEST_CASE("Config: Total test")
 {
     Config config("./config/subject.nginx.conf");
     CHECK(config.http->client_max_body_size == 10);
-    CHECK(config.http->server[0]->listen == 80);
+    CHECK(config.http->server[0]->listen == "80");
     CHECK(config.http->server[0]->server_name == "example.com");
     CHECK(config.http->server[0]->location.size() == 3);
     CHECK(config.http->server[0]->location[0]->urls[0] == "/");
