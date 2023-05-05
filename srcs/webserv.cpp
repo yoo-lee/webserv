@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #define NEVENTS 16
 using std::cout;
@@ -118,7 +119,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
 
         // Body Test
         //cout << "Body(only string):" << endl;
-        char buf[1024];
+        char buf[1600];
         int size = req->read_buf(buf);
         size_t file_size= 0;
         int cnt = 0;
@@ -126,7 +127,6 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
             cnt++;
             req->add_loaded_body_size(size);
             file_size += size;
-            //cout << "while No.1 body size:" << size << endl;
             //for(int i=0;i<size;i++){
                 //cout << "body [" << i << "]:" << buf[i] << endl;
             //}
@@ -165,14 +165,14 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         //socket
 
 
-        //cout << "req->get_content_length()=" << req->get_content_length() << endl;
-        //cout << "req->get_loaded_body_size()=" << req->get_loaded_body_size() << endl;
-        if(req->get_content_length() > req->get_loaded_body_size())
+        if(req->get_content_length() > req->get_loaded_body_size()){
+            cout << "connected_communication not change OUT" << endl;
             return ;
+        }
         socket->erase_request(fd);
         event->events = EPOLLOUT;
         if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
-            cout << "error;connected_communication No.2" << endl;
+            cout << strerror(errno) << endl;
         }
     }else if (event->events & EPOLLOUT){
         bool write_all = socket->send(fd);
@@ -183,16 +183,29 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         //sock_fds.erase(fd);
         this->_fd_sockets.erase(fd);
         if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
-            cout << "error;connected_communication No.3" << endl;
+            cout << "connected_communication not change IN" << endl;
         }
         socket->erase_response(fd);
         //close(fd);
     }
 }
 
-void Webserv::communication()
+void Webserv::timeout(int time_sec)
 {
     Socket *sock;
+    for(size_t i=0; i < this->sockets.size(); i++){
+        sock = this->sockets[i];
+        std::vector<int> delete_fd = sock->timeout(time_sec);
+        for(size_t i=0; i < delete_fd.size(); i++){
+            int tmp_fd = delete_fd[i];
+            sock->delete_fd_map(tmp_fd);
+            this->_fd_sockets.erase(tmp_fd);
+        }
+    }
+}
+
+void Webserv::communication()
+{
     size_t size = this->sockets.size();
     struct epoll_event sock_event[size];
     struct epoll_event server_event;
@@ -200,42 +213,19 @@ void Webserv::communication()
     memset(&(sock_event[0]), 0, sizeof(struct epoll_event) * size);
     memset(&server_event, 0, sizeof(struct epoll_event));
 
-    //std::vector<int> sock_fds;
-    //std::map<int, Socket*> this->_fd_sockets;
 
     if(this->init_epoll() == false){
         return ;
     }
     while(1)
     {
-        std::vector<int> tmp(10);
-        tmp[0] = 1;
-        tmp[1] = 2;
-        cout << tmp[0] << endl;
-        int time_sec = -1;
+        int time_msec = -1;
         if (this->_fd_sockets.size() > 0){
-            time_sec = 5;
+            time_msec = 5;
         }
-        time_sec = 5;
-        int nfds = epoll_wait(this->epfd, sock_event, size, time_sec * 10);
+        int nfds = epoll_wait(this->epfd, sock_event, size, time_msec * 1000);
         if (nfds == 0) {
-            for(size_t i=0; i < this->sockets.size(); i++){
-                sock = this->sockets[i];
-                std::vector<int> delete_fd = sock->timeout(time_sec);
-                cout << "timeout end No.1 delete fd size=" << delete_fd.size() << endl;
-                for(size_t i=0; i < delete_fd.size(); i++){
-                    int tmp_fd = delete_fd[i];
-                    cout << "timeout end No.2 fd=" << tmp_fd << endl;
-                    //Socket *sock = this->_fd_sockets[tmp_fd];
-                    cout << "timeout end No.3" << endl;
-                    sock->delete_fd_map(tmp_fd);
-                    cout << "timeout end No.4" << endl;
-                    this->_fd_sockets.erase(tmp_fd);
-                    cout << "timeout end No.5" << endl;
-                //cout << "timeout end No.3" << endl;
-                }
-                cout << "timeout end No.6" << endl;
-            }
+            this->timeout(time_msec);
             continue;
         }
         else if (nfds < 0)
@@ -256,7 +246,6 @@ void Webserv::communication()
             if (socket)
             {
                 int fd = socket->accept_request();
-                //sock_fds.push_back(fd);
                 memset(&server_event, 0, sizeof(server_event));
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
@@ -265,7 +254,6 @@ void Webserv::communication()
                 {
                     continue;
                 }
-                //close(fd);
             }
         }
     }
