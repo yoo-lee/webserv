@@ -18,19 +18,19 @@ class Statement
     Statement(string directive, vector<string> params);
     Statement(string directive, string param);
     Statement(string directive);
-    Statement(const Statement &statement);
+    Statement(const Statement& statement);
     virtual ~Statement() = 0;
 
-    virtual void print(ostream &os, string indent) const;
-    virtual bool operator==(const Statement &other) const;
-    virtual bool operator!=(const Statement &other) const;
+    virtual void print(ostream& os, string indent) const;
+    virtual bool operator==(const Statement& other) const;
+    virtual bool operator!=(const Statement& other) const;
 
     string get_directive() const;
     vector<string> get_params() const;
     string get_param(size_t index) const;
 
-    friend ostream &operator<<(ostream &os, const Statement &statement);
-    virtual Statement *clone() const = 0;
+    friend ostream& operator<<(ostream& os, const Statement& statement);
+    virtual Statement* clone() const = 0;
 };
 
 #endif /* STATEMENT_H */

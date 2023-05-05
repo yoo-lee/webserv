@@ -44,26 +44,26 @@ class AST
 {
   private:
     vector<Token> _tokens;
-    vector<Statement const *> _root;
+    vector<Statement const*> _root;
 
-    vector<Statement *> program();
-    Statement const *statement();
-    Statement const *try_simple_statement(stack<Token> &buf);
-    BlockStatement const *try_block_statement(stack<Token> &buf);
-    string directive(stack<Token> &buf);
-    vector<string> parameters(stack<Token> &buf);
-    string parameter(stack<Token> &buf);
-    string consume(Token::Type type, stack<Token> &buf);
-    void backtrace(stack<Token> &buf);
-    void decide(stack<Token> &buf);
+    vector<Statement*> program();
+    Statement const* statement();
+    Statement const* try_simple_statement(stack<Token>& buf);
+    BlockStatement const* try_block_statement(stack<Token>& buf);
+    string directive(stack<Token>& buf);
+    vector<string> parameters(stack<Token>& buf);
+    string parameter(stack<Token>& buf);
+    string consume(Token::Type type, stack<Token>& buf);
+    void backtrace(stack<Token>& buf);
+    void decide(stack<Token>& buf);
 
   public:
     AST();
-    AST(const vector<Token> &tokens);
+    AST(const vector<Token>& tokens);
     ~AST();
     void print_tree();
-    vector<Statement const *> const &get_root() const;
-    Statement const *operator[](string directive) const;
+    vector<Statement const*> const& get_root() const;
+    Statement const* operator[](string directive) const;
 };
 
 #endif /* AST_H */

@@ -13,19 +13,19 @@ using std::vector;
 class Server
 {
   private:
-    void set_server_name(BlockStatement const &server);
-    void set_listen_port(BlockStatement const &server);
+    void set_server_name(BlockStatement const& server);
+    void set_listen_port(BlockStatement const& server);
     void validate_listen() const;
 
   public:
     std::string listen;
     bool is_default_server;
     string server_name;
-    vector<Location *> location;
-    Location const &operator[](size_t index) const;
+    vector<Location*> location;
+    Location const& operator[](size_t index) const;
 
-    Server(Statement const *server);
-    Server(Server const *server);
+    Server(Statement const* server);
+    Server(Server const* server);
     ~Server();
 };
 

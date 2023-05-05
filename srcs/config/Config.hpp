@@ -15,9 +15,9 @@ class Config
 {
   private:
   public:
-    HTTP const *http;
+    HTTP const* http;
     Config(string file_text, bool is_file_text);
-    Config(const char *file_path);
+    Config(const char* file_path);
     void init(string file_text);
     ~Config();
 };

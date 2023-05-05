@@ -19,6 +19,6 @@ class Parser
     Parser(string file_text);
     ~Parser();
     void print();
-    vector<Statement const *> const &get_root();
+    vector<Statement const*> const& get_root();
 };
 #endif /* PARSER_H */
