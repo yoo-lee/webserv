@@ -6,6 +6,7 @@ using std::runtime_error;
 
 Config::Config(string file_text, bool is_file_text)
 {
+    (void)is_file_text;
     init(file_text);
 }
 
