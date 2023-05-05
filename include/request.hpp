@@ -1,17 +1,20 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+#include "Config.hpp"
 #include "get_next_line.hpp"
 #include "socket_data.hpp"
 #include "split.hpp"
 #include <map>
 #include <string>
 
+using std::string;
+
 class Request : public SocketData
 {
   public:
     Request();
-    Request(int fd);
+    Request(int fd, Config const& config);
     ~Request();
     const std::string& get_path();
     const std::string& get_uri(); // will remove
