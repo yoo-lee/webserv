@@ -3,15 +3,15 @@
 #endif
 #include "SimpleStatement.hpp"
 
-SimpleStatement::SimpleStatement(std::string directive, std::vector<std::string> params) : Statement(directive, params)
+SimpleStatement::SimpleStatement(string directive, vector<string> params) : Statement(directive, params)
 {
     if (params.size() == 0)
         throw SyntaxError("SimpleStatement params size must be > 0");
 }
-SimpleStatement::SimpleStatement(std::string directive, std::string param) : Statement(directive, param) {}
-SimpleStatement::SimpleStatement(std::string directive) : Statement(directive) {}
+SimpleStatement::SimpleStatement(string directive, string param) : Statement(directive, param) {}
+SimpleStatement::SimpleStatement(string directive) : Statement(directive) {}
 SimpleStatement::SimpleStatement(const SimpleStatement &s) : Statement(s) {}
-SimpleStatement::SimpleStatement(Statement *s) : Statement(*s) {}
+SimpleStatement::SimpleStatement(Statement const *s) : Statement(*s) {}
 SimpleStatement::~SimpleStatement() {}
 
 Statement *SimpleStatement::clone() const
@@ -22,7 +22,7 @@ Statement *SimpleStatement::clone() const
 #ifdef UNIT_TEST
 TEST_CASE("SimpleStatement constructor")
 {
-    std::vector<std::string> params;
+    vector<string> params;
     params.push_back("param1");
     params.push_back("param2");
     SimpleStatement s("directive", params);
@@ -36,7 +36,7 @@ TEST_CASE("SimpleStatement constructor")
 
 TEST_CASE("SimpleStatement copy constructor")
 {
-    std::vector<std::string> params;
+    vector<string> params;
     params.push_back("param1");
     params.push_back("param2");
     SimpleStatement s("directive", params);

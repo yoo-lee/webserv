@@ -6,11 +6,14 @@
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
+
+using std::ostream;
+
 Token::Token() {}
 
-Token::Token(std::string str, Token::Type type) : _type(type), _str(str) {}
+Token::Token(string str, Token::Type type) : _type(type), _str(str) {}
 
-Token::Token(char c, Token::Type type) : _type(type), _str(std::string(&c, 1)) {}
+Token::Token(char c, Token::Type type) : _type(type), _str(string(&c, 1)) {}
 
 Token::Token(const Token &token)
 {
@@ -18,7 +21,7 @@ Token::Token(const Token &token)
     _str = token.get_str();
 }
 
-std::string Token::get_typename(Token::Type type)
+string Token::get_typename(Token::Type type)
 {
     const char *type_name_list[] = {"COMMA",  "SEMI", "DQUOTE", "SQUOTE",      "STRING",  "LCURLY",
                                     "RCURLY", "INT",  "ID",     "WHITE_SPACE", "COMMENT", "NONE"};
@@ -32,12 +35,12 @@ Token::Type Token::get_type() const
     return _type;
 }
 
-std::string Token::get_str() const
+string Token::get_str() const
 {
     return _str;
 }
 
-std::ostream &operator<<(std::ostream &os, const Token &token)
+ostream &operator<<(ostream &os, const Token &token)
 {
     os << token.get_str() << " : " << Token::get_typename(token.get_type());
     return os;

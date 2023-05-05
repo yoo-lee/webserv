@@ -4,14 +4,16 @@
 #include "doctest.h"
 #endif
 
-std::string Server::get_server_name(BlockStatement const &server)
+using std::exception;
+
+string Server::get_server_name(BlockStatement const &server)
 {
     try
     {
-        Statement *server_name_directive = server["server_name"];
+        Statement const *server_name_directive = server["server_name"];
         return server_name_directive->get_param(0);
     }
-    catch (const std::exception &e)
+    catch (const exception &e)
     {
         return "";
     }
@@ -21,24 +23,24 @@ int Server::get_listen_port(BlockStatement const &server)
 {
     try
     {
-        Statement *listen_directive = server["listen"];
-        return myStoi(listen_directive->get_param(0));
+        Statement const *listen_directive = server["listen"];
+        return my_stoi(listen_directive->get_param(0));
     }
-    catch (const std::exception &e)
+    catch (const exception &e)
     {
         throw SyntaxError("listen directive not found or invalid");
     }
 }
 
-Server::Server(Statement *server) : is_default_server(false)
+Server::Server(Statement const *server) : is_default_server(false)
 {
     if (server == NULL)
         throw SyntaxError("Server: Taken directive is NULL");
-    if (!dynamic_cast<BlockStatement *>(server))
+    if (!dynamic_cast<BlockStatement const *>(server))
         throw SyntaxError("Server: Taken directive is not block statement");
     if (server->get_directive() != "server")
         throw SyntaxError("Server: Taken directive is not server directive");
-    BlockStatement server_directive = *(dynamic_cast<BlockStatement *>(server));
+    BlockStatement server_directive = *(dynamic_cast<BlockStatement const *>(server));
 
     listen = get_listen_port(server_directive);
     if (server_directive["listen"]->get_params().size() == 2 &&
@@ -70,7 +72,7 @@ Server::~Server()
 TEST_CASE("Server: constructor")
 {
     Parser parser("server { listen 80; server_name localhost; }");
-    std::vector<Statement *> server_directive = parser.get_root();
+    vector<Statement const *> server_directive = parser.get_root();
     Server server(server_directive[0]);
     CHECK(server.listen == 80);
     CHECK(server.server_name == "localhost");
@@ -79,7 +81,7 @@ TEST_CASE("Server: constructor")
 TEST_CASE("Server: constructor")
 {
     Parser parser("server { listen 80; server_name localhost; location / { root /; } }");
-    std::vector<Statement *> server_directive = parser.get_root();
+    vector<Statement const *> server_directive = parser.get_root();
     Server server(server_directive[0]);
     CHECK(server.listen == 80);
     CHECK(server.server_name == "localhost");
@@ -93,21 +95,21 @@ TEST_CASE("Server: constructor")
 TEST_CASE("Server: taken not server directive")
 {
     Parser parser("location / { root /; }");
-    std::vector<Statement *> server_directive = parser.get_root();
+    vector<Statement const *> server_directive = parser.get_root();
     CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
 }
 
 TEST_CASE("Server: taken not block statement")
 {
     Parser parser("server listen 80;");
-    std::vector<Statement *> server_directive = parser.get_root();
+    vector<Statement const *> server_directive = parser.get_root();
     CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
 }
 
 TEST_CASE("Server: taken not listen directive")
 {
     Parser parser("server { server_name localhost; }");
-    std::vector<Statement *> server_directive = parser.get_root();
+    vector<Statement const *> server_directive = parser.get_root();
     CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
 }
 #endif

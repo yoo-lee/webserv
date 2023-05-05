@@ -35,31 +35,35 @@ WS: [ \t\n\r\f]+ -> skip;
 #include "NotFound.hpp"
 #include "Statement.hpp"
 
+using std::stack;
+using std::string;
+using std::vector;
+
 // TODO: ASTではなくなった。もっと適切な名前に変更する。
 class AST
 {
   private:
-    std::vector<Token> _tokens;
-    std::vector<Statement *> _root;
+    vector<Token> _tokens;
+    vector<Statement const *> _root;
 
-    std::vector<Statement *> program();
-    Statement *statement();
-    Statement *try_simple_statement(std::stack<Token> &buf);
-    BlockStatement *try_block_statement(std::stack<Token> &buf);
-    std::string directive(std::stack<Token> &buf);
-    std::vector<std::string> parameters(std::stack<Token> &buf);
-    std::string parameter(std::stack<Token> &buf);
-    std::string consume(Token::Type type, std::stack<Token> &buf);
-    void backtrace(std::stack<Token> &buf);
-    void decide(std::stack<Token> &buf);
+    vector<Statement *> program();
+    Statement const *statement();
+    Statement const *try_simple_statement(stack<Token> &buf);
+    BlockStatement const *try_block_statement(stack<Token> &buf);
+    string directive(stack<Token> &buf);
+    vector<string> parameters(stack<Token> &buf);
+    string parameter(stack<Token> &buf);
+    string consume(Token::Type type, stack<Token> &buf);
+    void backtrace(stack<Token> &buf);
+    void decide(stack<Token> &buf);
 
   public:
     AST();
-    AST(const std::vector<Token> &tokens);
+    AST(const vector<Token> &tokens);
     ~AST();
     void print_tree();
-    std::vector<Statement *> const &get_root() const;
-    Statement *operator[](std::string directive) const;
+    vector<Statement const *> const &get_root() const;
+    Statement const *operator[](string directive) const;
 };
 
 #endif /* AST_H */

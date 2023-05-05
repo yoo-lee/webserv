@@ -15,8 +15,8 @@ class LimitExcept
     vector<string> allow_list;
     bool allow_all;
     LimitExcept();
-    LimitExcept(Statement *const limit_except_directive);
-    LimitExcept(LimitExcept *const l);
+    LimitExcept(Statement const *limit_except_directive);
+    LimitExcept(LimitExcept const *l);
     ~LimitExcept();
 };
 

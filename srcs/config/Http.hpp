@@ -5,16 +5,20 @@
 #include "SyntaxError.hpp"
 #include <string>
 #include <vector>
+
+using std::string;
+using std::vector;
+
 class HTTP
 {
   private:
-    int get_client_max_body_size(BlockStatement &http_directive);
+    int get_client_max_body_size(BlockStatement const &http_directive);
 
   public:
     int client_max_body_size;
-    std::vector<Server *> server;
+    vector<Server const *> server;
     HTTP();
-    HTTP(Statement *const directive);
+    HTTP(Statement const *directive);
     ~HTTP();
     Server const &operator[](size_t index);
     HTTP &operator=(HTTP const &other);

@@ -9,14 +9,16 @@
 #include <string>
 #include <vector>
 
+using std::string;
+
 class Config
 {
   private:
   public:
-    HTTP *http;
-    Config(std::string file_text, bool is_file_text);
+    HTTP const *http;
+    Config(string file_text, bool is_file_text);
     Config(const char *file_path);
-    void init(std::string file_text);
+    void init(string file_text);
     ~Config();
 };
 

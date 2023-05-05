@@ -5,22 +5,27 @@
 #include <map>
 #include <string>
 #include <vector>
+
+using std::map;
+using std::string;
+using std::vector;
+
 class Location
 {
   private:
     Location();
 
   public:
-    std::vector<std::string> urls;
-    std::map<std::string, std::vector<std::string> > properties;
-    LimitExcept *limit_except;
-    std::string index;
+    vector<string> urls;
+    map<string, vector<string> > properties;
+    LimitExcept const *limit_except;
+    string index;
     bool autoindex;
-    std::map<std::string, std::string> error_page;
-    Location(Statement *location_directive);
-    Location(Location *location);
+    map<string, string> error_page;
+    Location(Statement const *location_directive);
+    Location(Location const *location);
     ~Location();
-    std::vector<std::string> operator[](std::string index);
+    vector<string> operator[](string index);
 };
 
 #endif /* LOCATION_H */

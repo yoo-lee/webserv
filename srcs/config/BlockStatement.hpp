@@ -1,27 +1,31 @@
-#ifndef BLOCKSTATEMENT_H
-#define BLOCKSTATEMENT_H
+#ifndef BLOCK_STATEMENT_H
+#define BLOCK_STATEMENT_H
 #include "Statement.hpp"
 #include <string>
 #include <vector>
 
+using std::ostream;
+using std::string;
+using std::vector;
+
 class BlockStatement : public Statement
 {
   private:
-    std::vector<Statement *> _child_statements;
+    vector<Statement const *> _child_statements;
 
   public:
-    BlockStatement(std::string directive, std::vector<std::string> params, std::vector<Statement *> child_statements);
-    BlockStatement(std::string directive, std::vector<Statement *> child_statements);
+    BlockStatement(string directive, vector<string> params, vector<Statement const *> child_statements);
+    BlockStatement(string directive, vector<Statement const *> child_statements);
     BlockStatement(const BlockStatement &b);
-    BlockStatement(Statement *s);
+    BlockStatement(Statement const *s);
     ~BlockStatement();
 
-    void print(std::ostream &os, std::string indent) const;
-    friend std::ostream &operator<<(std::ostream &os, const BlockStatement &statement);
-    std::vector<Statement *> get_children() const;
-    std::vector<Statement *> get_children(std::string directive) const;
-    Statement *operator[](std::string directive) const;
+    void print(ostream &os, string indent) const;
+    friend ostream &operator<<(ostream &os, const BlockStatement &statement);
+    vector<Statement const *> get_children() const;
+    vector<Statement const *> get_children(string directive) const;
+    Statement const *operator[](string directive) const;
     virtual Statement *clone() const;
 };
 
-#endif /* BLOCKSTATEMENT_H */
+#endif /* BLOCK_STATEMENT_H */

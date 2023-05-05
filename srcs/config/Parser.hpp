@@ -6,15 +6,19 @@
 #include "Token.hpp"
 #include <iostream>
 #include <vector>
+
+using std::string;
+using std::vector;
+
 class Parser
 {
   private:
     AST _tree;
 
   public:
-    Parser(std::string file_text);
+    Parser(string file_text);
     ~Parser();
     void print();
-    std::vector<Statement *> const &get_root();
+    vector<Statement const *> const &get_root();
 };
 #endif /* PARSER_H */

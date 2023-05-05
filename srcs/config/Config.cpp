@@ -1,24 +1,29 @@
 #include "Config.hpp"
-Config::Config(std::string file_text, bool is_file_text)
+
+using std::ifstream;
+using std::istreambuf_iterator;
+using std::runtime_error;
+
+Config::Config(string file_text, bool is_file_text)
 {
     init(file_text);
 }
 
 Config::Config(const char *file_path)
 {
-    std::ifstream ifs(file_path);
+    ifstream ifs(file_path);
     if (!ifs)
-        throw std::runtime_error("Config: File not found: " + std::string(file_path));
-    std::string file_text((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+        throw runtime_error("Config: File not found: " + string(file_path));
+    string file_text((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
     init(file_text);
 }
 
-void Config::init(std::string file_text)
+void Config::init(string file_text)
 {
     Parser parser(file_text);
-    std::vector<Statement *> root = parser.get_root();
+    vector<Statement const *> root = parser.get_root();
     if (root.size() != 1)
-        throw std::runtime_error("Invalid config file. May have no root or multiple roots.");
+        throw runtime_error("Invalid config file. May have no root or multiple roots.");
     http = new HTTP(root[0]);
 }
 

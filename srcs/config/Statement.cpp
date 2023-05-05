@@ -9,20 +9,20 @@
 #include "doctest.h"
 #endif
 
-Statement::Statement(std::string directive, std::vector<std::string> params) : _directive(directive), _params(params) {}
+Statement::Statement(string directive, vector<string> params) : _directive(directive), _params(params) {}
 
-Statement::Statement(std::string directive, std::string param) : _directive(directive)
+Statement::Statement(string directive, string param) : _directive(directive)
 {
     _params.push_back(param);
 }
 
-Statement::Statement(std::string directive) : _directive(directive) {}
+Statement::Statement(string directive) : _directive(directive) {}
 
 Statement::Statement(const Statement &s) : _directive(s._directive), _params(s._params) {}
 
 Statement::~Statement() {}
 
-void Statement::print(std::ostream &os, std::string indent) const
+void Statement::print(ostream &os, string indent) const
 {
     os << indent << "directive: '" << _directive << "' , params: [ ";
     for (size_t i = 0; i < _params.size(); i++)
@@ -30,7 +30,7 @@ void Statement::print(std::ostream &os, std::string indent) const
     os << "]";
 }
 
-std::ostream &operator<<(std::ostream &os, const Statement &statement)
+ostream &operator<<(ostream &os, const Statement &statement)
 {
     return os;
     statement.print(os, "");
@@ -53,18 +53,18 @@ bool Statement::operator!=(const Statement &other) const
     return !(*this == other);
 }
 
-std::string Statement::get_directive() const
+string Statement::get_directive() const
 {
     return _directive;
 }
 
-std::vector<std::string> Statement::get_params() const
+vector<string> Statement::get_params() const
 {
     return _params;
 }
 
 // SimpleStatementは1以上のパラメータを持つが、BlockStatementは0以上のパラメータを持つ
-std::string Statement::get_param(size_t index) const
+string Statement::get_param(size_t index) const
 {
     if (index >= _params.size())
         throw SyntaxError("Statement::get_param index out of bounds");

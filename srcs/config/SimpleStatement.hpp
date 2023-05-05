@@ -9,14 +9,17 @@
 #include "doctest.h"
 #endif
 
+using std::string;
+using std::vector;
+
 class SimpleStatement : public Statement
 {
   public:
-    SimpleStatement(std::string directive, std::vector<std::string> params);
-    SimpleStatement(std::string directive, std::string param);
-    SimpleStatement(std::string directive);
+    SimpleStatement(string directive, vector<string> params);
+    SimpleStatement(string directive, string param);
+    SimpleStatement(string directive);
     SimpleStatement(const SimpleStatement &s);
-    SimpleStatement(Statement *s);
+    SimpleStatement(Statement const *s);
     ~SimpleStatement();
     virtual Statement *clone() const;
 };

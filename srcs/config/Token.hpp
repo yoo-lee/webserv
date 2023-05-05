@@ -2,6 +2,10 @@
 #define TOKEN_H
 #include <iostream>
 #include <string>
+
+using std::ostream;
+using std::string;
+
 class Token
 {
   public:
@@ -21,21 +25,21 @@ class Token
         NONE
     };
     Token();
-    Token(std::string str, Type type);
+    Token(string str, Type type);
     Token(char c, Type type);
-    Token(const Token &token);
+    Token(Token const &token);
     ~Token();
     Type get_type() const;
-    static std::string get_typename(Token::Type type);
-    std::string get_str() const;
-    friend std::ostream &operator<<(std::ostream &os, const Token &token);
-    bool operator==(const Token &rhs) const;
-    bool operator!=(const Token &rhs) const;
-    Token &operator=(const Token &rhs);
+    static string get_typename(Token::Type type);
+    string get_str() const;
+    friend ostream &operator<<(ostream &os, Token const &token);
+    bool operator==(Token const &rhs) const;
+    bool operator!=(Token const &rhs) const;
+    Token &operator=(Token const &rhs);
 
   private:
     Type _type;
-    std::string _str;
+    string _str;
 };
 
 #endif /* TOKEN_H */
