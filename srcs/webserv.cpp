@@ -37,20 +37,12 @@ Webserv::Webserv(const std::vector<std::string> ports)epfd(0)
 
 Webserv::Webserv(Config& config) : epfd(0), _config(config)
 {
-    std::vector<std::string> test;
+    std::vector<std::string> ports;
     size_t server_cnt = config.http->server.size();
-    cout << "server_cnt" << server_cnt << endl;
     for(size_t i=0; i<server_cnt; i++){
-        int port = config.http->server[i]->listen;
-        cout << port << endl;
-        //std::string port = Utility::to_string(config.http->server[i]->listen);
-        test.push_back(Utility::to_string(port));
+        ports.push_back(config.http->server[i]->listen);
     }
-    
-    test.push_back("11111");
-    test.push_back("11112");
-    test.push_back("11113");
-    init_socket(test);
+    init_socket(ports);
 }
 
 Webserv::~Webserv()
