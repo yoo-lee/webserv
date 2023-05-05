@@ -128,7 +128,6 @@ TEST_CASE("Location: constructor")
     vector<string> params;
     params.push_back("/hello");
     params.push_back("/world");
-    cout << "x" << endl;
 
     vector<Statement const *> statements;
     statements.push_back(new SimpleStatement("root", "/"));
@@ -155,7 +154,6 @@ TEST_CASE("Location: copy constructor")
     BlockStatement const *location_directive = new BlockStatement("location", params, statements);
     Location *location = new Location(location_directive);
     Location location2(location);
-    cout << "user2" << endl;
     CHECK(location2.urls[0] == "/hello");
     CHECK(location2.urls[1] == "/world");
     CHECK(location2.properties["root"].size() == 1);
@@ -163,5 +161,6 @@ TEST_CASE("Location: copy constructor")
     CHECK(location2.index == "index.html");
 
     delete location;
+    delete location_directive;
 }
 #endif
