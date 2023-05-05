@@ -1,34 +1,38 @@
 
-#include "webserv.hpp"
-#include <string>
-#include <iostream>
-#include "split.hpp"
-#include <stdlib.h>
 #include "Config.hpp"
+#include "split.hpp"
+#include "webserv.hpp"
+#include <iostream>
+#include <stdlib.h>
+#include <string>
 
-using std::string;
-using std::vector;
 using std::cout;
 using std::endl;
+using std::string;
+using std::vector;
 
-//std::string base_path = "/home/sano/work/42/webserv/github/webserv/srcs/dir";
+// std::string base_path = "/home/sano/work/42/webserv/github/webserv/srcs/dir";
 std::string base_path = "srcs/dir";
 
-void server(Webserv& webserv)
+void server(Webserv &webserv)
 {
-    try{
+    try
+    {
         webserv.communication();
-    }catch(std::exception &e){
+    }
+    catch (std::exception &e)
+    {
         cout << e.what() << endl;
     }
 }
 
-int main(int argc, char const* argv[]) 
+int main(int argc, char const *argv[])
 {
 
     (void)argc;
     (void)argv;
-    if (argc != 2) {
+    if (argc != 2)
+    {
         std::cout << "Error: Specify config file" << std::endl;
         return (EXIT_FAILURE);
     }
@@ -38,7 +42,7 @@ int main(int argc, char const* argv[])
     // ソケットの初期設定
     Webserv webserv = Webserv(config);
     // イベントループ開始
-    while(1)
+    while (1)
     {
         server(webserv);
     }
