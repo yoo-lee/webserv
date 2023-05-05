@@ -14,7 +14,7 @@ class Request : public SocketData
 {
   public:
     Request();
-    Request(int fd, Config const& config);
+    Request(int fd);
     ~Request();
     const std::string& get_path();
     const std::string& get_uri(); // will remove
