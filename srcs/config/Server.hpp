@@ -15,6 +15,7 @@ class Server
   private:
     void set_server_name(BlockStatement const &server);
     void set_listen_port(BlockStatement const &server);
+    void validate_listen() const;
 
   public:
     std::string listen;

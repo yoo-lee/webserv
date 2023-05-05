@@ -19,11 +19,23 @@ void Server::set_server_name(BlockStatement const &server)
     }
 }
 
+void Server::validate_listen() const
+{
+    if (listen.length() > 6)
+        throw SyntaxError("listen port is invalid");
+    int port = my_stoi(listen);
+
+    if ((listen != "0" && port == 0) || port < 0 || port > 65535)
+        throw SyntaxError("listen port is invalid");
+}
+
 void Server::set_listen_port(BlockStatement const &server)
 {
     try
     {
         Statement const *listen_directive = server["listen"];
+        if (listen_directive->get_params().size() != 2 && listen_directive->get_params().size() != 1)
+            throw SyntaxError("listen directive has invalid number of parameters");
         try
         {
             if (listen_directive->get_param(1) == "default_server")
@@ -33,6 +45,7 @@ void Server::set_listen_port(BlockStatement const &server)
         {
         }
         listen = listen_directive->get_param(0);
+        validate_listen();
     }
     catch (const exception &e)
     {
@@ -96,6 +109,27 @@ TEST_CASE("Server: constructor")
 }
 
 /* ERROR CASE */
+
+TEST_CASE("Server: listen port is not number")
+{
+    Parser parser("server { listen eight; server_name localhost; }");
+    vector<Statement const *> server_directive = parser.get_root();
+    CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
+}
+
+TEST_CASE("Server: listen port is too large")
+{
+    Parser parser("server { listen 10000000000; server_name localhost; }");
+    vector<Statement const *> server_directive = parser.get_root();
+    CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
+}
+
+TEST_CASE("Server: listen port is minus")
+{
+    Parser parser("server { listen -1; server_name localhost; }");
+    vector<Statement const *> server_directive = parser.get_root();
+    CHECK_THROWS_AS((Server(server_directive[0])), SyntaxError);
+}
 
 TEST_CASE("Server: taken not server directive")
 {
