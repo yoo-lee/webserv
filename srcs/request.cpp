@@ -38,8 +38,7 @@ Request::~Request()
 void Request::print_request()
 {
     cout << "Print Request!!!!!!!!!!!!!!!!!!!!" << endl;
-    cout << "method: " << identify_method(this->_method) << endl;
-    cout << "uri: " << this->_uri << endl;
+    cout << "method: " << method_to_str(this->_method) << endl;
     cout << "version: " << this->_version << endl;
 
     cout << "headers size:" << this->_headers.size() << endl;
@@ -69,20 +68,18 @@ void Request::parse()
         throw std::exception();
     }
     Split::iterator ite = sp.begin();
-    this->_method = identify_method(*ite);
-    this->_uri = *(++ite);
-    const char* _path = this->_uri.c_str();
+    this->_method = str_to_method(*ite);
+    const char* path = (++ite)->c_str();
     size_t cnt = 0;
-    while (_path && *_path) {
-        if (*_path != '/')
+    while (path && *path) {
+        if (*path != '/')
             break;
         cnt++;
-        _path++;
+        path++;
     }
-    this->_path = this->_uri.substr(cnt);
-    this->_path = Utility::delete_space(this->_path);
-    this->_version = *(++ite);
-    this->_version = Utility::delete_space(this->_version);
+    string tmp = string(path).substr(cnt);
+    this->_path = Utility::delete_space(tmp);
+    this->_version = Utility::delete_space(*(++ite));
     string header;
     string value;
     std::string::size_type pos;
@@ -124,12 +121,7 @@ METHOD Request::get_method()
 
 const std::string Request::get_method_string()
 {
-    return (identify_method(this->_method));
-}
-
-const string& Request::get_uri()
-{
-    return (this->_uri);
+    return (method_to_str(this->_method));
 }
 
 const string& Request::get_version()

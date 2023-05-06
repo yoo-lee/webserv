@@ -14,19 +14,16 @@ class Response : public SocketData
     // コンストラクタ
     Response(Request& request);
     // HTTP レスポンスを構築するメソッド
-    void buildResponse();
+    void build_response();
     // ステータスコードを設定するメソッド
-    void setStatus(int code);
+    void set_status(int code);
     // HTTP レスポンスを文字列で返す
-    string getRes() const;
+    string get_response_string() const;
     // HTTP レスポンスのバイト数を返す
     int getLen() const;
-    string getStatusMessage(int code);
-    METHOD identify_method(string method);
-    string identify_method(METHOD method);
-
-    string methodToString(METHOD method);
-    string get_file_path();
+    string get_status_message(int code);
+    METHOD str_to_method(string method);
+    string method_to_str(METHOD method);
 
   private:
     string _file_path;

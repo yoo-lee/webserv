@@ -1,5 +1,5 @@
-#ifndef TCPSOCKET_HPP
-#define TCPSOCKET_HPP
+#ifndef TCP_SOCKET_H
+#define TCP_SOCKET_H
 
 #include "socket.hpp"
 #include <netdb.h>
@@ -15,9 +15,10 @@ class TCPSocket : public Socket
     TCPSocket(const TCPSocket& socket);
     TCPSocket& operator=(const TCPSocket& socket);
     ~TCPSocket();
-    void communication();
+    void communicate();
+
   private:
     void init();
 };
 
-#endif
+#endif /* TCP_SOCKET_H */

@@ -1,15 +1,15 @@
 #include "get_next_line.hpp"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <iostream>
-#include <unistd.h>
 #include "utility.hpp"
+#include <iostream>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 using std::cout;
 using std::endl;
 using std::string;
 
-GetNextLine::GetNextLine(int fd_) : _buf_body_pos(NULL), _buf_body_size(0), buf_size(0), _fd(fd_), _sp(NULL), _pos(0)
+GetNextLine::GetNextLine(int fd_) : _buf_body_pos(NULL), _buf_body_size(0), _buf_size(0), _fd(fd_), _sp(NULL), _pos(0)
 {
     this->read_line();
 }
@@ -19,7 +19,7 @@ GetNextLine::~GetNextLine()
     delete _sp;
 }
 
-int GetNextLine::read(char *buf, int size)
+int GetNextLine::read(char* buf, int size)
 {
     return recv(this->_fd, buf, size, MSG_DONTWAIT);
 }
@@ -28,36 +28,35 @@ int GetNextLine::read(char *buf, int size)
 void GetNextLine::read_line()
 {
     int size = this->read(this->_buf, BUF_MAX);
-    if (size < 0){
+    if (size < 0) {
         cout << "read_line() test No.0 escape loop() recv error" << endl;
-        return ;
+        return;
     }
-    this->buf_size = size;
-        //if (this->buf_size > 0)
-            //break;
-        //else if (cnt > 10)
-            //return ;
-        //usleep(10);
-        //cnt++;
+    this->_buf_size = size;
+    // if (this->buf_size > 0)
+    // break;
+    // else if (cnt > 10)
+    // return ;
+    // usleep(10);
+    // cnt++;
     //}
 
     this->_buf_body_pos = Utility::strnstr(this->_buf, "\r\n\r\n", size);
-    //cout << "buf body pos=" << &this->_buf_body_pos << endl;
-    //cout << "buf pos=" << &this->_buf << endl;
-    if (this->_buf_body_pos)
-    {
+    // cout << "buf body pos=" << &this->_buf_body_pos << endl;
+    // cout << "buf pos=" << &this->_buf << endl;
+    if (this->_buf_body_pos) {
         *this->_buf_body_pos = '\0';
         this->_buf_body_pos += 4;
         this->_buf_body_size = size - (this->_buf_body_pos - this->_buf);
     }
     string str = string(this->_buf);
-    if (_sp == NULL){
+    if (_sp == NULL) {
         this->_sp = new Split(str, "\r\n");
-    }else{
+    } else {
         this->_sp->concat(str, "\r\n");
     }
-    //if (this->_buf_body_pos == NULL){
-        //this->read_line();
+    // if (this->_buf_body_pos == NULL){
+    // this->read_line();
     //}
 }
 
@@ -68,23 +67,22 @@ size_t GetNextLine::size()
     return (this->_sp->size());
 }
 
-int GetNextLine::get_extra_buf(char *buf)
+int GetNextLine::get_extra_buf(char* buf)
 {
     ssize_t tmp = 0;
-    if (this->_buf_body_size > 0)
-    {
+    if (this->_buf_body_size > 0) {
         Utility::memcpy(buf, this->_buf_body_pos, this->_buf_body_size);
         buf[0] = '0';
         buf[1] = '1';
         buf[2] = '2';
         buf[3] = '3';
         buf[4] = '4';
-        //printf("address=%p\n", this->_buf_body_pos);
-        //printf("address1=%p\n", &(this->_buf_body_pos[0]));
-        //printf("address2=%p\n", &(this->_buf[0]));
-        //cout << "No.2 gnl buf body address 1=" << &(this->_buf_body_pos[0]) << endl;
+        // printf("address=%p\n", this->_buf_body_pos);
+        // printf("address1=%p\n", &(this->_buf_body_pos[0]));
+        // printf("address2=%p\n", &(this->_buf[0]));
+        // cout << "No.2 gnl buf body address 1=" << &(this->_buf_body_pos[0]) << endl;
         tmp = this->_buf_body_size;
-        //tmp = 5;
+        // tmp = 5;
         this->_buf_body_size = 0;
     }
     return (tmp);
@@ -108,23 +106,23 @@ int GetNextLine::get_extra_buf(char *buf)
     return (0);
 }
 
-string &GetNextLine::getline()
+string& GetNextLine::getline()
 {
-    if (this->_sp == NULL || this->_sp->size() == this->_pos){
-        if (this->_buf_body_pos == NULL){
+    if (this->_sp == NULL || this->_sp->size() == this->_pos) {
+        if (this->_buf_body_pos == NULL) {
             this->read_line();
         }
     }
-    if (this->_sp == NULL){
+    if (this->_sp == NULL) {
         return (this->last_str);
     }
-    if (this->_sp->size() == this->_pos){
+    if (this->_sp->size() == this->_pos) {
         return (this->last_str);
     }
     return (*(this->_sp))[this->_pos++];
 }
 
-int GetNextLine::get_body(char *buf, size_t size)
+int GetNextLine::get_body(char* buf, size_t size)
 {
     return (read(buf, size));
 }

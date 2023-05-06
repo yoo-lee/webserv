@@ -1,10 +1,9 @@
 #include "socket_data.hpp"
 #include <iostream>
 
-
-using std::string;
 using std::cout;
 using std::endl;
+using std::string;
 
 SocketData::SocketData() : _timeout_cnt(0)
 {
@@ -16,45 +15,45 @@ SocketData::~SocketData()
     ;
 }
 
-METHOD SocketData::identify_method(string method)
+METHOD SocketData::str_to_method(string method)
 {
-    if (method == "GET"){
+    if (method == "GET") {
         return (GET);
-    }else if (method == "POST"){
+    } else if (method == "POST") {
         return (POST);
-    }else if (method == "PUT"){
+    } else if (method == "PUT") {
         return (PUT);
-    }else if (method == "HEAD"){
+    } else if (method == "HEAD") {
         return (HEAD);
-    }else if (method == "DELETE"){
+    } else if (method == "DELETE") {
         return (DELETE);
-    }else if (method == "OPTIONS"){
+    } else if (method == "OPTIONS") {
         return (OPTIONS);
-    }else if (method == "TRACE"){
+    } else if (method == "TRACE") {
         return (TRACE);
-    }else if (method == "CONNECT"){
+    } else if (method == "CONNECT") {
         return (CONNECT);
     }
     return (NG);
 }
 
-std::string SocketData::identify_method(METHOD method)
+std::string SocketData::method_to_str(METHOD method)
 {
-    if (method == GET){
+    if (method == GET) {
         return ("GET");
-    }else if (method == POST){
+    } else if (method == POST) {
         return ("POST");
-    }else if (method == PUT){
+    } else if (method == PUT) {
         return ("PUT");
-    }else if (method == HEAD){
+    } else if (method == HEAD) {
         return ("HEAD");
-    }else if (method == DELETE){
+    } else if (method == DELETE) {
         return ("DELETE");
-    }else if (method == OPTIONS){
+    } else if (method == OPTIONS) {
         return ("OPTIONS");
-    }else if (method == TRACE){
+    } else if (method == TRACE) {
         return ("TRACE");
-    }else if (method == CONNECT){
+    } else if (method == CONNECT) {
         return ("CONNECT");
     }
     return ("NG");
@@ -62,9 +61,8 @@ std::string SocketData::identify_method(METHOD method)
 
 bool SocketData::increment_timeout(int time)
 {
-    this->_timeout_cnt =this->_timeout_cnt + time;
-    if (_timeout_cnt > _timeout)
-    {
+    this->_timeout_cnt = this->_timeout_cnt + time;
+    if (_timeout_cnt > _timeout) {
         return (true);
     }
     return (false);

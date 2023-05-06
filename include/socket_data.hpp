@@ -29,8 +29,8 @@ class SocketData
     SocketData();
     ~SocketData();
 
-    static string identify_method(METHOD method);
-    static METHOD identify_method(string method);
+    static string method_to_str(METHOD method);
+    static METHOD str_to_method(string method);
     bool increment_timeout(int time);
     void clear_timeout();
 

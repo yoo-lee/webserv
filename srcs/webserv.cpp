@@ -120,7 +120,7 @@ Socket* Webserv::find_listen_socket(int socket_fd)
     return (NULL);
 }
 
-void Webserv::connected_communication(int fd, struct epoll_event* event, Socket* socket)
+void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* socket)
 {
     if (event->events & EPOLLIN) {
         Request* req = socket->recv(fd);
@@ -218,7 +218,7 @@ void Webserv::timeout(int time_sec)
     }
 }
 
-void Webserv::communication()
+void Webserv::communicate()
 {
     size_t size = this->_sockets.size();
     struct epoll_event sock_event[size];
@@ -247,7 +247,7 @@ void Webserv::communication()
             std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
             if (tmp_fd != this->_fd_sockets.end()) {
                 Socket* socket = tmp_fd->second;
-                connected_communication(tmp_fd->first, &(sock_event[i]), socket);
+                connect_communication(tmp_fd->first, &(sock_event[i]), socket);
                 continue;
             }
             Socket* socket = find_listen_socket(sock_event[i].data.fd);
