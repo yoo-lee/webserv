@@ -4,6 +4,7 @@
 #include "split.hpp"
 #include "utility.hpp"
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -16,6 +17,7 @@ using std::cout;
 using std::endl;
 using std::map;
 using std::string;
+using std::tolower;
 
 Request::Request(int fd_)
     : fd(fd_),
@@ -99,7 +101,7 @@ void Request::parse()
         if (header.size() < 2) {
             break;
         }
-        std::transform(header.begin(), header.end(), header.begin(), tolower);
+        std::transform(header.begin(), header.end(), header.begin(), static_cast<int (*)(int)>(tolower));
         value = str.substr(pos + 1);
         value = Utility::delete_space(value);
         this->headers.insert(make_pair(header, value));
@@ -219,7 +221,7 @@ bool Request::is_cgi()
 
 bool Request::is_cgi(string path) const
 {
-    const Server* server = _config->http->get_server(this->headers["Host"]);
+    const Server* server = _config->http->get_server(this->headers.at("host"));
     for (size_t j = 0; j < server->location.size(); j++) {
         Location* current = const_cast<Location*>(server->location[j]);
         for (size_t k = 0; k < current->urls.size(); k++) {

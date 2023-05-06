@@ -1,6 +1,7 @@
 #ifndef SOCKET_DATA_HPP
 #define SOCKET_DATA_HPP
 
+#include "Config.hpp"
 #include "get_next_line.hpp"
 #include "split.hpp"
 #include <map>
