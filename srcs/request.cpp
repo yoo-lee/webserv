@@ -30,9 +30,7 @@ Request::Request(int fd_)
     this->parse();
 }
 
-Request::~Request()
-{
-}
+Request::~Request() {}
 
 void Request::print_request()
 {
@@ -137,13 +135,12 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-char* Request::get_body(int *size)
+string Request::get_body()
 {
-    *size = _body_size;
     return (_buf);
 }
 
-int Request::read_buf(char *buf)
+int Request::read_buf(char* buf)
 {
     Utility::memcpy(buf, _buf, _body_size);
     return (_body_size);

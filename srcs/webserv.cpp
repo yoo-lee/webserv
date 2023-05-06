@@ -137,10 +137,10 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
         }
 
         // Body Test
-        //int size;
-        //char *buf;
-        //buf = req->get_body(&size);
-        //cout << buf << endl;
+        string buf;
+        buf = req->get_body();
+        cout << "Body: " << buf << endl;
+        cout << "Body length: " << buf.length() << endl;
 
         // Test (will remove)
         req->print_request();
