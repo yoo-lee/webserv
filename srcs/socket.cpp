@@ -124,14 +124,14 @@ Request* Socket::recv(int fd)
     Request* req = this->_fd_map[fd]->get_req();
     if (req != NULL)
         return req;
-    try {
-        req = new Request(fd);
-        this->_fd_map[fd]->insert(req);
-    } catch (std::exception& e) {
-        req = NULL;
-        this->_fd_map[fd]->insert(req);
-        cout << e.what() << endl;
-    }
+    // try {
+    req = new Request(fd);
+    this->_fd_map[fd]->insert(req);
+    // } catch (std::exception& e) {
+    //     req = NULL;
+    //     this->_fd_map[fd]->insert(req);
+    //     cout << e.what() << endl;
+    // }
     return (req);
 }
 
