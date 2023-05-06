@@ -20,7 +20,7 @@ class HTTP
     HTTP();
     HTTP(Statement const* directive);
     ~HTTP();
-    Server const* get_server(string server_name);
+    Server const* get_server(string server_name) const;
     Server const& operator[](size_t index);
     HTTP& operator=(HTTP const& other);
 };

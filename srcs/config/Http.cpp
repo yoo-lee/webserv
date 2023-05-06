@@ -35,7 +35,7 @@ HTTP::~HTTP()
         delete server[i];
 }
 
-Server const* HTTP::get_server(string server_name)
+Server const* HTTP::get_server(string server_name) const
 {
     for (size_t i = 0; i < server.size(); i++)
         if (server[i]->server_name == server_name)
