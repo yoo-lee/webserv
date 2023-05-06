@@ -219,16 +219,12 @@ bool Request::is_cgi()
 
 bool Request::is_cgi(string path) const
 {
-    vector<const Server*> server_list = _config->http->server;
-    for (size_t i = 0; i < server_list.size(); i++) {
-        if (server_list[i]->location.size() == 0)
-            continue;
-        for (size_t j = 0; j < server_list[i]->location.size(); j++) {
-            Location* current = const_cast<Location*>(server_list[i]->location[j]);
-            for (size_t k = 0; k < current->urls.size(); k++) {
-                if (current->urls[k] == path && (*current)["cgi_path"][0] != "") {
-                    return (true);
-                }
+    const Server* server = _config->http->get_server(this->headers["Host"]);
+    for (size_t j = 0; j < server->location.size(); j++) {
+        Location* current = const_cast<Location*>(server->location[j]);
+        for (size_t k = 0; k < current->urls.size(); k++) {
+            if (current->urls[k] == path && (*current)["cgi_path"][0] != "") {
+                return (true);
             }
         }
     }
