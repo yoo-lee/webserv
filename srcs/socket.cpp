@@ -29,14 +29,12 @@ void Socket::setAddrInfo(struct addrinfo &info)
 //bind
 void Socket::init()
 {
-    this->sock_fd= makeSocket();
-    //this->clientinfo;
-    memset(&(this->clientinfo), 0, sizeof(s_clientinfo));
-    this->ev.data.ptr = &clientinfo;
-    if (this->sock_fd < 0)
+    this->_sock_fd= makeSocket();
+    memset(&(this->_clientinfo), 0, sizeof(s_clientinfo));
+    this->_ev.data.ptr = &_clientinfo;
+    if (this->_sock_fd < 0)
     {
          cout << strerror(errno) << endl;
-         //throw std::exception();
          throw std::runtime_error("Failed to create sock_fdet\n");
     }
 
@@ -44,7 +42,7 @@ void Socket::init()
     memset(&hint, 0, sizeof(struct addrinfo));
     setAddrInfo(hint);
     struct addrinfo *res = NULL;
-    int err = getaddrinfo(NULL, this->port.c_str(), &hint, &res);
+    int err = getaddrinfo(NULL, this->_port.c_str(), &hint, &res);
     if (err != 0)
     {
         this->close_fd();
@@ -52,8 +50,8 @@ void Socket::init()
         throw std::runtime_error("Failed to init()\n");
     }
     int yes = 1;
-    setsockopt(this->sock_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&yes, sizeof(yes));
-    if (bind(this->sock_fd, res->ai_addr, res->ai_addrlen) != 0)
+    setsockopt(this->_sock_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&yes, sizeof(yes));
+    if (bind(this->_sock_fd, res->ai_addr, res->ai_addrlen) != 0)
     {
         this->close_fd();
         freeaddrinfo(res);
@@ -64,16 +62,16 @@ void Socket::init()
 
     //// sysctl net.ipv4.tcp_max_syn_backlog
     //// NG in guacamole
-    listen(this->sock_fd, _SOCKET_NUM);
+    listen(this->_sock_fd, _SOCKET_NUM);
 }
 //bind
 // バインド（bind）とは、ソケットにIPアドレスとポート番号を関連付けることです。
-Socket::Socket() : sock_fd(0), port("11112")
+Socket::Socket() : _sock_fd(0), _port("11112")
 {
     init();
 }
 
-Socket::Socket(std::string port_) : sock_fd(0) ,port(port_)
+Socket::Socket(std::string port_) : _sock_fd(0) ,_port(port_)
 {
     init();
 }
@@ -82,7 +80,7 @@ Socket::~Socket()
 {
     //delete this->req;
 }
-Socket::Socket(const Socket &sock_fdet) : sock_fd(sock_fdet.sock_fd), port(sock_fdet.port)
+Socket::Socket(const Socket &sock_fdet) : _sock_fd(sock_fdet._sock_fd), _port(sock_fdet._port)
 {
     init();
 }
@@ -99,12 +97,12 @@ void Socket::communication()
 
 int Socket::getSockFD()
 {
-    return (this->sock_fd);
+    return (this->_sock_fd);
 }
 
 void Socket::close_fd()
 {
-    close(this->sock_fd);
+    close(this->_sock_fd);
 }
 
 
@@ -114,7 +112,7 @@ int Socket::accept_request()
     memset(&client, 0, sizeof(struct sockaddr_in));
     socklen_t len = sizeof(client);
 
-    int fd = accept(this->sock_fd,(struct sockaddr *)&client, &len);
+    int fd = accept(this->_sock_fd,(struct sockaddr *)&client, &len);
     if (fd < 0)
     {
         cout << "Error accept():" << strerror(errno) << endl;
@@ -140,7 +138,7 @@ Request *Socket::recv(int fd)
     }catch(std::exception &e){
         req = NULL;
         this->_fd_map[fd]->insert(req);
-        cout << e.what() << endl; 
+        cout << e.what() << endl;
     }
     return (req);
 }
@@ -167,7 +165,7 @@ Response *Socket::get_response(int fd)
 
 std::vector<int> Socket::timeout(int time)
 {
-    std::map<int, FDManager*>::iterator iter = _fd_map.begin(); 
+    std::map<int, FDManager*>::iterator iter = _fd_map.begin();
     std::map<int, FDManager*>::iterator end = _fd_map.end();
     std::vector<int> delete_fd;
 

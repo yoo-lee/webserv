@@ -18,7 +18,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-Webserv::Webserv() : epfd(0)
+Webserv::Webserv() : _epfd(0)
 {
     std::vector<std::string> vec;
     vec.push_back("80");
@@ -34,7 +34,7 @@ Webserv::~Webserv()
 {
     close_all();
 }
-Webserv::Webserv(const Webserv &webserv) : epfd(0)
+Webserv::Webserv(const Webserv &webserv) : _epfd(0)
 {
     (void)webserv;
 }
@@ -51,7 +51,7 @@ void Webserv::init_socket(std::vector<std::string> vec)
         for (size_t i=0; i < vec.size(); i++)
         {
             Socket *sock = new Socket(vec[i]);
-            this->sockets.push_back(sock);
+            this->_sockets.push_back(sock);
         }
     }catch(std::exception &e) {
         close_all();
@@ -61,27 +61,27 @@ void Webserv::init_socket(std::vector<std::string> vec)
 
 void Webserv::close_all()
 {
-    for(size_t i=0; i < this->sockets.size();i++){
-        this->sockets[i]->close_fd();
+    for(size_t i=0; i < this->_sockets.size();i++){
+        this->_sockets[i]->close_fd();
     }
 }
 
 bool Webserv::init_epoll()
 {
-    this->epfd = epoll_create(this->sockets.size());
-    if(epfd < 0){
+    this->_epfd = epoll_create(this->_sockets.size());
+    if(_epfd < 0){
         cout << "Epoll Error:" << strerror(errno) << endl;
         return (false);
     }
-    for(size_t i=0; i < this->sockets.size();i++)
+    for(size_t i=0; i < this->_sockets.size();i++)
     {
         struct epoll_event ev;
         memset(&ev, 0, sizeof(struct epoll_event));
-        Socket *socket = this->sockets[i];
+        Socket *socket = this->_sockets[i];
 
         ev.events = EPOLLIN;
         ev.data.fd = socket->getSockFD();
-        if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, socket->getSockFD(), &ev) != 0){
+        if (epoll_ctl(this->_epfd, EPOLL_CTL_ADD, socket->getSockFD(), &ev) != 0){
             cout << "Epoll Ctl Error:" << strerror(errno) << endl;
             return (false);
         }
@@ -91,10 +91,10 @@ bool Webserv::init_epoll()
 
 Socket* Webserv::find_listen_socket(int socket_fd)
 {
-    for (size_t i=0;i< this->sockets.size(); i++)
+    for (size_t i=0;i< this->_sockets.size(); i++)
     {
-        if (this->sockets[i]->getSockFD() == socket_fd){
-            return (this->sockets[i]);
+        if (this->_sockets[i]->getSockFD() == socket_fd){
+            return (this->_sockets[i]);
         }
     }
     return (NULL);
@@ -106,7 +106,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         Request *req = socket->recv();
         if (!req){
             event->events = EPOLLOUT;
-            if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
+            if(epoll_ctl(this->_epfd, EPOLL_CTL_MOD, fd, event) != 0){
                 cout << "error;connected_communication No.2" << endl;
             }
             return;
@@ -144,7 +144,7 @@ void Webserv::connected_communication(int fd, struct epoll_event *event, Socket 
         // if(req->get_content_length() > req->get_loaded_body_size())
             // return ;
         event->events = EPOLLOUT;
-        if(epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0){
+        if(epoll_ctl(this->_epfd, EPOLL_CTL_MOD, fd, event) != 0){
             cout << "error;connected_communication No.2" << endl;
         }
     }else if (event->events & EPOLLOUT){
@@ -159,7 +159,7 @@ Content-Type: text/html\n\
 Content-Length: 4\n\
 \n\
 test\
-";		
+";
         socket->send(r_data);
 
         //todo
@@ -168,7 +168,7 @@ test\
             return ;
 
         event->events = EPOLLIN;
-        if(epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0){
+        if(epoll_ctl(this->_epfd, EPOLL_CTL_DEL, fd, event) != 0){
             cout << "error;connected_communication No.3" << endl;
         }
         //close(fd);
@@ -177,7 +177,7 @@ test\
 
 void Webserv::communication()
 {
-    size_t size = this->sockets.size();
+    size_t size = this->_sockets.size();
     struct epoll_event sock_event[size];
     struct epoll_event server_event;
 
@@ -192,7 +192,7 @@ void Webserv::communication()
     }
     while(1)
     {
-        int nfds = epoll_wait(this->epfd, sock_event, size, -1);
+        int nfds = epoll_wait(this->_epfd, sock_event, size, -1);
         if (nfds == 0) {
             continue;
         }
@@ -201,7 +201,7 @@ void Webserv::communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return ;
         }
-		
+
         for (int i = 0; i < nfds; i++)
         {
             std::vector<int>::iterator tmp_fd = find(sock_fds.begin(), sock_fds.end(), sock_event[i].data.fd);
@@ -220,7 +220,7 @@ void Webserv::communication()
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
                 map_socks.insert(std::make_pair(fd, socket));
-                if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event))
+                if (epoll_ctl(this->_epfd, EPOLL_CTL_ADD, fd, &server_event))
                 {
                     cout << "epoll_ctl error No.1" << endl;
                     continue;
@@ -230,4 +230,3 @@ void Webserv::communication()
         }
     }
 }
-

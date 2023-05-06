@@ -9,19 +9,19 @@ using std::cout;
 using std::endl;
 using std::string;
 
-GetNextLine::GetNextLine(int fd_) : _buf_body_pos(NULL), _buf_body_size(0), buf_size(0), fd(fd_), sp(NULL), pos(0)
+GetNextLine::GetNextLine(int fd_) : _buf_body_pos(NULL), _buf_body_size(0), buf_size(0), _fd(fd_), _sp(NULL), _pos(0)
 {
     this->read_line();
 }
 
 GetNextLine::~GetNextLine()
 {
-    delete sp;
+    delete _sp;
 }
 
 int GetNextLine::read(char *buf, int size)
 {
-    return recv(this->fd, buf, size, MSG_DONTWAIT);
+    return recv(this->_fd, buf, size, MSG_DONTWAIT);
 }
 
 #include <stdio.h>
@@ -51,10 +51,10 @@ void GetNextLine::read_line()
         this->_buf_body_size = size - (this->_buf_body_pos - this->_buf);
     }
     string str = string(this->_buf);
-    if (sp == NULL){
-        this->sp = new Split(str, "\r\n");
+    if (_sp == NULL){
+        this->_sp = new Split(str, "\r\n");
     }else{
-        this->sp->concat(str, "\r\n");
+        this->_sp->concat(str, "\r\n");
     }
     //if (this->_buf_body_pos == NULL){
         //this->read_line();
@@ -63,9 +63,9 @@ void GetNextLine::read_line()
 
 size_t GetNextLine::size()
 {
-    if (this->sp == NULL)
+    if (this->_sp == NULL)
         return (0);
-    return (this->sp->size());
+    return (this->_sp->size());
 }
 
 int GetNextLine::get_extra_buf(char *buf)
@@ -110,18 +110,18 @@ int GetNextLine::get_extra_buf(char *buf)
 
 string &GetNextLine::getline()
 {
-    if (this->sp == NULL || this->sp->size() == this->pos){
+    if (this->_sp == NULL || this->_sp->size() == this->_pos){
         if (this->_buf_body_pos == NULL){
             this->read_line();
         }
     }
-    if (this->sp == NULL){
+    if (this->_sp == NULL){
         return (this->last_str);
     }
-    if (this->sp->size() == this->pos){
+    if (this->_sp->size() == this->_pos){
         return (this->last_str);
     }
-    return (*(this->sp))[this->pos++];
+    return (*(this->_sp))[this->_pos++];
 }
 
 int GetNextLine::get_body(char *buf, size_t size)

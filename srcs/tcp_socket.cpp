@@ -12,8 +12,8 @@ using std::endl;
 
 void TCPSocket::init()
 {
-    this->sock_fd= socket(AF_INET, SOCK_STREAM, 0);
-    if (this->sock_fd < 0)
+    this->_sock_fd= socket(AF_INET, SOCK_STREAM, 0);
+    if (this->_sock_fd < 0)
     {
          cout << strerror(errno) << endl;
          //throw std::exception();
@@ -26,14 +26,14 @@ void TCPSocket::init()
     hint.ai_flags = AI_PASSIVE;
     hint.ai_socktype = SOCK_STREAM;
     struct addrinfo *res = NULL;
-    int err = getaddrinfo(NULL, this->port.c_str(), &hint, &res);
+    int err = getaddrinfo(NULL, this->_port.c_str(), &hint, &res);
     if (err != 0)
     {
         this->close_fd();
         cout << "Error getaddrinfo() :" << gai_strerror(err) << endl;
         throw std::runtime_error("Failed to init()\n");
     }
-    if (bind(this->sock_fd, res->ai_addr, res->ai_addrlen) != 0)
+    if (bind(this->_sock_fd, res->ai_addr, res->ai_addrlen) != 0)
     {
         this->close_fd();
         freeaddrinfo(res);
@@ -64,6 +64,5 @@ TCPSocket& TCPSocket::operator=(const TCPSocket &sock_fdet)
 
 void TCPSocket::communication()
 {
-    listen(this->sock_fd, 5);
+    listen(this->_sock_fd, 5);
 }
-
