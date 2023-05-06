@@ -24,15 +24,14 @@ Request::Request(int fd_)
       _method(NG),
       _err_line(""),
       _data_in_body(false),
-      _cgi(false)
+      _cgi(false),
+      _body_size(0)
 {
     this->parse();
 }
 
 Request::~Request()
 {
-    // delete _body;
-    // close(this->fd);
 }
 
 void Request::print_request()
@@ -50,6 +49,7 @@ void Request::print_request()
         cout << (*ite).first << ":" << (*ite).second << endl;
         i++;
     }
+    cout << "Print Request End" << endl;
 }
 
 void Request::parse()
@@ -112,6 +112,9 @@ void Request::parse()
     }
     this->_content_length = size;
     this->_transfer_encoding = this->search_header("transfer-encoding");
+
+    this->_body_size = this->read_body(this->_buf);
+    this->add_loaded_body_size(this->_body_size);
 }
 
 METHOD Request::get_method()
@@ -134,7 +137,19 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-int Request::read_buf(char* buf)
+char* Request::get_body(int *size)
+{
+    *size = _body_size;
+    return (_buf);
+}
+
+int Request::read_buf(char *buf)
+{
+    Utility::memcpy(buf, _buf, _body_size);
+    return (_body_size);
+}
+
+int Request::read_body(char* buf)
 {
     int size = this->_gnl.get_extra_buf(buf);
     if (size > 0)

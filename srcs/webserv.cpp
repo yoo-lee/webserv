@@ -137,23 +137,10 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
         }
 
         // Body Test
-        // cout << "Body(only string):" << endl;
-        char buf[1600];
-        int size = req->read_buf(buf);
-        size_t file_size = 0;
-        int cnt = 0;
-        while (size > 0) {
-            cnt++;
-            req->add_loaded_body_size(size);
-            file_size += size;
-            // for(int i=0;i<size;i++){
-            // cout << "body [" << i << "]:" << buf[i] << endl;
-            //}
-            // cout << buf << endl;
-            size = req->read_buf(buf);
-        }
-        // for "variable 'file_size' set but not used"
-        std::cout << "file_size:" << file_size << std::endl;
+        //int size;
+        //char *buf;
+        //buf = req->get_body(&size);
+        //cout << buf << endl;
 
         // Test (will remove)
         req->print_request();
