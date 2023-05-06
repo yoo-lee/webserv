@@ -3,5 +3,7 @@ IndentWidth: 4
 ColumnLimit: 120
 PackConstructorInitializers: CurrentLine
 AlwaysBreakTemplateDeclarations: Yes
-SplitEmptyFunction: true
-AllowShortFunctionsOnASingleLine: Empty
+SplitEmptyFunction: false,AllowShortFunctionsOnASingleLine: Empty
+Standard: Cpp03
+BreakBeforeBraces: Linux
+PointerAlignment: Left
