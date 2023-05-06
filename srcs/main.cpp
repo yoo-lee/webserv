@@ -1,4 +1,5 @@
-int main(int argc, char const* argv[]) {
+int main(int argc, char const *argv[])
+{
     // config読み込み
     // ソケットの初期設定
     // イベントループ開始
