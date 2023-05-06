@@ -34,20 +34,18 @@ Request::~Request() {}
 
 void Request::print_request()
 {
-    cout << "Print Request!!!!!!!!!!!!!!!!!!!!" << endl;
-    cout << "method: " << method_to_str(this->_method) << endl;
-    cout << "version: " << this->_version << endl;
+    cout << "|----- Print Request -----|" << endl;
+    cout << " method: " << method_to_str(this->_method) << endl;
+    cout << " version: " << this->_version << endl;
 
-    cout << "headers size:" << this->_headers.size() << endl;
-    ;
+    cout << " headers size:" << this->_headers.size() << endl;
+    cout << " path" << this->_path << endl;
     map<string, string>::iterator ite = this->_headers.begin();
     map<string, string>::iterator end = this->_headers.end();
-    int i = 0;
     for (; ite != end; ite++) {
-        cout << (*ite).first << ":" << (*ite).second << endl;
-        i++;
+        cout << " " << (*ite).first << ": " << (*ite).second << endl;
     }
-    cout << "Print Request End" << endl;
+    cout << "|-------------------------|" << endl;
 }
 
 void Request::parse()
@@ -67,16 +65,18 @@ void Request::parse()
     }
     Split::iterator ite = sp.begin();
     this->_method = str_to_method(*ite);
-    const char* path = (++ite)->c_str();
-    size_t cnt = 0;
-    while (path && *path) {
-        if (*path != '/')
-            break;
-        cnt++;
-        path++;
-    }
-    string tmp = string(path).substr(cnt);
-    this->_path = Utility::delete_space(tmp);
+    // ↓_pathになにいれればいいかわからんのでよくわからんので蓋をする
+    // std::cout << *(++ite) << std::endl;
+    // const char* path = (ite)->c_str();
+    // size_t cnt = 0;
+    // while (path && *path) {
+    //     if (*path != '/')
+    //         break;
+    //     cnt++;
+    //     path++;
+    // }
+    // string tmp = string(path).substr(cnt);
+    this->_path = Utility::delete_space(*(++ite));
     this->_version = Utility::delete_space(*(++ite));
     string header;
     string value;
@@ -154,9 +154,25 @@ int Request::read_body(char* buf)
     return (_gnl.get_body(&(buf[size]), BUF_MAX));
 }
 
-const string& Request::get_path()
+string const& Request::get_path()
 {
-    return (this->_path);
+    return _path;
+}
+
+// hoge/fuga/piyo -> hoge, fuga, piyo
+vector<string> Request::get_path_list()
+{
+    vector<string> path_list;
+    string buf;
+    size_t i = 0;
+    while (_path[i] != 0) {
+        buf += _path[i];
+        if (_path[i] == '/') {
+            path_list.push_back(buf);
+            buf = "";
+        }
+    }
+    return (path_list);
 }
 
 string Request::get_ip_address()

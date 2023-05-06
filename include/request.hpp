@@ -6,10 +6,11 @@
 #include "split.hpp"
 #include <map>
 #include <string>
+#include <vector>
 
 using std::map;
 using std::string;
-
+using std::vector;
 class Request : public SocketData
 {
   public:
@@ -17,6 +18,7 @@ class Request : public SocketData
     Request(int fd);
     ~Request();
     const string& get_path();
+    vector<string> get_path_list();
     const string& get_version();
     const string& get_body_size();
     METHOD get_method();
