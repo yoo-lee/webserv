@@ -23,7 +23,7 @@ CONFIG := \
 				 LimitExcept.cpp
 CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
 SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
-CGI 	:= 
+CGI 	:=
 SERVER 	:= webserv.cpp
 UTILITY := split.cpp get_next_line.cpp utility.cpp
 SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
@@ -51,7 +51,7 @@ CXX			:= c++
 CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98
 
 all:
-	@make $(NAME)	
+	@make $(NAME)
 
 $(NAME)	:	$(OBJECTS) | $(OBJDIR)
 		$(CXX)  $(OBJECTS) -o $@
@@ -75,12 +75,16 @@ fclean	:	clean
 
 re	:		fclean all
 
-bonus	:	
+bonus	:
 			@make WITH_BONUS=1
+
+run:
+	./webserv ./srcs/config/config/mini.nginx.conf
+
+
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 -include $(DEPS)
 endif
 
 .PHONY: all clean fclean bonus re
-
