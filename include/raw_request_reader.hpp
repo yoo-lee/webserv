@@ -1,5 +1,5 @@
-#ifndef GET_NEXT_LINE_H
-#define GET_NEXT_LINE_H
+#ifndef RAW_REQUEST_READER_H
+#define RAW_REQUEST_READER_H
 #include "split.hpp"
 #include <string>
 #include <unistd.h>
@@ -32,4 +32,4 @@ class RawRequestReader
     // void read_line(char *buf);
 };
 
-#endif /* GET_NEXT_LINE_H */
+#endif /* RAW_REQUEST_READER_H */

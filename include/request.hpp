@@ -16,7 +16,7 @@ class Request : public SocketData
 {
   public:
     Request();
-    Request(int fd);
+    Request(int fd, Config const& config);
     ~Request();
     const string& get_path();
     vector<string> get_path_list();
@@ -43,6 +43,8 @@ class Request : public SocketData
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);
     // void clear_timeout();
+
+    // bodyはメモリに格納できないレベルで大きい場合があるので、（一旦ファイルに書き込む（予定））
   private:
     const static int BUF_MAX = 1600;
     void parse();
@@ -53,8 +55,8 @@ class Request : public SocketData
     ssize_t _content_length;
     ssize_t _loaded_body_size;
     string _transfer_encoding;
-    char _buf[BUF_MAX];
-    GetNextLine _gnl;
+    char _loaded_packet_body[BUF_MAX];
+    RawRequestReader _buf;
     map<string, string> _headers;
     METHOD _method;
     string _path;
