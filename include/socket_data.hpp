@@ -27,7 +27,7 @@ typedef enum E_METHOD METHOD;
 class SocketData
 {
   public:
-    SocketData();
+    SocketData(Config const& config);
     ~SocketData();
 
     static string method_to_str(METHOD method);
@@ -40,7 +40,6 @@ class SocketData
     int _timeout_cnt;
 
     Config const* _config;
-    void set_config(Config const& config);
 };
 
 #endif
