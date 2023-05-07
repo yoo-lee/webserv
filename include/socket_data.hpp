@@ -2,7 +2,7 @@
 #define SOCKET_DATA_HPP
 
 #include "Config.hpp"
-#include "get_next_line.hpp"
+#include "raw_request_reader.hpp"
 #include "split.hpp"
 #include <map>
 #include <string>

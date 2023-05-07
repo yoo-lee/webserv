@@ -2,7 +2,7 @@
 #define REQUEST_H
 
 #include "Config.hpp"
-#include "get_next_line.hpp"
+#include "raw_request_reader.hpp"
 #include "socket_data.hpp"
 #include "split.hpp"
 #include <map>
