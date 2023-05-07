@@ -25,7 +25,7 @@ CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
 SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
 CGI 	:=
 SERVER 	:= webserv.cpp
-UTILITY := split.cpp get_next_line.cpp utility.cpp
+UTILITY := split.cpp raw_request_reader.cpp utility.cpp
 SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
 
 MANDATORY	:= main.cpp
