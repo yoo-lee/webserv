@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-SocketData::SocketData() : _timeout_cnt(0)
+SocketData::SocketData(Config const& config) : _timeout_cnt(0), _config(&config)
 {
     ;
 }
@@ -72,9 +72,4 @@ bool SocketData::increment_timeout(int time)
 void SocketData::clear_timeout()
 {
     _timeout_cnt = 0;
-}
-
-void SocketData::set_config(Config const& config)
-{
-    this->_config = &config;
 }

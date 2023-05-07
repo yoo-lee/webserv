@@ -137,9 +137,10 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
         }
 
         // Body Test
-
-        // Test (will remove)
-        req->print_request();
+        req->get_body();
+        <= bodyのすべて
+                // Test (will remove)
+                req->print_request();
         if (req->analyze() == false) {
             // make error Response;
             return;

@@ -1,9 +1,7 @@
 #include "fd_manager.hpp"
 #include <unistd.h>
 
-FDManager::FDManager(int fd) : _fd(fd), _req(NULL), _res(NULL)
-{
-}
+FDManager::FDManager(int fd) : _fd(fd), _req(NULL), _res(NULL) {}
 
 FDManager::~FDManager()
 {
@@ -13,7 +11,7 @@ FDManager::~FDManager()
 
 void FDManager::insert(Request* req)
 {
-    if (this->_req){
+    if (this->_req) {
         delete this->_req;
     }
     this->_req = req;
@@ -21,7 +19,7 @@ void FDManager::insert(Request* req)
 
 void FDManager::insert(Response* res)
 {
-    if (this->_res){
+    if (this->_res) {
         delete this->_res;
     }
     this->_res = res;
@@ -52,6 +50,6 @@ void FDManager::delete_res()
 void FDManager::close_fd()
 {
     close(_fd);
-    //this->delete_res();
-    //this->delete_req();
+    // this->delete_res();
+    // this->delete_req();
 }

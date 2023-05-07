@@ -18,11 +18,12 @@ using std::endl;
 using std::map;
 using std::string;
 
-Request::Request(int fd_)
-    : _fd(fd_),
+Request::Request(int fd_, Config const& config)
+    : SocketData(config),
+      _fd(fd_),
       _content_length(0),
       _loaded_body_size(0),
-      _gnl(this->_fd),
+      _buf(this->_fd),
       _method(NG),
       _err_line(""),
       _data_in_body(false),
@@ -30,6 +31,16 @@ Request::Request(int fd_)
       _body_size(0)
 {
     this->parse();
+    // TODO: configの絞り込み
+    // server_list = config.server
+    // for server in server_list
+    // {
+    //     if server->server_name == get_domain(url) && server->port == this->_port
+    //         {
+    //             this->server = server;
+    //             break;
+    //         }
+    // }
 }
 
 Request::~Request() {}
@@ -53,15 +64,15 @@ void Request::print_request()
 
 void Request::parse()
 {
-    string str = _gnl.getline();
-    if (str == _gnl.last_str) {
+    string str = _buf.getline();
+    if (str == _buf.last_str) {
         return;
     }
     Split sp(str, " ");
     if (sp.size() != 3) {
         cout << "size:" << sp.size() << endl;
         cout << "str:[" << str << "]" << endl;
-        str = _gnl.getline();
+        str = _buf.getline();
         cout << "str:[" << str << "]" << endl;
         cout << "Error:not 3 factor" << endl;
         throw std::exception();
@@ -70,6 +81,7 @@ void Request::parse()
     this->_method = str_to_method(*ite);
     // ↓_pathになにいれればいいかわからんのでよくわからんので蓋をする
     // std::cout << *(++ite) << std::endl;
+
     // const char* path = (ite)->c_str();
     // size_t cnt = 0;
     // while (path && *path) {
@@ -79,13 +91,14 @@ void Request::parse()
     //     path++;
     // }
     // string tmp = string(path).substr(cnt);
+
     this->_path = Utility::delete_space(*(++ite));
     this->_version = Utility::delete_space(*(++ite));
     string header;
     string value;
     std::string::size_type pos;
-    while ((str != _gnl.last_str)) {
-        str = _gnl.getline();
+    while ((str != _buf.last_str)) {
+        str = _buf.getline();
         pos = str.find(":");
         if (pos == string::npos || str.size() <= 0) {
             break;
@@ -114,7 +127,8 @@ void Request::parse()
     this->_content_length = size;
     this->_transfer_encoding = this->search_header("transfer-encoding");
 
-    this->_body_size = this->read_body(this->_buf);
+    // ここでボディをファイルに保存する場合は保存してそうじゃない場合はbufに保存する
+    this->_body_size = this->read_body(this->_loaded_packet_body);
     this->add_loaded_body_size(this->_body_size);
 }
 
@@ -142,21 +156,26 @@ const map<string, string>& Request::get_headers()
 char* Request::get_body(int* size)
 {
     *size = _body_size;
-    return (_buf);
+    return (_loaded_packet_body);
+}
+
+string get_body_tmp_file_path()
+{
+    // return file_path;
 }
 
 int Request::read_buf(char* buf)
 {
-    Utility::memcpy(buf, _buf, _body_size);
+    Utility::memcpy(buf, _loaded_packet_body, _body_size);
     return (_body_size);
 }
 
 int Request::read_body(char* buf)
 {
-    int size = this->_gnl.get_extra_buf(buf);
+    int size = this->_buf.get_extra_buf(buf);
     if (size > 0)
         return (size);
-    return (_gnl.get_body(&(buf[size]), BUF_MAX));
+    return (_buf.get_body(&(buf[size]), BUF_MAX));
 }
 
 string const& Request::get_path()
