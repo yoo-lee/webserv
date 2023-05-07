@@ -45,6 +45,7 @@ void Request::print_request()
     for (; ite != end; ite++) {
         cout << " " << (*ite).first << ": " << (*ite).second << endl;
     }
+    cout << " path dep: " << get_path_list().size() << endl;
     cout << "|-------------------------|" << endl;
 }
 
@@ -167,11 +168,12 @@ vector<string> Request::get_path_list()
     string buf;
     size_t i = 0;
     while (_path[i] != 0) {
-        buf += _path[i];
-        if (_path[i] == '/') {
+        if ((_path[i] == '/' || i == _path.length() - 1) && buf != "") {
             path_list.push_back(buf);
             buf = "";
-        }
+        } else
+            buf += _path[i];
+        i++;
     }
     return (path_list);
 }
