@@ -16,7 +16,7 @@ SocketData::~SocketData()
     ;
 }
 
-METHOD SocketData::identify_method(string method)
+METHOD SocketData::str_to_method(string method)
 {
     if (method == "GET") {
         return (GET);
@@ -38,7 +38,7 @@ METHOD SocketData::identify_method(string method)
     return (NG);
 }
 
-std::string SocketData::identify_method(METHOD method)
+std::string SocketData::method_to_str(METHOD method)
 {
     if (method == GET) {
         return ("GET");

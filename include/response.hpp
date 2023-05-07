@@ -1,37 +1,36 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
-#include <string>
 #include "request.hpp"
 #include "socket_data.hpp"
+#include <string>
 
-class Response : public SocketData{
-public:
-	Response();
+using std::string;
+
+class Response : public SocketData
+{
+  public:
+    Response();
     // コンストラクタ
     Response(Request& request);
     // HTTP レスポンスを構築するメソッド
-    void buildResponse();
+    void build_response();
     // ステータスコードを設定するメソッド
-    void setStatus(int code);
+    void set_status(int code);
     // HTTP レスポンスを文字列で返す
-    std::string getRes() const;
+    string get_response_string() const;
     // HTTP レスポンスのバイト数を返す
     int getLen() const;
-    std::string getStatusMessage(int code);
-	METHOD identify_method(std::string method);
-	std::string identify_method(METHOD method);
+    string get_status_message(int code);
+    METHOD str_to_method(string method);
+    string method_to_str(METHOD method);
 
-	std::string methodToString(METHOD method);
-    std::string get_file_path();
-
-private:
-    std::string file_path;
-    Request &_request;
-    std::string _res;
-    std::string _body;
+  private:
+    string _file_path;
+    Request& _request;
+    string _res;
+    string _body;
     int _code;
-
 };
 
 #endif /* RESPONSE_HPP */

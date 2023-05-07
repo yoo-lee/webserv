@@ -1,10 +1,13 @@
 #ifndef SOCKET_DATA_HPP
 #define SOCKET_DATA_HPP
 
+#include "Config.hpp"
 #include "get_next_line.hpp"
 #include "split.hpp"
 #include <map>
 #include <string>
+
+using std::string;
 
 enum E_METHOD {
     GET,
@@ -27,8 +30,8 @@ class SocketData
     SocketData();
     ~SocketData();
 
-    static std::string identify_method(METHOD method);
-    static METHOD identify_method(std::string method);
+    static string method_to_str(METHOD method);
+    static METHOD str_to_method(string method);
     bool increment_timeout(int time);
     void clear_timeout();
 

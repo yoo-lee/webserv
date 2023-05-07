@@ -36,7 +36,7 @@ Webserv::Webserv(const std::vector<std::string> ports)epfd(0)
 }
 */
 
-Webserv::Webserv(Config& config) : epfd(0), _config(config)
+Webserv::Webserv(Config& config) : _epfd(0), _config(config)
 {
     std::vector<std::string> ports;
     size_t server_cnt = config.http->server.size();
@@ -73,7 +73,7 @@ void Webserv::init_socket(std::vector<std::string> vec)
     try {
         for (size_t i = 0; i < vec.size(); i++) {
             Socket* sock = new Socket(vec[i]);
-            this->sockets.push_back(sock);
+            this->_sockets.push_back(sock);
         }
     } catch (std::exception& e) {
         close_all();
@@ -83,26 +83,26 @@ void Webserv::init_socket(std::vector<std::string> vec)
 
 void Webserv::close_all()
 {
-    for (size_t i = 0; i < this->sockets.size(); i++) {
-        this->sockets[i]->close_fd();
+    for (size_t i = 0; i < this->_sockets.size(); i++) {
+        this->_sockets[i]->close_fd();
     }
 }
 
 bool Webserv::init_epoll()
 {
-    this->epfd = epoll_create(this->sockets.size());
-    if (epfd < 0) {
+    this->_epfd = epoll_create(this->_sockets.size());
+    if (_epfd < 0) {
         cout << "Epoll Error:" << strerror(errno) << endl;
         return (false);
     }
-    for (size_t i = 0; i < this->sockets.size(); i++) {
+    for (size_t i = 0; i < this->_sockets.size(); i++) {
         struct epoll_event ev;
         memset(&ev, 0, sizeof(struct epoll_event));
-        Socket* socket = this->sockets[i];
+        Socket* socket = this->_sockets[i];
 
         ev.events = EPOLLIN;
         ev.data.fd = socket->getSockFD();
-        if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, socket->getSockFD(), &ev) != 0) {
+        if (epoll_ctl(this->_epfd, EPOLL_CTL_ADD, socket->getSockFD(), &ev) != 0) {
             cout << "Epoll Ctl Error:" << strerror(errno) << endl;
             return (false);
         }
@@ -112,21 +112,21 @@ bool Webserv::init_epoll()
 
 Socket* Webserv::find_listen_socket(int socket_fd)
 {
-    for (size_t i = 0; i < this->sockets.size(); i++) {
-        if (this->sockets[i]->getSockFD() == socket_fd) {
-            return (this->sockets[i]);
+    for (size_t i = 0; i < this->_sockets.size(); i++) {
+        if (this->_sockets[i]->getSockFD() == socket_fd) {
+            return (this->_sockets[i]);
         }
     }
     return (NULL);
 }
 
-void Webserv::connected_communication(int fd, struct epoll_event* event, Socket* socket)
+void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* socket)
 {
     if (event->events & EPOLLIN) {
         Request* req = socket->recv(fd);
         if (!req) {
             event->events = EPOLLOUT;
-            if (epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0) {
+            if (epoll_ctl(this->_epfd, EPOLL_CTL_MOD, fd, event) != 0) {
                 cout << "error;connected_communication No.2" << endl;
             }
             return;
@@ -137,23 +137,6 @@ void Webserv::connected_communication(int fd, struct epoll_event* event, Socket*
         }
 
         // Body Test
-        // cout << "Body(only string):" << endl;
-        char buf[1600];
-        int size = req->read_buf(buf);
-        size_t file_size = 0;
-        int cnt = 0;
-        while (size > 0) {
-            cnt++;
-            req->add_loaded_body_size(size);
-            file_size += size;
-            // for(int i=0;i<size;i++){
-            // cout << "body [" << i << "]:" << buf[i] << endl;
-            //}
-            // cout << buf << endl;
-            size = req->read_buf(buf);
-        }
-        // for "variable 'file_size' set but not used"
-        std::cout << "file_size:" << file_size << std::endl;
 
         // Test (will remove)
         req->print_request();
@@ -185,7 +168,7 @@ void Webserv::connected_communication(int fd, struct epoll_event* event, Socket*
         }
         socket->erase_request(fd);
         event->events = EPOLLOUT;
-        if (epoll_ctl(this->epfd, EPOLL_CTL_MOD, fd, event) != 0) {
+        if (epoll_ctl(this->_epfd, EPOLL_CTL_MOD, fd, event) != 0) {
             cout << strerror(errno) << endl;
         }
     } else if (event->events & EPOLLOUT) {
@@ -196,7 +179,7 @@ void Webserv::connected_communication(int fd, struct epoll_event* event, Socket*
 
         // sock_fds.erase(fd);
         this->_fd_sockets.erase(fd);
-        if (epoll_ctl(this->epfd, EPOLL_CTL_DEL, fd, event) != 0) {
+        if (epoll_ctl(this->_epfd, EPOLL_CTL_DEL, fd, event) != 0) {
             cout << "connected_communication not change IN" << endl;
         }
         socket->erase_response(fd);
@@ -207,8 +190,8 @@ void Webserv::connected_communication(int fd, struct epoll_event* event, Socket*
 void Webserv::timeout(int time_sec)
 {
     Socket* sock;
-    for (size_t i = 0; i < this->sockets.size(); i++) {
-        sock = this->sockets[i];
+    for (size_t i = 0; i < this->_sockets.size(); i++) {
+        sock = this->_sockets[i];
         std::vector<int> delete_fd = sock->timeout(time_sec);
         for (size_t i = 0; i < delete_fd.size(); i++) {
             int tmp_fd = delete_fd[i];
@@ -218,9 +201,9 @@ void Webserv::timeout(int time_sec)
     }
 }
 
-void Webserv::communication()
+void Webserv::communicate()
 {
-    size_t size = this->sockets.size();
+    size_t size = this->_sockets.size();
     struct epoll_event sock_event[size];
     struct epoll_event server_event;
 
@@ -235,7 +218,7 @@ void Webserv::communication()
         if (this->_fd_sockets.size() > 0) {
             time_msec = 5;
         }
-        int nfds = epoll_wait(this->epfd, sock_event, size, time_msec * 1000);
+        int nfds = epoll_wait(this->_epfd, sock_event, size, time_msec * 1000);
         if (nfds == 0) {
             this->timeout(time_msec);
             continue;
@@ -247,7 +230,7 @@ void Webserv::communication()
             std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
             if (tmp_fd != this->_fd_sockets.end()) {
                 Socket* socket = tmp_fd->second;
-                connected_communication(tmp_fd->first, &(sock_event[i]), socket);
+                connect_communication(tmp_fd->first, &(sock_event[i]), socket);
                 continue;
             }
             Socket* socket = find_listen_socket(sock_event[i].data.fd);
@@ -257,7 +240,7 @@ void Webserv::communication()
                 server_event.events = EPOLLIN;
                 server_event.data.fd = fd;
                 this->_fd_sockets.insert(std::make_pair(fd, socket));
-                if (epoll_ctl(this->epfd, EPOLL_CTL_ADD, fd, &server_event)) {
+                if (epoll_ctl(this->_epfd, EPOLL_CTL_ADD, fd, &server_event)) {
                     continue;
                 }
             }

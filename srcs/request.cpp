@@ -4,6 +4,7 @@
 #include "split.hpp"
 #include "utility.hpp"
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -18,40 +19,36 @@ using std::map;
 using std::string;
 
 Request::Request(int fd_)
-    : fd(fd_),
+    : _fd(fd_),
       _content_length(0),
       _loaded_body_size(0),
-      _gnl(this->fd),
-      method(NG),
-      err_line(""),
+      _gnl(this->_fd),
+      _method(NG),
+      _err_line(""),
       _data_in_body(false),
-      _cgi(false)
+      _cgi(false),
+      _body_size(0)
 {
     this->parse();
 }
 
-Request::~Request()
-{
-    // delete _body;
-    // close(this->fd);
-}
+Request::~Request() {}
 
 void Request::print_request()
 {
-    cout << "Print Request!!!!!!!!!!!!!!!!!!!!" << endl;
-    cout << "method: " << identify_method(this->method) << endl;
-    cout << "uri: " << this->uri << endl;
-    cout << "version: " << this->version << endl;
+    cout << "|----- Print Request -----|" << endl;
+    cout << " method: " << method_to_str(this->_method) << endl;
+    cout << " version: " << this->_version << endl;
 
-    cout << "headers size:" << this->headers.size() << endl;
-    ;
-    map<string, string>::iterator ite = this->headers.begin();
-    map<string, string>::iterator end = this->headers.end();
-    int i = 0;
+    cout << " headers size:" << this->_headers.size() << endl;
+    cout << " path" << this->_path << endl;
+    map<string, string>::iterator ite = this->_headers.begin();
+    map<string, string>::iterator end = this->_headers.end();
     for (; ite != end; ite++) {
-        cout << (*ite).first << ":" << (*ite).second << endl;
-        i++;
+        cout << " " << (*ite).first << ": " << (*ite).second << endl;
     }
+    cout << " path dep: " << get_path_list().size() << endl;
+    cout << "|-------------------------|" << endl;
 }
 
 void Request::parse()
@@ -70,20 +67,20 @@ void Request::parse()
         throw std::exception();
     }
     Split::iterator ite = sp.begin();
-    this->method = identify_method(*ite);
-    this->uri = *(++ite);
-    const char* path = this->uri.c_str();
-    size_t cnt = 0;
-    while (path && *path) {
-        if (*path != '/')
-            break;
-        cnt++;
-        path++;
-    }
-    this->path = this->uri.substr(cnt);
-    this->path = Utility::delete_space(this->path);
-    this->version = *(++ite);
-    this->version = Utility::delete_space(this->version);
+    this->_method = str_to_method(*ite);
+    // ↓_pathになにいれればいいかわからんのでよくわからんので蓋をする
+    // std::cout << *(++ite) << std::endl;
+    // const char* path = (ite)->c_str();
+    // size_t cnt = 0;
+    // while (path && *path) {
+    //     if (*path != '/')
+    //         break;
+    //     cnt++;
+    //     path++;
+    // }
+    // string tmp = string(path).substr(cnt);
+    this->_path = Utility::delete_space(*(++ite));
+    this->_version = Utility::delete_space(*(++ite));
     string header;
     string value;
     std::string::size_type pos;
@@ -99,10 +96,10 @@ void Request::parse()
         if (header.size() < 2) {
             break;
         }
-        std::transform(header.begin(), header.end(), header.begin(), tolower);
+        std::transform(header.begin(), header.end(), header.begin(), static_cast<int (*)(int)>(std::tolower));
         value = str.substr(pos + 1);
         value = Utility::delete_space(value);
-        this->headers.insert(make_pair(header, value));
+        this->_headers.insert(make_pair(header, value));
     }
     string size_str = this->search_header("content-length");
     ssize_t size = -1;
@@ -116,34 +113,45 @@ void Request::parse()
     }
     this->_content_length = size;
     this->_transfer_encoding = this->search_header("transfer-encoding");
+
+    this->_body_size = this->read_body(this->_buf);
+    this->add_loaded_body_size(this->_body_size);
 }
 
 METHOD Request::get_method()
 {
-    return (this->method);
+    return (this->_method);
 }
 
 const std::string Request::get_method_string()
 {
-    return (identify_method(this->method));
-}
-
-const string& Request::get_uri()
-{
-    return (this->uri);
+    return (method_to_str(this->_method));
 }
 
 const string& Request::get_version()
 {
-    return (this->version);
+    return (this->_version);
 }
 
 const map<string, string>& Request::get_headers()
 {
-    return (this->headers);
+    return (this->_headers);
+}
+
+// できればこのget_bodyでbodyの全体がほしい
+char* Request::get_body(int* size)
+{
+    *size = _body_size;
+    return (_buf);
 }
 
 int Request::read_buf(char* buf)
+{
+    Utility::memcpy(buf, _buf, _body_size);
+    return (_body_size);
+}
+
+int Request::read_body(char* buf)
 {
     int size = this->_gnl.get_extra_buf(buf);
     if (size > 0)
@@ -151,9 +159,26 @@ int Request::read_buf(char* buf)
     return (_gnl.get_body(&(buf[size]), BUF_MAX));
 }
 
-const string& Request::get_path()
+string const& Request::get_path()
 {
-    return (this->path);
+    return _path;
+}
+
+// hoge/fuga/piyo -> hoge, fuga, piyo
+vector<string> Request::get_path_list()
+{
+    vector<string> path_list;
+    string buf;
+    size_t i = 0;
+    while (_path[i] != 0) {
+        if ((_path[i] == '/' || i == _path.length() - 1) && buf != "") {
+            path_list.push_back(buf);
+            buf = "";
+        } else
+            buf += _path[i];
+        i++;
+    }
+    return (path_list);
 }
 
 string Request::get_ip_address()
@@ -192,8 +217,8 @@ string Request::search_header(string header)
 {
     (void)header;
     std::map<std::string, std::string>::const_iterator ite;
-    ite = this->headers.find(header);
-    if (ite == this->headers.end()) {
+    ite = _headers.find(header);
+    if (ite == _headers.end()) {
         return ("");
     }
     return (ite->second);
@@ -214,12 +239,17 @@ bool Request::have_data_in_body()
 
 bool Request::is_cgi()
 {
-    return is_cgi(this->path);
+    return is_cgi(_path);
 }
 
 bool Request::is_cgi(string path) const
 {
-    const Server* server = _config->http->get_server(this->headers["Host"]);
+    const Server* server;
+    try {
+        server = _config->http->get_server(_headers.at("Host"));
+    } catch (const std::exception& e) {
+        server = _config->http->server.at(0);
+    }
     for (size_t j = 0; j < server->location.size(); j++) {
         Location* current = const_cast<Location*>(server->location[j]);
         for (size_t k = 0; k < current->urls.size(); k++) {

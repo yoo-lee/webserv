@@ -18,11 +18,11 @@ std::string base_path = "srcs/dir";
 
 void server(Webserv& webserv)
 {
-    try {
-        webserv.communication();
-    } catch (std::exception& e) {
-        cout << e.what() << endl;
-    }
+    // try {
+    webserv.communicate();
+    // } catch (std::exception& e) {
+    // cout << e.what() << endl;
+    // }
 }
 
 int main(int argc, char const* argv[])
