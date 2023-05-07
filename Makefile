@@ -25,7 +25,7 @@ CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
 SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
 CGI 	:=
 SERVER 	:= webserv.cpp
-UTILITY := split.cpp raw_request_reader.cpp utility.cpp
+UTILITY := splitted_string.cpp raw_request_reader.cpp utility.cpp
 SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
 
 MANDATORY	:= main.cpp
@@ -78,9 +78,14 @@ re	:		fclean all
 bonus	:
 			@make WITH_BONUS=1
 
+r: run
 run:
 	./webserv ./srcs/config/config/mini.nginx.conf
 
+mr: make_run
+make_run:
+	@make re
+	@make run
 
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)

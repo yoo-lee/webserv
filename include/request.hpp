@@ -4,7 +4,7 @@
 #include "Config.hpp"
 #include "raw_request_reader.hpp"
 #include "socket_data.hpp"
-#include "split.hpp"
+#include "splitted_string.hpp"
 #include <map>
 #include <string>
 #include <vector>

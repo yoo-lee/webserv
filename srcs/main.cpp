@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Config.hpp"
-#include "split.hpp"
+#include "splitted_string.hpp"
 #include "webserv.hpp"
 
 using std::cout;

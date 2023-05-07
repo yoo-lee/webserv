@@ -1,7 +1,7 @@
 #include "request.hpp"
 #include "Config.hpp"
 #include "raw_request_reader.hpp"
-#include "split.hpp"
+#include "splitted_string.hpp"
 #include "utility.hpp"
 #include <algorithm>
 #include <cctype>
@@ -64,11 +64,16 @@ void Request::print_request()
 
 void Request::parse()
 {
+    init_method();
+    init_path();
+    init_version();
+    init_headers();
     string str = _buf.getline();
     if (str == _buf.last_str) {
         return;
     }
-    Split sp(str, " ");
+    std::cout << "str: " << str << std::endl;
+    SplittedString sp(str, " ");
     if (sp.size() != 3) {
         cout << "size:" << sp.size() << endl;
         cout << "str:[" << str << "]" << endl;
@@ -77,21 +82,9 @@ void Request::parse()
         cout << "Error:not 3 factor" << endl;
         throw std::exception();
     }
-    Split::iterator ite = sp.begin();
+    std::cout << sp << std::endl;
+    SplittedString::iterator ite = sp.begin();
     this->_method = str_to_method(*ite);
-    // ↓_pathになにいれればいいかわからんのでよくわからんので蓋をする
-    // std::cout << *(++ite) << std::endl;
-
-    // const char* path = (ite)->c_str();
-    // size_t cnt = 0;
-    // while (path && *path) {
-    //     if (*path != '/')
-    //         break;
-    //     cnt++;
-    //     path++;
-    // }
-    // string tmp = string(path).substr(cnt);
-
     this->_path = Utility::delete_space(*(++ite));
     this->_version = Utility::delete_space(*(++ite));
     string header;
@@ -152,7 +145,6 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-// できればこのget_bodyでbodyの全体がほしい
 char* Request::get_body(int* size)
 {
     *size = _body_size;

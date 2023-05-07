@@ -1,6 +1,6 @@
 #ifndef RAW_REQUEST_READER_H
 #define RAW_REQUEST_READER_H
-#include "split.hpp"
+#include "splitted_string.hpp"
 #include <string>
 #include <unistd.h>
 #include <vector>
@@ -24,7 +24,7 @@ class RawRequestReader
     ssize_t _buf_size;
     // ssize_t buf_pos;
     const int _fd;
-    Split* _sp;
+    SplittedString* _sp;
     // std::vector<std::string> vec;
     size_t _pos;
     void read_line();

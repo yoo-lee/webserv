@@ -48,7 +48,7 @@ void RawRequestReader::read_line()
     }
     string str = string(this->_buf);
     if (_sp == NULL) {
-        this->_sp = new Split(str, "\r\n");
+        this->_sp = new SplittedString(str, "\r\n");
     } else {
         this->_sp->concat(str, "\r\n");
     }

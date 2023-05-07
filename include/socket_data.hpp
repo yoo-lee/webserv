@@ -3,7 +3,7 @@
 
 #include "Config.hpp"
 #include "raw_request_reader.hpp"
-#include "split.hpp"
+#include "splitted_string.hpp"
 #include <map>
 #include <string>
 
