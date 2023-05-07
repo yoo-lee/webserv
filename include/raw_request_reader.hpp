@@ -1,5 +1,6 @@
 #ifndef RAW_REQUEST_READER_H
 #define RAW_REQUEST_READER_H
+#include "byte_vector.hpp"
 #include "splitted_string.hpp"
 #include <string>
 #include <unistd.h>
@@ -11,10 +12,11 @@ class RawRequestReader
     RawRequestReader(int fd);
     ~RawRequestReader();
     std::string& getline();
-    int get_body(char* buf, size_t size);
+    // int get_body(char* buf, size_t size);
+    ByteVector get_body(size_t size);
     std::string last_str;
     size_t size();
-    int get_extra_buf(char* buf);
+    ByteVector get_extra_buf();
 
   private:
     const static int BUF_MAX = 1600;
