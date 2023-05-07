@@ -1,7 +1,8 @@
 #include "fd_manager.hpp"
+#include "Config.hpp"
 #include <unistd.h>
 
-FDManager::FDManager(int fd) : _fd(fd), _req(NULL), _res(NULL) {}
+FDManager::FDManager(int fd, Config const& config) : SocketData(config), _fd(fd), _req(NULL), _res(NULL) {}
 
 FDManager::~FDManager()
 {

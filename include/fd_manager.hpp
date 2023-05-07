@@ -8,7 +8,7 @@
 class FDManager : public SocketData
 {
   public:
-    FDManager(int fd);
+    FDManager(int fd, Config const& config);
     ~FDManager();
     void insert(Request* req);
     void insert(Response* res);

@@ -161,7 +161,7 @@ char* Request::get_body(int* size)
 
 string get_body_tmp_file_path()
 {
-    // return file_path;
+    return "file_path";
 }
 
 int Request::read_buf(char* buf)

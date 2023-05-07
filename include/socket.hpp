@@ -1,6 +1,6 @@
 #ifndef SOCKET_H
 #define SOCKET_H
-
+#include "Config.hpp"
 #include "fd_manager.hpp"
 #include "request.hpp"
 #include "response.hpp"
@@ -24,8 +24,8 @@ typedef struct clientinfo {
 class Socket
 {
   public:
-    Socket();
-    Socket(std::string port);
+    Socket(Config const& config);
+    Socket(std::string port, Config const& config);
     Socket(const Socket& socket);
     Socket& operator=(const Socket& socket);
     virtual ~Socket();
@@ -53,6 +53,7 @@ class Socket
     struct epoll_event _ev;
     s_clientinfo _clientinfo;
     bool send_err(std::string err);
+    Config const& _config;
 
     template <typename T>
     bool increment_timeout(T& obj, int time);

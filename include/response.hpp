@@ -1,6 +1,6 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
-
+#include "Config.hpp"
 #include "request.hpp"
 #include "socket_data.hpp"
 #include <string>
@@ -12,7 +12,7 @@ class Response : public SocketData
   public:
     Response();
     // コンストラクタ
-    Response(Request& request);
+    Response(Request& request, Config const& config);
     // HTTP レスポンスを構築するメソッド
     void build_response();
     // ステータスコードを設定するメソッド

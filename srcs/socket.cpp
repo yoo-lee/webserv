@@ -1,4 +1,5 @@
 // #include "sock_fdet.hpp"
+#include "Config.hpp"
 #include "string.h"
 #include "tcp_socket.hpp"
 #include <errno.h>
@@ -62,12 +63,12 @@ void Socket::init()
 }
 // bind
 //  バインド（bind）とは、ソケットにIPアドレスとポート番号を関連付けることです。
-Socket::Socket() : _sock_fd(0), _port("11112")
+Socket::Socket(Config const& config) : _sock_fd(0), _port("11112"), _config(config)
 {
     init();
 }
 
-Socket::Socket(std::string port_) : _sock_fd(0), _port(port_)
+Socket::Socket(std::string port_, Config const& config) : _sock_fd(0), _port(port_), _config(config)
 {
     init();
 }
@@ -76,7 +77,10 @@ Socket::~Socket()
 {
     // delete this->req;
 }
-Socket::Socket(const Socket& sock_fdet) : _sock_fd(sock_fdet._sock_fd), _port(sock_fdet._port)
+Socket::Socket(const Socket& sock_fdet)
+    : _sock_fd(sock_fdet._sock_fd),
+      _port(sock_fdet._port),
+      _config(sock_fdet._config)
 {
     init();
 }
@@ -111,7 +115,7 @@ int Socket::accept_request()
         // return ();
     }
 
-    FDManager* fd_m = new FDManager(fd);
+    FDManager* fd_m = new FDManager(fd, _config);
     this->_fd_map.insert(std::make_pair(fd, fd_m));
     int cur_flags = fcntl(fd, F_GETFL, 0);
     cur_flags |= O_NONBLOCK;
@@ -125,7 +129,7 @@ Request* Socket::recv(int fd)
     if (req != NULL)
         return req;
     // try {
-    req = new Request(fd);
+    req = new Request(fd, _config);
     this->_fd_map[fd]->insert(req);
     // } catch (std::exception& e) {
     //     req = NULL;

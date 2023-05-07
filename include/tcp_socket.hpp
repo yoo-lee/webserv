@@ -11,7 +11,7 @@
 class TCPSocket : public Socket
 {
   public:
-    TCPSocket();
+    TCPSocket(Config const& config);
     TCPSocket(const TCPSocket& socket);
     TCPSocket& operator=(const TCPSocket& socket);
     ~TCPSocket();

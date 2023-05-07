@@ -1,5 +1,6 @@
 // #include "sock_fdet.hpp"
 #include "tcp_socket.hpp"
+#include "Config.hpp"
 #include <errno.h>
 #include <iostream>
 #include <string.h>
@@ -40,7 +41,7 @@ void TCPSocket::init()
     freeaddrinfo(res);
 }
 
-TCPSocket::TCPSocket() : Socket()
+TCPSocket::TCPSocket(Config const& config) : Socket(config)
 {
     init();
 }

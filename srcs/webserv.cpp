@@ -72,7 +72,7 @@ void Webserv::init_socket(std::vector<std::string> vec)
 {
     try {
         for (size_t i = 0; i < vec.size(); i++) {
-            Socket* sock = new Socket(vec[i]);
+            Socket* sock = new Socket(vec[i], _config);
             this->_sockets.push_back(sock);
         }
     } catch (std::exception& e) {
@@ -137,10 +137,8 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
         }
 
         // Body Test
-        req->get_body();
-        <= bodyのすべて
-                // Test (will remove)
-                req->print_request();
+        // Test (will remove)
+        req->print_request();
         if (req->analyze() == false) {
             // make error Response;
             return;
@@ -153,10 +151,10 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
 
         Response* res;
         if (req->is_cgi()) {
-            res = new Response(*req);
+            res = new Response(*req, _config);
             // cig processing
         } else {
-            res = new Response(*req);
+            res = new Response(*req, _config);
             // server processing except cgi
         }
         socket->set_response(fd, res);
