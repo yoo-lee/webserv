@@ -64,10 +64,6 @@ void Request::print_request()
 
 void Request::parse()
 {
-    init_method();
-    init_path();
-    init_version();
-    init_headers();
     string str = _buf.getline();
     if (str == _buf.last_str) {
         return;
@@ -121,7 +117,7 @@ void Request::parse()
     this->_transfer_encoding = this->search_header("transfer-encoding");
 
     // ここでボディをファイルに保存する場合は保存してそうじゃない場合はbufに保存する
-    this->_body_size = this->read_body(this->_loaded_packet_body);
+    this->_body_size = this->read_body().get_length();
     this->add_loaded_body_size(this->_body_size);
 }
 
@@ -145,10 +141,9 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-char* Request::get_body(int* size)
+ByteVector Request::get_body(size_t size)
 {
-    *size = _body_size;
-    return (_loaded_packet_body);
+    return (ByteVector(_loaded_packet_body, size));
 }
 
 string get_body_tmp_file_path()
@@ -156,18 +151,17 @@ string get_body_tmp_file_path()
     return "file_path";
 }
 
-int Request::read_buf(char* buf)
+ByteVector Request::read_buf()
 {
-    Utility::memcpy(buf, _loaded_packet_body, _body_size);
-    return (_body_size);
+    return (ByteVector(_loaded_packet_body, _body_size));
 }
 
-int Request::read_body(char* buf)
+ByteVector Request::read_body()
 {
-    int size = this->_buf.get_extra_buf(buf);
-    if (size > 0)
-        return (size);
-    return (_buf.get_body(&(buf[size]), BUF_MAX));
+    ByteVector bytes = this->_buf.get_extra_buf();
+    if (bytes.size() > 0)
+        return bytes;
+    return (_buf.get_body(BUF_MAX));
 }
 
 string const& Request::get_path()

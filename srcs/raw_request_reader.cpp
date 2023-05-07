@@ -1,4 +1,5 @@
 #include "raw_request_reader.hpp"
+#include "byte_vector.hpp"
 #include "utility.hpp"
 #include <iostream>
 #include <sys/socket.h>
@@ -61,15 +62,11 @@ size_t RawRequestReader::size()
     return (this->_sp->size());
 }
 
-int RawRequestReader::get_extra_buf(char* buf)
+ByteVector RawRequestReader::get_extra_buf()
 {
-    ssize_t tmp = 0;
-    if (this->_buf_body_size > 0) {
-        Utility::memcpy(buf, this->_buf_body_pos, this->_buf_body_size);
-        tmp = this->_buf_body_size;
-        this->_buf_body_size = 0;
-    }
-    return (tmp);
+    ByteVector by(this->_buf_body_pos, this->_buf_body_size);
+    this->_buf_body_size = 0;
+    return (by);
 }
 
 string& RawRequestReader::getline()
@@ -88,7 +85,9 @@ string& RawRequestReader::getline()
     return (*(this->_sp))[this->_pos++];
 }
 
-int RawRequestReader::get_body(char* buf, size_t size)
+ByteVector RawRequestReader::get_body(size_t size)
 {
-    return (read(buf, size));
+    char buf[BUF_MAX];
+    read(buf, size);
+    return (ByteVector(buf, size));
 }

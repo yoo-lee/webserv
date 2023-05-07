@@ -2,6 +2,7 @@
 #define REQUEST_H
 
 #include "Config.hpp"
+#include "byte_vector.hpp"
 #include "raw_request_reader.hpp"
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
@@ -26,9 +27,9 @@ class Request : public SocketData
     const string get_method_string();
     const map<string, string>& get_headers();
     void print_request();
-    int read_body(char* buf); // will move to private
-    int read_buf(char* buf);
-    char* get_body(int* size);
+    ByteVector read_body(); // will move to private
+    ByteVector read_buf();
+    ByteVector get_body(size_t size);
     string get_domain();
     string get_ip_address();
     ssize_t get_content_length();
