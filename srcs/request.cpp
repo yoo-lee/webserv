@@ -135,9 +135,10 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-string Request::get_body()
+vector<char> Request::get_body()
 {
-    return (_buf);
+    std::vector<char> body(_buf, _buf + sizeof(_buf) / sizeof(char));
+    return (body);
 }
 
 int Request::read_buf(char* buf)
