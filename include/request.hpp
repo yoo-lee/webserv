@@ -27,7 +27,7 @@ class Request : public SocketData
     void print_request();
     int read_body(char* buf); // will move to private
     int read_buf(char* buf);
-    vector<char> get_body();
+    char* get_body(int* size);
     string get_domain();
     string get_ip_address();
     ssize_t get_content_length();
