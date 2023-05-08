@@ -52,7 +52,6 @@ class Request : public SocketData
   private:
     const static int BUF_MAX = 1600;
     void parse();
-    string search_header(string);
     string& get_next_line(int fd);
     void parse_request_line();
     void parse_header_field();

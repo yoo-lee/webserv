@@ -69,7 +69,7 @@ void Request::parse()
     parse_header_field();
 
     parse_content_length();
-    _transfer_encoding = this->search_header("transfer-encoding");
+    _transfer_encoding = _headers["transfer-encoding"];
     parse_content_type();
 
     ByteVector tmp_loaded_packet_body = this->read_body();
@@ -131,7 +131,7 @@ void Request::parse_header_field()
 
 void Request::parse_content_length()
 {
-    string size_str = this->search_header("content-length");
+    string size_str = _headers["content-length"];
     ssize_t size = -1;
     if (size_str.size() > 10) {
         cout << "Error: exceed BODY SIZE MAX" << endl;
@@ -246,17 +246,6 @@ ssize_t Request::get_loaded_body_size()
 void Request::add_loaded_body_size(size_t size)
 {
     this->_loaded_body_size += size;
-}
-
-string Request::search_header(string header)
-{
-    (void)header;
-    std::map<std::string, std::string>::const_iterator ite;
-    ite = _headers.find(header);
-    if (ite == _headers.end()) {
-        return ("");
-    }
-    return (ite->second);
 }
 
 bool Request::analyze()
