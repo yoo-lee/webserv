@@ -2,22 +2,15 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef UNIT_TEST
+#include "doctest.h"
+#endif
+
 using std::cout;
 using std::endl;
 using std::string;
 
 #include <stdio.h>
-
-string Utility::delete_space(string& str)
-{
-    const std::string& space = "\t\n\v\f\r ";
-    ssize_t first_space = str.find_first_not_of(space);
-    ssize_t last_space = str.find_last_not_of(space);
-    if (first_space < 0 || last_space < 0) {
-        return ("");
-    }
-    return (str.substr(first_space, last_space + 1));
-}
 
 size_t Utility::strlen(const char* str)
 {
@@ -95,11 +88,21 @@ string Utility::to_lower(string str)
 
 string Utility::trim_white_space(string str)
 {
-    std::string::size_type left = str.find_first_not_of(" \t\n\r");
+    std::string::size_type left = str.find_first_not_of("\t\n\v\f\r ");
     if (left != std::string::npos) {
-        std::string::size_type right = str.find_last_not_of(" \t\n\r");
+        std::string::size_type right = str.find_last_not_of("\t\n\v\f\r ");
         return str.substr(left, right - left + 1);
-    } else {
+    } else
         return "";
-    }
 }
+
+#ifdef UNIT_TEST
+TEST_CASE("trim_white_space")
+{
+    CHECK(Utility::trim_white_space("  \t\n\v\f\r  ") == "");
+    CHECK(Utility::trim_white_space("  \t\n\v\f\r  a") == "a");
+    CHECK(Utility::trim_white_space("a  \t\n\v\f\r  ") == "a");
+    CHECK(Utility::trim_white_space("  \t\n\v\f\r  a  \t\n\v\f\r  ") == "a");
+    CHECK(Utility::trim_white_space("  \t\n\v\f\r  a  \t\n\v\f\r  b  \t\n\v\f\r  ") == "a  \t\n\v\f\r  b");
+}
+#endif
