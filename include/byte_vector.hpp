@@ -1,8 +1,10 @@
 #ifndef BYTE_VECTOR_H
 #define BYTE_VECTOR_H
+#include <ostream>
 #include <stddef.h>
 #include <string>
 #include <vector>
+using std::ostream;
 using std::string;
 using std::vector;
 
@@ -22,6 +24,8 @@ class ByteVector : public vector<char>
     size_t get_array(char* buf, size_t size);
     size_t get_length();
     void load(char const* bytes, size_t size);
+
+    friend std::ostream& operator<<(ostream& os, ByteVector& bv);
 };
 
 #endif /* BYTE_VECTOR_H */

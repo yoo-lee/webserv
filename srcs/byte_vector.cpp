@@ -46,3 +46,11 @@ void ByteVector::load(char const* bytes, size_t size)
         this->push_back(bytes[i]);
     }
 }
+
+std::ostream& operator<<(ostream& os, ByteVector& bv)
+{
+    for (size_t i = 0; i < bv.size(); i++) {
+        os << bv[i];
+    }
+    return (os);
+}
