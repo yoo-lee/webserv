@@ -18,17 +18,18 @@ using std::endl;
 using std::map;
 using std::string;
 
+#define BODY_TMP_DIRECTORY_PATH "/tmp/webserv_body_tmp/"
+
 Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
-      _content_length(0),
       _loaded_body_size(0),
       _buf(this->_fd),
+      _content_length(0),
       _method(NG),
       _err_line(""),
-      _data_in_body(false),
-      _cgi(false),
-      _body_size(0)
+      _is_data_in_body(false),
+      _is_cgi(false)
 {
     this->parse();
     // TODO: configの絞り込み
@@ -64,45 +65,72 @@ void Request::print_request()
 
 void Request::parse()
 {
-    string str = _buf.getline();
-    if (str == _buf.last_str) {
+    parse_request_line();
+    parse_header_field();
+
+    parse_content_length();
+    _transfer_encoding = this->search_header("transfer-encoding");
+    parse_content_type();
+
+    ByteVector tmp_loaded_packet_body = this->read_body();
+    if (_content_type.is_form_data())
+        save_tmp_file(tmp_loaded_packet_body);
+    else
+        _loaded_packet_body = tmp_loaded_packet_body;
+
+    this->add_loaded_body_size(tmp_loaded_packet_body.size());
+}
+
+void Request::parse_request_line()
+{
+    string request_line = _buf.getline();
+    if (request_line == _buf.last_str) {
         return;
     }
-    std::cout << "str: " << str << std::endl;
-    SplittedString sp(str, " ");
-    if (sp.size() != 3) {
-        cout << "size:" << sp.size() << endl;
-        cout << "str:[" << str << "]" << endl;
-        str = _buf.getline();
-        cout << "str:[" << str << "]" << endl;
+    std::cout << "str: " << request_line << std::endl;
+    SplittedString request_line_words(request_line, " ");
+    if (request_line_words.size() != 3) {
+        cout << "size:" << request_line_words.size() << endl;
+        cout << "str:[" << request_line << "]" << endl;
+        request_line = _buf.getline();
+        cout << "str:[" << request_line << "]" << endl;
         cout << "Error:not 3 factor" << endl;
         throw std::exception();
     }
-    std::cout << sp << std::endl;
-    SplittedString::iterator ite = sp.begin();
-    this->_method = str_to_method(*ite);
-    this->_path = Utility::delete_space(*(++ite));
-    this->_version = Utility::delete_space(*(++ite));
-    string header;
+    std::cout << request_line_words << std::endl;
+    SplittedString::iterator request_line_words_it = request_line_words.begin();
+    _method = str_to_method(*request_line_words_it);
+    _path = Utility::delete_space(*(++request_line_words_it));
+    _version = Utility::delete_space(*(++request_line_words_it));
+}
+
+void Request::parse_header_field()
+{
+    string key;
     string value;
-    std::string::size_type pos;
-    while ((str != _buf.last_str)) {
-        str = _buf.getline();
-        pos = str.find(":");
-        if (pos == string::npos || str.size() <= 0) {
+    std::string::size_type split_pos;
+    string line;
+    while ((line != _buf.last_str)) {
+        line = _buf.getline();
+        split_pos = line.find(":");
+        if (split_pos == string::npos || line.size() <= 0) {
             break;
         }
-        header = str.substr(0, pos);
-        header = Utility::delete_space(header);
-        header = Utility::delete_space(header);
-        if (header.size() < 2) {
+        key = line.substr(0, split_pos);
+        key = Utility::delete_space(key);
+        key = Utility::delete_space(key);
+        if (key.size() < 2) {
             break;
         }
-        std::transform(header.begin(), header.end(), header.begin(), static_cast<int (*)(int)>(std::tolower));
-        value = str.substr(pos + 1);
+        std::transform(key.begin(), key.end(), key.begin(), static_cast<int (*)(int)>(std::tolower));
+        value = line.substr(split_pos + 1);
         value = Utility::delete_space(value);
-        this->_headers.insert(make_pair(header, value));
+        this->_headers.insert(make_pair(key, value));
     }
+}
+
+void Request::parse_content_length()
+{
     string size_str = this->search_header("content-length");
     ssize_t size = -1;
     if (size_str.size() > 10) {
@@ -114,11 +142,16 @@ void Request::parse()
         ss >> size;
     }
     this->_content_length = size;
-    this->_transfer_encoding = this->search_header("transfer-encoding");
+}
 
-    // ここでボディをファイルに保存する場合は保存してそうじゃない場合はbufに保存する
-    this->_body_size = this->read_body().get_length();
-    this->add_loaded_body_size(this->_body_size);
+void Request::parse_content_type()
+{
+    _content_type = ContentType(_headers);
+}
+
+void Request::save_tmp_file(ByteVector bytes)
+{
+    std::cout << "save_tmp_file: " << bytes << std::endl;
 }
 
 METHOD Request::get_method()
@@ -141,19 +174,16 @@ const map<string, string>& Request::get_headers()
     return (this->_headers);
 }
 
-ByteVector Request::get_body(size_t size)
+ByteVector Request::get_body_text()
 {
-    return (ByteVector(_loaded_packet_body, size));
+    if (!this->_content_type.is_form_data())
+        return _loaded_packet_body;
+    throw std::runtime_error("Request::get_body_text() does not use  multipart/form-data");
 }
 
-string get_body_tmp_file_path()
+vector<path> Request::get_body_tmp_file_list()
 {
-    return "file_path";
-}
-
-ByteVector Request::read_buf()
-{
-    return (ByteVector(_loaded_packet_body, _body_size));
+    return _tmp_body_file_list;
 }
 
 ByteVector Request::read_body()
@@ -231,15 +261,15 @@ string Request::search_header(string header)
 
 bool Request::analyze()
 {
-    _data_in_body = false;
-    _cgi = false;
+    _is_data_in_body = false;
+    _is_cgi = false;
     return (true);
 }
 
 bool Request::have_data_in_body()
 {
-    _data_in_body = true;
-    return (_data_in_body);
+    _is_data_in_body = true;
+    return (_is_data_in_body);
 }
 
 bool Request::is_cgi()

@@ -3,6 +3,7 @@
 
 #include "Config.hpp"
 #include "byte_vector.hpp"
+#include "content_type.hpp"
 #include "raw_request_reader.hpp"
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
@@ -13,6 +14,8 @@
 using std::map;
 using std::string;
 using std::vector;
+
+typedef string path;
 class Request : public SocketData
 {
   public:
@@ -28,8 +31,7 @@ class Request : public SocketData
     const map<string, string>& get_headers();
     void print_request();
     ByteVector read_body(); // will move to private
-    ByteVector read_buf();
-    ByteVector get_body(size_t size);
+    ByteVector get_body_text();
     string get_domain();
     string get_ip_address();
     ssize_t get_content_length();
@@ -40,6 +42,7 @@ class Request : public SocketData
     bool have_data_in_body();
     bool is_cgi();
     bool is_cgi(string path) const;
+    vector<path> get_body_tmp_file_list();
     // static string identify_method(METHOD method);
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);
@@ -51,13 +54,22 @@ class Request : public SocketData
     void parse();
     string search_header(string);
     string& get_next_line(int fd);
+    void parse_request_line();
+    void parse_header_field();
+    void parse_content_length();
+    void parse_content_type();
+    bool is_contents_upload_file(string const& content_type);
+    void save_tmp_file(ByteVector bytes);
 
     const int _fd;
-    ssize_t _content_length;
     ssize_t _loaded_body_size;
-    string _transfer_encoding;
-    char _loaded_packet_body[BUF_MAX];
+    ByteVector _loaded_packet_body;
     RawRequestReader _buf;
+    vector<path> _tmp_body_file_list;
+
+    ssize_t _content_length;
+    string _transfer_encoding;
+
     map<string, string> _headers;
     METHOD _method;
     string _path;
@@ -65,9 +77,10 @@ class Request : public SocketData
     string _err_line;
     string _domain;
     string _ip;
-    bool _data_in_body;
-    bool _cgi;
-    int _body_size;
+    ContentType _content_type;
+
+    bool _is_data_in_body;
+    bool _is_cgi;
 };
 
 #endif /* REQUEST_H */

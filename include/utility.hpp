@@ -12,6 +12,8 @@ class Utility
     static size_t strlen(const char* str);
     static std::string delete_space(std::string& str);
     static char* strnstr(const char* haystack, const char* needle, size_t len);
+    static std::string to_lower(std::string str);
+    static std::string trim_white_space(std::string str);
 
     template <typename T>
     static std::string to_string(T value);
