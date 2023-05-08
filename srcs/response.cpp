@@ -12,7 +12,7 @@ Response::Response()
 */
 
 // Constructor for Response class that takes a Request object as argument
-Response::Response(Request& request, Config const& config) : SocketData(config), _request(request)
+Response::Response(Request& request) : SocketData(*(request.get_config())), _request(request)
 {
 
     // Set the status code based on the request method

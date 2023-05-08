@@ -12,7 +12,7 @@ class Response : public SocketData
   public:
     Response();
     // コンストラクタ
-    Response(Request& request, Config const& config);
+    Response(Request& request);
     // HTTP レスポンスを構築するメソッド
     void build_response();
     // ステータスコードを設定するメソッド
