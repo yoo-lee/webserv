@@ -22,11 +22,13 @@ CONFIG := \
 				 Http.cpp \
 				 LimitExcept.cpp
 CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
-SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
+UNIT_TEST_SOCKET := content_type.cpp
+SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp {UNIT_TEST_SOCKET}
 CGI 	:=
 SERVER 	:= webserv.cpp
 UTILITY := splitted_string.cpp raw_request_reader.cpp utility.cpp byte_vector.cpp
 SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
+UNIT_SRC := $(UNIT_TEST_SOCKET) $(UTILITY)
 
 MANDATORY	:= main.cpp
 BONUS		:= main_bonus.cpp
@@ -40,15 +42,17 @@ SRC	+= $(MANDATORY)
 DELENTRY	:= $(addprefix $(OBJDIR)/, $(BONUS))
 endif
 
-INCS	:= ./include ./srcs/config
-IFLAGS	:= $(addprefix -I,$(INCS))
-SRCS	:= $(addprefix $(SRCDIR), $(SRC))
-OBJS	:= $(SRCS:.cpp=.o)
-OBJECTS	:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o))
-DEPS	:= $(OBJECTS:.o=.d)
+INCS			:= ./include ./srcs/config
+IFLAGS			:= $(addprefix -I,$(INCS))
+SRCS			:= $(addprefix $(SRCDIR), $(SRC))
+UNIT_SRCS		:= $(addprefix $(SRCDIR)/, $(UNIT_SRC))
+OBJS			:= $(SRCS:.cpp=.o)
+OBJECTS			:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o))
+DEPS			:= $(OBJECTS:.o=.d)
 
 CXX			:= c++
 CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98 -g3
+UNIT_CXXFLAGS := -Wall -Wextra -Werror -std=c++11 -g3 -D UNIT_TEST
 
 all:
 	@make $(NAME)
@@ -87,6 +91,10 @@ make_run:
 	@make re
 	@make run
 
+ut: unit_test
+unit_test: $(UNIT_SRCS)
+	$(CXX) $(UNIT_CXXFLAGS) $(IFLAGS) -D UNIT_TEST -o unit_test $(UNIT_SRCS)
+	./unit_test
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 -include $(DEPS)
