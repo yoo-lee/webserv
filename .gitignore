@@ -4,3 +4,4 @@ webserv
 *.a
 obj/
 objs/
+unit_test
