@@ -19,7 +19,7 @@ std::string base_path = "srcs/dir";
 void server(Webserv& webserv)
 {
     // try {
-    webserv.communicate();
+    webserv.process_communication();
     // } catch (std::exception& e) {
     // cout << e.what() << endl;
     // }
