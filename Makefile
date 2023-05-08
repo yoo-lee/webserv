@@ -1,8 +1,8 @@
 NAME	:= webserv
-LIB		:= ./lib/
+LIB		:= ./lib
 OBJDIR	:= ./obj
-SRCDIR	:= ./srcs/
-CFGDIR	:= config/
+SRCDIR	:= ./srcs
+CFGDIR	:= config
 
 CONFIG := \
 				 AST.cpp \
@@ -22,16 +22,15 @@ CONFIG := \
 				 Http.cpp \
 				 LimitExcept.cpp
 CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
-UNIT_TEST_SOCKET := content_type.cpp
-SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp {UNIT_TEST_SOCKET}
-CGI 	:=
-SERVER 	:= webserv.cpp
-UTILITY := splitted_string.cpp raw_request_reader.cpp utility.cpp byte_vector.cpp
-SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
-UNIT_SRC := $(UNIT_TEST_SOCKET) $(UTILITY)
-
+SOCKET 				:= fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp content_type.cpp
+CGI 				:=
+SERVER 				:= webserv.cpp
+UTILITY 			:= splitted_string.cpp raw_request_reader.cpp utility.cpp byte_vector.cpp
+SRC					:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
+UNIT_SRCS 			:= $(addprefix $(SRCDIR)/, $(SRC))
 MANDATORY	:= main.cpp
 BONUS		:= main_bonus.cpp
+
 
 
 ifdef WITH_BONUS
@@ -44,8 +43,7 @@ endif
 
 INCS			:= ./include ./srcs/config
 IFLAGS			:= $(addprefix -I,$(INCS))
-SRCS			:= $(addprefix $(SRCDIR), $(SRC))
-UNIT_SRCS		:= $(addprefix $(SRCDIR)/, $(UNIT_SRC))
+SRCS			:= $(addprefix $(SRCDIR)/, $(SRC))
 OBJS			:= $(SRCS:.cpp=.o)
 OBJECTS			:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o))
 DEPS			:= $(OBJECTS:.o=.d)

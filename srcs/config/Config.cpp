@@ -72,24 +72,47 @@ http {
 }
 */
 
+#include <unistd.h>
+
 TEST_CASE("Config: Total test")
 {
-    Config config("./config/subject.nginx.conf");
-    CHECK(config.http->client_max_body_size == 10);
-    CHECK(config.http->server[0]->listen == "80");
-    CHECK(config.http->server[0]->server_name == "example.com");
-    CHECK(config.http->server[0]->location.size() == 3);
-    CHECK(config.http->server[0]->location[0]->urls[0] == "/");
-    CHECK(config.http->server[0]->location[0]->autoindex == true);
-    CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
-    CHECK(config.http->server[0]->location[0]->index == "index.html");
-    CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
-    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
-    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
-    CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
-    CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
-    CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
-    CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos) {
+        Config config("./srcs/config/config/subject.nginx.conf");
+        CHECK(config.http->client_max_body_size == 10);
+        CHECK(config.http->server[0]->listen == "80");
+        CHECK(config.http->server[0]->server_name == "example.com");
+        CHECK(config.http->server[0]->location.size() == 3);
+        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
+        CHECK(config.http->server[0]->location[0]->autoindex == true);
+        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
+        CHECK(config.http->server[0]->location[0]->index == "index.html");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
+        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
+        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
+        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
+        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    } else {
+        Config config("./config/subject.nginx.conf");
+        CHECK(config.http->client_max_body_size == 10);
+        CHECK(config.http->server[0]->listen == "80");
+        CHECK(config.http->server[0]->server_name == "example.com");
+        CHECK(config.http->server[0]->location.size() == 3);
+        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
+        CHECK(config.http->server[0]->location[0]->autoindex == true);
+        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
+        CHECK(config.http->server[0]->location[0]->index == "index.html");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
+        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
+        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
+        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
+        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    }
 }
 
 TEST_CASE("Config: empty")

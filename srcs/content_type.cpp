@@ -1,5 +1,4 @@
 #ifdef UNIT_TEST
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #endif
 #include "content_type.hpp"
@@ -34,6 +33,8 @@ ContentType::ContentType(map<string, string> const& headers) : _charset(""), _bo
         throw runtime_error(me + "ContentType() : invalid Content-Type syntax");
 }
 
+ContentType::ContentType() {}
+
 ContentType& ContentType::operator=(ContentType const& other)
 {
     if (this != &other) {
@@ -61,8 +62,6 @@ void ContentType::set_directive(vector<string> directives)
             throw runtime_error(me + "ContentType() : invalid Content-Type directive: " + key + "=" + value);
     }
 }
-
-ContentType::ContentType() {}
 
 bool ContentType::is_form_data()
 {
