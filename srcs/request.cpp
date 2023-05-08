@@ -17,6 +17,7 @@ using std::cout;
 using std::endl;
 using std::map;
 using std::string;
+using std::vector;
 
 #define BODY_TMP_DIRECTORY_PATH "/tmp/webserv_body_tmp/"
 
@@ -27,28 +28,21 @@ Request::Request(int fd_, Config const& config)
       _buf(this->_fd),
       _content_length(0),
       _method(NG),
-      _err_line(""),
-      _is_data_in_body(false),
-      _is_cgi(false)
+      _err_line("")
 {
     this->parse();
-    // TODO: configの絞り込み
-    // server_list = config.server
-    // for server in server_list
-    // {
-    //     if server->server_name == get_domain(url) && server->port == this->_port
-    //         {
-    //             this->server = server;
-    //             break;
-    //         }
-    // }
+    parse_server_config();
+    parse_location_config();
+
+    const vector<Server const*> server_list = _config->http->server;
 }
 
 Request::~Request() {}
 
-void Request::print_request()
+void Request::print_request() const
 {
-    cout << "|----- Print Request -----|" << endl;
+    cout << "|-- Print Request Header --|" << endl;
+    cout << " fd: " << this->_fd << endl;
     cout << " method: " << method_to_str(this->_method) << endl;
     cout << " version: " << this->_version << endl;
 
@@ -60,7 +54,7 @@ void Request::print_request()
         cout << " " << (*ite).first << ": " << (*ite).second << endl;
     }
     cout << " path dep: " << get_path_list().size() << endl;
-    cout << "|-------------------------|" << endl;
+    cout << "|--------------------------|" << endl;
 }
 
 void Request::parse()
@@ -79,6 +73,7 @@ void Request::parse()
         _loaded_packet_body = tmp_loaded_packet_body;
 
     this->add_loaded_body_size(tmp_loaded_packet_body.size());
+    validate();
 }
 
 void Request::parse_request_line()
@@ -100,8 +95,8 @@ void Request::parse_request_line()
     std::cout << request_line_words << std::endl;
     SplittedString::iterator request_line_words_it = request_line_words.begin();
     _method = str_to_method(*request_line_words_it);
-    _path = Utility::delete_space(*(++request_line_words_it));
-    _version = Utility::delete_space(*(++request_line_words_it));
+    _path = Utility::trim_white_space(*(++request_line_words_it));
+    _version = Utility::trim_white_space(*(++request_line_words_it));
 }
 
 void Request::parse_header_field()
@@ -117,14 +112,14 @@ void Request::parse_header_field()
             break;
         }
         key = line.substr(0, split_pos);
-        key = Utility::delete_space(key);
-        key = Utility::delete_space(key);
+        key = Utility::trim_white_space(key);
+        key = Utility::trim_white_space(key);
         if (key.size() < 2) {
             break;
         }
         std::transform(key.begin(), key.end(), key.begin(), static_cast<int (*)(int)>(std::tolower));
         value = line.substr(split_pos + 1);
-        value = Utility::delete_space(value);
+        value = Utility::trim_white_space(value);
         this->_headers.insert(make_pair(key, value));
     }
 }
@@ -154,22 +149,22 @@ void Request::save_tmp_file(ByteVector bytes)
     std::cout << "save_tmp_file: " << bytes << std::endl;
 }
 
-METHOD Request::get_method()
+METHOD Request::get_method() const
 {
     return (this->_method);
 }
 
-const std::string Request::get_method_string()
+const std::string Request::get_method_string() const
 {
     return (method_to_str(this->_method));
 }
 
-const string& Request::get_version()
+const string& Request::get_version() const
 {
     return (this->_version);
 }
 
-const map<string, string>& Request::get_headers()
+const map<string, string>& Request::get_headers() const
 {
     return (this->_headers);
 }
@@ -194,13 +189,13 @@ ByteVector Request::read_body()
     return (_buf.get_body(BUF_MAX));
 }
 
-string const& Request::get_path()
+string const& Request::get_path() const
 {
     return _path;
 }
 
 // hoge/fuga/piyo -> hoge, fuga, piyo
-vector<string> Request::get_path_list()
+vector<string> Request::get_path_list() const
 {
     vector<string> path_list;
     string buf;
@@ -216,29 +211,29 @@ vector<string> Request::get_path_list()
     return (path_list);
 }
 
-string Request::get_ip_address()
+string Request::get_ip_address() const
 {
     // todo
     return ("127.0.0.1");
 }
 
-string Request::get_domain()
+string Request::get_domain() const
 {
     // todo
     return ("test.com");
 }
 
-ssize_t Request::get_content_length()
+ssize_t Request::get_content_length() const
 {
     return (this->_content_length);
 }
 
-string Request::get_transfer_encoding()
+string Request::get_transfer_encoding() const
 {
     return (this->_transfer_encoding);
 }
 
-ssize_t Request::get_loaded_body_size()
+ssize_t Request::get_loaded_body_size() const
 {
     return (this->_loaded_body_size);
 }
@@ -248,32 +243,52 @@ void Request::add_loaded_body_size(size_t size)
     this->_loaded_body_size += size;
 }
 
-bool Request::analyze()
+void Request::validate()
 {
-    _is_data_in_body = false;
-    _is_cgi = false;
-    return (true);
+    if (get_content_length() == get_loaded_body_size())
+        throw std::runtime_error("Request::validate() content_length != loaded_body_size");
 }
 
-bool Request::have_data_in_body()
-{
-    _is_data_in_body = true;
-    return (_is_data_in_body);
-}
-
-bool Request::is_cgi()
+bool Request::is_cgi() const
 {
     return is_cgi(_path);
 }
 
+Server const* Request::get_server_config() const
+{
+    try {
+        return _config->http->get_server(_headers.at("Host"));
+    } catch (const std::exception& e) {
+        return _config->http->server.at(0);
+    }
+}
+
+bool is_prefix(const std::string& strA, const std::string& strB)
+{
+    if (strB.size() > strA.size()) {
+        return false;
+    }
+    return strA.find(strB) == 0;
+}
+
+Location const* Request::get_location_config() const
+{
+    // vector<Location* const> maybe_current_locations;
+    // Server const* server = get_server_config();
+    // for (size_t j = 0; j < server->location.size(); j++) {
+    //     Location* current = const_cast<Location*>(server->location[j]);
+    //     for (size_t k = 0; k < current->urls.size(); k++)
+    //         if (is_prefix(current->urls[k], _path) && _port == current->properties["listen"])
+    //             maybe_current_locations.push_back(current);
+    // }
+    // if (maybe_current_locations.size() == 0)
+    //     return 0;
+    // if (maybe_current_locations.size() == 1)
+}
+
 bool Request::is_cgi(string path) const
 {
-    const Server* server;
-    try {
-        server = _config->http->get_server(_headers.at("Host"));
-    } catch (const std::exception& e) {
-        server = _config->http->server.at(0);
-    }
+    Server const* server = get_server_config();
     for (size_t j = 0; j < server->location.size(); j++) {
         Location* current = const_cast<Location*>(server->location[j]);
         for (size_t k = 0; k < current->urls.size(); k++) {
@@ -283,4 +298,9 @@ bool Request::is_cgi(string path) const
         }
     }
     return (false);
+}
+
+Config const* Request::get_config() const
+{
+    return _config;
 }

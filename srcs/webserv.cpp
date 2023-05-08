@@ -139,22 +139,18 @@ void Webserv::connect_communication(int fd, struct epoll_event* event, Socket* s
         // Body Test
         // Test (will remove)
         req->print_request();
-        if (req->analyze() == false) {
-            // make error Response;
-            return;
-        }
 
         // bool read_all = true;
-        if (req->have_data_in_body() == false) {
-            return;
-        }
+        // if (req->have_data_in_body() == false) {
+        //     return;
+        // }
 
         Response* res;
         if (req->is_cgi()) {
-            res = new Response(*req, _config);
+            res = new Response(*req);
             // cig processing
         } else {
-            res = new Response(*req, _config);
+            res = new Response(*req);
             // server processing except cgi
         }
         socket->set_response(fd, res);

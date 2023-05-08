@@ -22,14 +22,14 @@ class Request : public SocketData
     Request();
     Request(int fd, Config const& config);
     ~Request();
-    const string& get_path();
-    vector<string> get_path_list();
-    const string& get_version();
-    const string& get_body_size();
-    METHOD get_method();
-    const string get_method_string();
-    const map<string, string>& get_headers();
-    void print_request();
+    const string& get_path() const;
+    vector<string> get_path_list() const;
+    const string& get_version() const;
+    const string& get_body_size() const;
+    METHOD get_method() const;
+    const string get_method_string() const;
+    const map<string, string>& get_headers() const;
+    void print_request() const;
     ByteVector read_body(); // will move to private
     ByteVector get_body_text();
     string get_domain();
@@ -38,11 +38,15 @@ class Request : public SocketData
     ssize_t get_loaded_body_size();
     string get_transfer_encoding();
     void add_loaded_body_size(size_t size);
-    bool analyze();
-    bool have_data_in_body();
-    bool is_cgi();
+    void validate();
+    bool is_cgi() const;
     bool is_cgi(string path) const;
+    Config const* get_config() const;
     vector<path> get_body_tmp_file_list();
+    Server const* get_server_config() const;
+    Location const* get_location_config() const;
+    void parse_server_config();
+    void parse_location_config();
     // static string identify_method(METHOD method);
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);
@@ -77,9 +81,6 @@ class Request : public SocketData
     string _domain;
     string _ip;
     ContentType _content_type;
-
-    bool _is_data_in_body;
-    bool _is_cgi;
 };
 
 #endif /* REQUEST_H */
