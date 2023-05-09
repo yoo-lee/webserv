@@ -7,6 +7,7 @@
 #include "Config.hpp"
 #include "splitted_string.hpp"
 #include "webserv.hpp"
+#include "base64.hpp"
 
 using std::cout;
 using std::endl;
@@ -27,6 +28,7 @@ void server(Webserv& webserv)
 
 int main(int argc, char const* argv[])
 {
+
     (void)argc;
     (void)argv;
     if (argc != 2) {

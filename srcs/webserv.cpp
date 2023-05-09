@@ -15,6 +15,7 @@
 #include "response.hpp"
 #include "tcp_socket.hpp"
 #include "utility.hpp"
+#include "cgi.hpp"
 
 #define NEVENTS 16
 using std::cout;
@@ -147,6 +148,8 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
 
         Response* res;
         if (req->is_cgi()) {
+            CGI *cgi = new CGI(req);
+            delete cgi;
             res = new Response(*req);
             // cig processing
         } else {
@@ -156,7 +159,6 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         socket->set_response(fd, res);
 
         // socket
-
         if (req->get_content_length() > req->get_loaded_body_size()) {
             cout << "connected_communication not change OUT" << endl;
             return;
