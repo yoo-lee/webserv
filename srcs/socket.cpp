@@ -91,8 +91,6 @@ Socket& Socket::operator=(const Socket& sock_fdet)
     return (*this);
 }
 
-void Socket::communicate() {}
-
 int Socket::getSockFD()
 {
     return (this->_sock_fd);

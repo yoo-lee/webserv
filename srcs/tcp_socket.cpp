@@ -59,8 +59,3 @@ TCPSocket& TCPSocket::operator=(const TCPSocket& sock_fdet)
         return (*this);
     return (*this);
 }
-
-void TCPSocket::communicate()
-{
-    listen(this->_sock_fd, 5);
-}

@@ -15,7 +15,6 @@ class TCPSocket : public Socket
     TCPSocket(const TCPSocket& socket);
     TCPSocket& operator=(const TCPSocket& socket);
     ~TCPSocket();
-    void communicate();
 
   private:
     void init();

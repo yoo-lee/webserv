@@ -29,7 +29,6 @@ class Socket
     Socket(const Socket& socket);
     Socket& operator=(const Socket& socket);
     virtual ~Socket();
-    virtual void communicate();
     void close_fd();
     int getSockFD();
     Request* recv(int fd);
