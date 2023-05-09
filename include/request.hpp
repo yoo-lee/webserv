@@ -32,11 +32,11 @@ class Request : public SocketData
     void print_request() const;
     ByteVector read_body(); // will move to private
     ByteVector get_body_text();
-    string get_domain();
-    string get_ip_address();
-    ssize_t get_content_length();
-    ssize_t get_loaded_body_size();
-    string get_transfer_encoding();
+    string get_domain() const;
+    string get_ip_address() const;
+    ssize_t get_content_length() const;
+    ssize_t get_loaded_body_size() const;
+    string get_transfer_encoding() const;
     void add_loaded_body_size(size_t size);
     void validate();
     bool is_cgi() const;

@@ -31,8 +31,8 @@ Request::Request(int fd_, Config const& config)
       _err_line("")
 {
     this->parse();
-    parse_server_config();
-    parse_location_config();
+    // parse_server_config(); 未実装
+    // parse_location_config(); 未実装
 
     const vector<Server const*> server_list = _config->http->server;
 }
@@ -48,8 +48,8 @@ void Request::print_request() const
 
     cout << " headers size:" << this->_headers.size() << endl;
     cout << " path" << this->_path << endl;
-    map<string, string>::iterator ite = this->_headers.begin();
-    map<string, string>::iterator end = this->_headers.end();
+    map<string, string>::const_iterator ite = this->_headers.begin();
+    map<string, string>::const_iterator end = this->_headers.end();
     for (; ite != end; ite++) {
         cout << " " << (*ite).first << ": " << (*ite).second << endl;
     }
@@ -284,6 +284,7 @@ Location const* Request::get_location_config() const
     // if (maybe_current_locations.size() == 0)
     //     return 0;
     // if (maybe_current_locations.size() == 1)
+    return 0;
 }
 
 bool Request::is_cgi(string path) const
