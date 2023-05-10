@@ -28,7 +28,6 @@ void server(Webserv& webserv)
 
 int main(int argc, char const* argv[])
 {
-
     (void)argc;
     (void)argv;
     if (argc != 2) {
