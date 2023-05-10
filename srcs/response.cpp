@@ -14,7 +14,6 @@ Response::Response()
 // Constructor for Response class that takes a Request object as argument
 Response::Response(Request& request) : SocketData(*(request.get_config())), _request(request)
 {
-
     // Set the status code based on the request method
     METHOD method = request.get_method();
     if (method == GET) {
@@ -28,6 +27,13 @@ Response::Response(Request& request) : SocketData(*(request.get_config())), _req
 
     // Build the response
     build_response();
+}
+
+Response::Response(Request& request, int code) : SocketData(*(request.get_config())), _request(request), _code(code)
+{
+    _res = "HTTP/1.1 " + Utility::to_string(_code) + " " + get_status_message(_code) + "\r\n";
+    _res += "Content-Type: text/html\r\n";
+    _res += "Content-Length: 0\r\n\r\n";
 }
 
 // HTTP response as string
@@ -122,8 +128,32 @@ std::string Response::get_status_message(int code)
     switch (code) {
     case 200:
         return "OK";
+    case 204:
+        return "Not Content";
+    case 206:
+        return "Partial Content";
+    case 301:
+        return "Moved Permanently";
+    case 302:
+        return "Not Found";
+    case 303:
+        return "See Other";
+    case 304:
+        return "Not Modified";
+    case 307:
+        return "Temporary Redirect";
+    case 400:
+        return "Bad Request";
+    case 401:
+        return "Bad Unauthorized";
+    case 403:
+        return "Forbidden";
     case 404:
         return "Not Found";
+    case 500:
+        return "Internal Server Error";
+    case 503:
+        return "Service Unavailable";
     // Add other status codes as needed
     default:
         return "Unknown Status";
