@@ -21,6 +21,7 @@ class Request : public SocketData
   public:
     Request();
     Request(int fd, Config const& config);
+    Request(int fd, Config const& config, std::string port);
     ~Request();
     const string& get_path() const;
     vector<string> get_path_list() const;
@@ -80,6 +81,7 @@ class Request : public SocketData
     string _err_line;
     string _domain;
     string _ip;
+    string _port;
     ContentType _content_type;
 };
 

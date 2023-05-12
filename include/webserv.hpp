@@ -4,6 +4,7 @@
 #include "tcp_socket.hpp"
 #include <climits>
 #include <vector>
+#include <set>
 
 using std::map;
 using std::string;
@@ -24,7 +25,7 @@ class Webserv
 
   private:
     int _epfd;
-    void init_socket(std::vector<std::string>);
+    void init_socket(std::set<std::string>);
     bool init_epoll();
     void close_all();
     void process_connected_communication(int fd, struct epoll_event* event, Socket* socket);

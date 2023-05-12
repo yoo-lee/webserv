@@ -8,6 +8,7 @@
 #include "splitted_string.hpp"
 #include "webserv.hpp"
 #include "base64.hpp"
+#include "utility.hpp"
 
 using std::cout;
 using std::endl;
@@ -26,6 +27,19 @@ void server(Webserv& webserv)
     // }
 }
 
+std::map<std::string, std::vector<std::string> > Utility::_cfg_locations;
+//std::map<std::pair<std::string, std::string>, std::map<std::string, std::vector<std::string> > > _cfg_locations_contents;
+//std::map<pair<std::string, std::string> , std::map<std::string, std::vector<std::string> > > Utility::_cfg_locations_contents;
+std::map<pair<std::string, std::string> , std::vector<std::map<std::string, std::vector<std::string> > > > Utility::_cfg_locations_contents;
+std::map<pair<std::string, std::string> , std::map<std::string, std::vector<std::string> > > Utility::_cfg_locations_content;
+//std::vector<std::string> Utility::_cfg_root_dir;
+//.std::vector<std::string> Utility::_cfg_extension;
+//std::map<std::string, std::vector<std::string> > Utility::_cfg_root_dir;
+//std::map<std::string, std::vector<std::string> > Utility::_cfg_extension;
+//std::map<std::pair<std::string, std::string>, std::vector<std::map<std::string, std::string> > > Utility::_cfg_locations_contents;
+//int Utility::i;
+//std::vector<int> Utility::ii;
+//int Utility::tmp;
 int main(int argc, char const* argv[])
 {
     (void)argc;
@@ -36,6 +50,15 @@ int main(int argc, char const* argv[])
     }
     // config読み込み
     Config config(argv[1]);
+
+    std::string port = "11111";
+    std::vector<std::string> test = Utility::get_cfg_locations(config, port);
+    std::vector<std::string> test2 = Utility::get_cfg_locations(config, port);
+    cout << test.size() << endl;
+    for(size_t i=0;i<test.size();i++){
+        cout << test[i] << endl;
+        cout << test2[i] << endl;
+    }
 
     // ソケットの初期設定
     Webserv webserv = Webserv(config);
