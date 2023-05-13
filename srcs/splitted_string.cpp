@@ -17,11 +17,14 @@ void SplittedString::split(std::string& str, std::string delimiter)
         pos = str.find(delimiter, offset);
         if (pos == string::npos) {
             string last = str.substr(offset);
-            this->_splitted_string.push_back(str.substr(offset));
+            if (last != delimiter && last.size() != 0){
+                this->_splitted_string.push_back(last);
+            }
             break;
         }
-        if (pos - offset > 0)
+        if (pos - offset > 0){
             this->_splitted_string.push_back(str.substr(offset, pos - offset));
+        }
         offset = pos + del_len;
     }
 }
