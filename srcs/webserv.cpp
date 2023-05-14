@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
+#include "cgi.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "tcp_socket.hpp"
 #include "utility.hpp"
-#include "cgi.hpp"
 
 #define NEVENTS 16
 using std::cout;
@@ -74,7 +74,7 @@ void Webserv::init_socket(std::set<std::string> ports)
     try {
         std::set<std::string>::iterator port_ite = ports.begin();
         std::set<std::string>::iterator port_end = ports.end();
-        for (; port_ite != port_end; port_ite++){
+        for (; port_ite != port_end; port_ite++) {
             Socket* sock = new Socket(*port_ite, _config);
             this->_sockets.push_back(sock);
         }
@@ -155,9 +155,9 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // }
 
         Response* res;
-        //if (req->is_cgi()) {
-        if (1){
-            CGI *cgi = new CGI(req);
+        // if (req->is_cgi()) {
+        if (1) {
+            CGI* cgi = new CGI(req);
             delete cgi;
             res = new Response(*req);
             // cig processing

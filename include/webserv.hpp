@@ -3,8 +3,8 @@
 #include "Config.hpp"
 #include "tcp_socket.hpp"
 #include <climits>
-#include <vector>
 #include <set>
+#include <vector>
 
 using std::map;
 using std::string;

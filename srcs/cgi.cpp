@@ -59,13 +59,12 @@ int make_thread(int* fd_in, int* fd_out)
     return pid;
 }
 
-
 void CGI::parse()
 {
-    Request &req = *this->_req;
+    Request& req = *this->_req;
     string path = req.get_path();
     this->parse_cgi_file(path, req);
-    //this->divide_(path, req);
+    // this->divide_(path, req);
     this->check_executable_path();
 
     cout << "_cgi_filepath:" << _cgi_filepath << endl;
@@ -74,15 +73,15 @@ void CGI::parse()
 
     std::map<std::string, std::string>::iterator arg_ite = args.begin();
     std::map<std::string, std::string>::iterator arg_end = args.end();
-    for (;arg_ite != arg_end; arg_ite++){
+    for (; arg_ite != arg_end; arg_ite++) {
         cout << arg_ite->first << ":" << arg_ite->second << endl;
-        //cout << "args[" << i << "]:" << args[i].first << endl;
+        // cout << "args[" << i << "]:" << args[i].first << endl;
     }
 
-    //if (req.get_method() == POST) {
-        // ByteVector bytes = req->get_body_text();
+    // if (req.get_method() == POST) {
+    //  ByteVector bytes = req->get_body_text();
     //} else if (req.get_method() == GET) {
-        //this->parse_args(req);
+    // this->parse_args(req);
     //}
 
     std::map<string, string>::iterator ite = this->args.begin();
@@ -118,7 +117,7 @@ int CGI::fork_parse()
         cout << "Error" << endl;
     } else if (pid == 0) {
         int rval = execve(python, argv, environ);
-        //cout << "exe:" << this->exe_command.c_str() << endl;
+        // cout << "exe:" << this->exe_command.c_str() << endl;
         cout << "argv_p:" << argv[0] << endl;
         cout << "envirton[0]:" << environ[0] << endl;
         cout << "envirton[1]:" << environ[1] << endl;
@@ -168,19 +167,16 @@ void CGI::parse_args(std::string& query)
     }
 }
 
-void CGI::get_config_path()
-{
-
-}
+void CGI::get_config_path() {}
 
 void CGI::check_executable_path()
 {
     //(void)path;
     //(void)extension;
-    const Config *cfg = _req->get_config();
+    const Config* cfg = _req->get_config();
 
     std::vector<Location*> lo = cfg->http->server[0]->location;
-    //const std::vector<std::string> locations = cfg->get_cfg_locations(_req->get_port(), _req->get_hostname());
+    // const std::vector<std::string> locations = cfg->get_cfg_locations(_req->get_port(), _req->get_hostname());
 
     /*
     for(size_t i=0;i<lo.size();i++){
@@ -207,11 +203,11 @@ void CGI::parse_cgi_file(string& uri, Request& req)
 
     // cout << req << endl;
     //  todo will refer to config data
-    //std::map<string, string> cgi_map;
-    //cgi_map.insert(std::make_pair(".rb", "ruby"));
-    //cgi_map.insert(std::make_pair(".py", "python3"));
+    // std::map<string, string> cgi_map;
+    // cgi_map.insert(std::make_pair(".rb", "ruby"));
+    // cgi_map.insert(std::make_pair(".py", "python3"));
     ////cgi_map.insert(std::make_pair(".php", "php"));
-    //cgi_map.insert(std::make_pair(".pl", "perl"));
+    // cgi_map.insert(std::make_pair(".pl", "perl"));
 
     cout << "uri origin:" << uri << endl;
     size_t pos = uri.find("?");
@@ -225,18 +221,18 @@ void CGI::parse_cgi_file(string& uri, Request& req)
         path = uri;
     }
 
-    //string cfg_extension = Utility::get_cfg_extension(*_req->get_config(), this->_query);
-    //pos = path.rfind(".");
-    //std::string extension = path.substr(pos);
-    //cout << "extention:" << extension << endl;
-    //check_executable_path(path, extension);
-    //cout << "No.1 path:" << path << endl;
-    //if (cgi_map.count(extension) <= 0) {
-        //return;
+    // string cfg_extension = Utility::get_cfg_extension(*_req->get_config(), this->_query);
+    // pos = path.rfind(".");
+    // std::string extension = path.substr(pos);
+    // cout << "extention:" << extension << endl;
+    // check_executable_path(path, extension);
+    // cout << "No.1 path:" << path << endl;
+    // if (cgi_map.count(extension) <= 0) {
+    // return;
     //}
-    //cout << "No.2 path:" << path << endl;
-    //this->exe_command = cgi_map[extension];
+    // cout << "No.2 path:" << path << endl;
+    // this->exe_command = cgi_map[extension];
     this->_cgi_filepath = Utility::delete_duplicated_slash(path);
-    //if (cgi_map.count(extension) <= 0) {
-    //}
+    // if (cgi_map.count(extension) <= 0) {
+    // }
 }
