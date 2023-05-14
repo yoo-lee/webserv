@@ -345,7 +345,7 @@ std::string& Request::get_port()
     return _port;
 }
 
-std::string& Request::get_hostname()
+std::string& Request::get_host()
 {
-    return _hostname;
+    return _host;
 }

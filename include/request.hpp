@@ -51,7 +51,7 @@ class Request : public SocketData
     void parse_location_config();
     bool is_full_body_loaded() const;
     std::string& get_port();
-    std::string& get_hostname();
+    std::string& get_host();
     // static string identify_method(METHOD method);
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);
@@ -87,7 +87,7 @@ class Request : public SocketData
     string _domain;
     string _ip;
     string _port;
-    string _hostname;
+    string _host;
     ContentType _content_type;
 };
 

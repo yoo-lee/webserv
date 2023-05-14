@@ -53,7 +53,6 @@ class Socket
     s_clientinfo _clientinfo;
     bool send_err(std::string err);
     Config const& _config;
-    std::string _hostname;
 
     template <typename T>
     bool increment_timeout(T& obj, int time);
