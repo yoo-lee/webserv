@@ -123,12 +123,18 @@ Socket* Webserv::find_listen_socket(int socket_fd)
 void Webserv::process_connected_communication(int fd, struct epoll_event* event, Socket* socket)
 {
     if (event->events & EPOLLIN) {
+        std::cout << "get" << std::endl;
         Request* req = socket->recv(fd);
-        if (!req) {
+        req->read_body();
+        std::cout << "readed" << std::endl;
+        if (req->is_full_body_loaded()) {
+            std::cout << "full" << std::endl;
             event->events = EPOLLOUT;
             if (epoll_ctl(this->_epfd, EPOLL_CTL_MOD, fd, event) != 0) {
                 cout << "error;connected_communication No.2" << endl;
             }
+        } else {
+            std::cout << "not full" << std::endl;
             return;
         }
         if (req->get_method() == NG) {
@@ -139,7 +145,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // Body Test
         // Test (will remove)
         req->print_request();
-
+        std::cout << req->get_body().get_array() << std::endl;
         // bool read_all = true;
         // if (req->have_data_in_body() == false) {
         //     return;
@@ -209,6 +215,7 @@ void Webserv::process_communication()
         return;
     }
     while (1) {
+        std::cout << "inf loop start" << std::endl;
         int time_msec = -1;
         if (this->_fd_sockets.size() > 0) {
             time_msec = 5;
@@ -221,10 +228,12 @@ void Webserv::process_communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return;
         }
+        std::cout << "nfds:" << nfds << std::endl;
         for (int i = 0; i < nfds; i++) {
             std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
             if (tmp_fd != this->_fd_sockets.end()) {
                 Socket* socket = tmp_fd->second;
+                std::cout << "find" << std::endl;
                 process_connected_communication(tmp_fd->first, &(sock_event[i]), socket);
                 continue;
             }
@@ -240,5 +249,6 @@ void Webserv::process_communication()
                 }
             }
         }
+        std::cout << "end" << std::endl;
     }
 }

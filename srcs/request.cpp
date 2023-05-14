@@ -184,9 +184,14 @@ vector<path> Request::get_body_tmp_file_list()
 ByteVector Request::read_body()
 {
     ByteVector bytes = this->_buf.get_extra_buf();
-    if (bytes.size() > 0)
+    if (bytes.size() > 0) {
+        std::cout << bytes.get_array() << std::endl;
+        _body.insert(_body.end(), bytes.begin(), bytes.end());
         return bytes;
-    return (_buf.get_body(BUF_MAX));
+    }
+    ByteVector tmp = _buf.get_body(BUF_MAX);
+    _body.insert(_body.end(), bytes.begin(), bytes.end());
+    return tmp;
 }
 
 string const& Request::get_path() const
@@ -231,6 +236,11 @@ ssize_t Request::get_content_length() const
 string Request::get_transfer_encoding() const
 {
     return (this->_transfer_encoding);
+}
+
+ByteVector Request::get_body() const
+{
+    return _body;
 }
 
 ssize_t Request::get_loaded_body_size() const
@@ -304,4 +314,11 @@ bool Request::is_cgi(string path) const
 Config const* Request::get_config() const
 {
     return _config;
+}
+
+bool Request::is_full_body_loaded() const
+{
+    // TODO: Transfer-Encoding: chunked
+    // TODO: _body.size() == _content_length;
+    return _body.size() >= static_cast<unsigned long>(_content_length);
 }

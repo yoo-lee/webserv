@@ -62,6 +62,7 @@ size_t RawRequestReader::size()
     return (this->_sp->size());
 }
 
+// headerを読み込んだ際に余分に読み込んだbodyを返す
 ByteVector RawRequestReader::get_extra_buf()
 {
     ByteVector by(this->_buf_body_pos, this->_buf_body_size);
