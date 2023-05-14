@@ -1,6 +1,7 @@
 
 #include "utility.hpp"
 #include <iostream>
+#include "splitted_string.hpp"
 #include <sstream>
 
 #ifdef UNIT_TEST
@@ -98,88 +99,93 @@ string Utility::trim_white_space(string str)
         return "";
 }
 
-std::vector<Server const *> Utility::get_cfg_server(const Config &cfg, string &port)
+Server const* Utility::get_cfg_server(const Config &cfg, string &port, string &host)
 {
+    std::map< std::pair<std::string, std::string>, Server const *>::iterator cash_ite = Utility::_cfg_servers.find(make_pair(port, host));
+    if (cash_ite != Utility::_cfg_servers.end()){
+        return (cash_ite->second);
+    }
     std::vector<Server const*> servers;
     for(size_t i=0; i<cfg.http->server.size(); i++){
-        if (cfg.http->server[i]->listen == port){
-            servers.push_back(cfg.http->server[i]);
+        if (cfg.http->server[i]->listen == port && cfg.http->server[i]->server_name == host){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
         }
     }
-    return (servers);
+
+    for(size_t i=0; i<cfg.http->server.size(); i++){
+        if (cfg.http->server[i]->listen == port && cfg.http->server[i]->is_default_server){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
+        }
+    }
+    for(size_t i=0; i<cfg.http->server.size(); i++){
+        if (cfg.http->server[i]->listen == port){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
+        }
+    }
+    return (NULL);
 }
 
-std::vector<std::string> Utility::get_cfg_locations(const Config &cfg, string &port)
+std::vector<std::string> Utility::get_cfg_locations(const Config &cfg, string &port, string &host)
 {
-    std::map<std::string, std::vector<std::string> >::iterator cash_ite =  Utility::_cfg_locations.find(port);
+    std::map<pair<std::string, std::string>, std::vector<std::string> >::iterator cash_ite =  Utility::_cfg_locations.find(make_pair(port, host));
     if (cash_ite != Utility::_cfg_locations.end()){
         return (cash_ite->second);
     }
-
-    std::vector<Server const*> servers = Utility::get_cfg_server(cfg, port);
-    (void)servers;
+    Server const* servers = Utility::get_cfg_server(cfg, port, host);
     std::vector<std::string> locations;
 
-    for(size_t i=0; i< servers.size();i++){
-        for(size_t j=0;j<servers[i]->location.size();j++){
-            for(size_t k=0;k<servers[i]->location[j]->urls.size();k++){
-                locations.push_back(servers[i]->location[j]->urls[k]);
-            }
+    for(size_t j=0;j<servers->location.size();j++){
+        for(size_t k=0;k<servers->location[j]->urls.size();k++){
+            locations.push_back(servers->location[j]->urls[k]);
         }
     }
-    Utility::_cfg_locations.insert(std::make_pair(port, locations));
+    Utility::_cfg_locations.insert( std::make_pair(std::make_pair(port, host), locations));
     return (locations);
 }
 
-std::vector<std::map<std::string, std::vector<std::string > > > Utility::get_cfg_locations_contents(const Config &cfg, string &port, string &location)
+std::map<std::string, std::vector<std::string > > Utility::get_cfg_locations_contents(const Config &cfg, string &port, string &host, string &location)
 {
-    std::vector<map<string, std::vector<string> > > properties;
-    std::vector<Server const*> servers = Utility::get_cfg_server(cfg, port);
-    //std::map<std::string, std::map<std::string, std::map<std::string, std::string> > > port_location_contens;
-    //std::map<std::string, <std::string> port_location;
+    map<pair< pair<string, string>, string> , map<string, vector<string> > >::iterator cash_ite = Utility::_cfg_locations_content.find(make_pair(make_pair(port, host), location));
+    if (cash_ite != Utility::_cfg_locations_content.end()){
+        return (cash_ite->second);
+    }
 
-    //std::map<std::string, <std::string> port_location;
-    //std::vector<map<string, vector<string> > > properties;
-    for(size_t i=0; i< servers.size();i++){
-        for(size_t j=0;j<servers[i]->location.size();j++){
-            for(size_t k=0;k<servers[i]->location[j]->urls.size();k++){
-                if (servers[i]->location[j]->urls[k] == location){
-                    properties.push_back(servers[i]->location[i]->properties);
-                    Utility::_cfg_locations_content.insert(make_pair( make_pair(port, location) , servers[i]->location[i]->properties));
-                    //break;
-                }
+    std::vector<map<string, std::vector<string> > > properties;
+    Server const* servers = Utility::get_cfg_server(cfg, port, host);
+    for(size_t j=0;j<servers->location.size();j++){
+        for(size_t k=0;k<servers->location[j]->urls.size();k++){
+            if (servers->location[j]->urls[k] == location){
+                Utility::_cfg_locations_content.insert(make_pair(make_pair( make_pair(port, host), location) , servers->location[j]->properties));
+
+                return (servers->location[j]->properties);
             }
-            //map<string, vector<string> >::iterator pro_ite = servers[i]->location[i]->properties.begin();
-            //map<string, vector<string> >::iterator pro_end = servers[i]->location[i]->properties.end();
-            //for(; pro_ite != pro_end ; pro_ite++){
-                ////cout << "properties first:" << (*pro_ite).first << endl;
-                //vector<string> tmp_vec = (*pro_ite).second;
-                //for (size_t i=0; i<tmp_vec.size(); i++){
-                    //extensions.push_back(tmp_vec[i]);
-                    //cout << "properties second:" << tmp_vec[i] << endl;
-                //}
-            //}
         }
     }
-    //std::vector<string> test_map;
-    //std::vector<map<string, vector<string> > > properties2;
-    //string test1 = "test1";
-    //std::vector<string> test3;
-    //test3.push_back(test1);
-    //properties2.insert(make_pair(test1, test3));
-    //Utility::_cfg_locations_contents.insert(make_pair(port, location), properties);
-    Utility::_cfg_locations_contents.insert(make_pair(make_pair(port, location), properties));
-    //
-    //
-
-    //std::map<std::string, std::map<std::string, std::vector<std::string> > > tmp1;
-    //tmp1.insert(make_pair( test1, properties2));
-    //std::map<pair<std::string, std::string> , std::map<std::string, std::vector<std::string> > > tmp1;
-    //Utility::_cfg_locations_contents.insert(make_pair( make_pair(port, location) , properties2));
-    return (properties);
+    std::map<std::string, std::vector<std::string> > rval;
+    return (rval);
 }
 
 
+std::string Utility::delete_duplicated_slash(std::string str)
+{
+    string delimiter = "/";
+    SplittedString sp(str, delimiter);
+    std::string only_one_slash;
+    if (str[0] == '/'){
+        only_one_slash = delimiter;
+    }
+    for(size_t i=0;i<sp.size();i++){
+        only_one_slash += sp[i];
+        only_one_slash += "/";
+    }
+    if (str[str.size() - 1] != '/'){
+        only_one_slash.erase(only_one_slash.end() -1, only_one_slash.end());
+    }
+    return (only_one_slash);
+}
 
 #ifdef UNIT_TEST
 TEST_CASE("trim_white_space")

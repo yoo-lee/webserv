@@ -128,6 +128,7 @@ Request* Socket::recv(int fd)
         return req;
     // try {
     //req = new Request(fd, _config);
+    //string host = "";
     req = new Request(fd, _config, _port);
     this->_fd_map[fd]->insert(req);
     // } catch (std::exception& e) {

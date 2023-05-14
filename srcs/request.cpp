@@ -37,7 +37,7 @@ Request::Request(int fd_, Config const& config)
     const vector<Server const*> server_list = _config->http->server;
 }
 
-Request::Request(int fd_, Config const& config, std::string port)
+Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
       _loaded_body_size(0),
@@ -53,7 +53,6 @@ Request::Request(int fd_, Config const& config, std::string port)
 
     const vector<Server const*> server_list = _config->http->server;
 }
-
 
 Request::~Request() {}
 
@@ -322,4 +321,14 @@ bool Request::is_cgi(string path) const
 Config const* Request::get_config() const
 {
     return _config;
+}
+
+std::string& Request::get_port()
+{
+    return _port;
+}
+
+std::string& Request::get_hostname()
+{
+    return _hostname;
 }
