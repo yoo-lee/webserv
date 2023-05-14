@@ -21,6 +21,7 @@ class Request : public SocketData
   public:
     Request();
     Request(int fd, Config const& config);
+    Request(int fd, Config const& config, std::string& port);
     ~Request();
     const string& get_path() const;
     vector<string> get_path_list() const;
@@ -48,8 +49,9 @@ class Request : public SocketData
     Location const* get_location_config() const;
     void parse_server_config();
     void parse_location_config();
-
     bool is_full_body_loaded() const;
+    std::string& get_port();
+    std::string& get_hostname();
     // static string identify_method(METHOD method);
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);
@@ -84,6 +86,8 @@ class Request : public SocketData
     string _err_line;
     string _domain;
     string _ip;
+    string _port;
+    string _hostname;
     ContentType _content_type;
 };
 

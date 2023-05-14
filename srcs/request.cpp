@@ -37,6 +37,23 @@ Request::Request(int fd_, Config const& config)
     const vector<Server const*> server_list = _config->http->server;
 }
 
+Request::Request(int fd_, Config const& config, string& port)
+    : SocketData(config),
+      _fd(fd_),
+      _loaded_body_size(0),
+      _buf(this->_fd),
+      _content_length(0),
+      _method(NG),
+      _err_line(""),
+      _port(port)
+{
+    this->parse();
+    // parse_server_config(); 未実装
+    // parse_location_config(); 未実装
+
+    const vector<Server const*> server_list = _config->http->server;
+}
+
 Request::~Request() {}
 
 void Request::print_request() const
@@ -321,4 +338,14 @@ bool Request::is_full_body_loaded() const
     // TODO: Transfer-Encoding: chunked
     // TODO: _body.size() == _content_length;
     return _body.size() >= static_cast<unsigned long>(_content_length);
+}
+
+std::string& Request::get_port()
+{
+    return _port;
+}
+
+std::string& Request::get_hostname()
+{
+    return _hostname;
 }

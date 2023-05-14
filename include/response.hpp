@@ -13,6 +13,8 @@ class Response : public SocketData
     Response();
     // コンストラクタ
     Response(Request& request);
+    // ステータス付与用コンストラクタ
+    Response(Request& request, int status_code);
     // HTTP レスポンスを構築するメソッド
     void build_response();
     // ステータスコードを設定するメソッド

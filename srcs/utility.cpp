@@ -1,5 +1,7 @@
+
 #include "utility.hpp"
 #include <iostream>
+#include "splitted_string.hpp"
 #include <sstream>
 
 #ifdef UNIT_TEST
@@ -9,6 +11,7 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::make_pair;
 
 #include <stdio.h>
 
@@ -94,6 +97,94 @@ string Utility::trim_white_space(string str)
         return str.substr(left, right - left + 1);
     } else
         return "";
+}
+
+Server const* Utility::get_cfg_server(const Config &cfg, string &port, string &host)
+{
+    std::map< std::pair<std::string, std::string>, Server const *>::iterator cash_ite = Utility::_cfg_servers.find(make_pair(port, host));
+    if (cash_ite != Utility::_cfg_servers.end()){
+        return (cash_ite->second);
+    }
+    std::vector<Server const*> servers;
+    for(size_t i=0; i<cfg.http->server.size(); i++){
+        if (cfg.http->server[i]->listen == port && cfg.http->server[i]->server_name == host){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
+        }
+    }
+
+    for(size_t i=0; i<cfg.http->server.size(); i++){
+        if (cfg.http->server[i]->listen == port && cfg.http->server[i]->is_default_server){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
+        }
+    }
+    for(size_t i=0; i<cfg.http->server.size(); i++){
+        if (cfg.http->server[i]->listen == port){
+            Utility::_cfg_servers.insert(make_pair(make_pair(port, host), cfg.http->server[i]));
+            return (cfg.http->server[i]);
+        }
+    }
+    return (NULL);
+}
+
+std::vector<std::string> Utility::get_cfg_locations(const Config &cfg, string &port, string &host)
+{
+    std::map<pair<std::string, std::string>, std::vector<std::string> >::iterator cash_ite =  Utility::_cfg_locations.find(make_pair(port, host));
+    if (cash_ite != Utility::_cfg_locations.end()){
+        return (cash_ite->second);
+    }
+    Server const* servers = Utility::get_cfg_server(cfg, port, host);
+    std::vector<std::string> locations;
+
+    for(size_t j=0;j<servers->location.size();j++){
+        for(size_t k=0;k<servers->location[j]->urls.size();k++){
+            locations.push_back(servers->location[j]->urls[k]);
+        }
+    }
+    Utility::_cfg_locations.insert( std::make_pair(std::make_pair(port, host), locations));
+    return (locations);
+}
+
+std::map<std::string, std::vector<std::string > > Utility::get_cfg_locations_contents(const Config &cfg, string &port, string &host, string &location)
+{
+    map<pair< pair<string, string>, string> , map<string, vector<string> > >::iterator cash_ite = Utility::_cfg_locations_content.find(make_pair(make_pair(port, host), location));
+    if (cash_ite != Utility::_cfg_locations_content.end()){
+        return (cash_ite->second);
+    }
+
+    std::vector<map<string, std::vector<string> > > properties;
+    Server const* servers = Utility::get_cfg_server(cfg, port, host);
+    for(size_t j=0;j<servers->location.size();j++){
+        for(size_t k=0;k<servers->location[j]->urls.size();k++){
+            if (servers->location[j]->urls[k] == location){
+                Utility::_cfg_locations_content.insert(make_pair(make_pair( make_pair(port, host), location) , servers->location[j]->properties));
+
+                return (servers->location[j]->properties);
+            }
+        }
+    }
+    std::map<std::string, std::vector<std::string> > rval;
+    return (rval);
+}
+
+
+std::string Utility::delete_duplicated_slash(std::string str)
+{
+    string delimiter = "/";
+    SplittedString sp(str, delimiter);
+    std::string only_one_slash;
+    if (str[0] == '/'){
+        only_one_slash = delimiter;
+    }
+    for(size_t i=0;i<sp.size();i++){
+        only_one_slash += sp[i];
+        only_one_slash += "/";
+    }
+    if (str[str.size() - 1] != '/'){
+        only_one_slash.erase(only_one_slash.end() -1, only_one_slash.end());
+    }
+    return (only_one_slash);
 }
 
 #ifdef UNIT_TEST

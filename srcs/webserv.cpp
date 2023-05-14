@@ -15,6 +15,7 @@
 #include "response.hpp"
 #include "tcp_socket.hpp"
 #include "utility.hpp"
+#include "cgi.hpp"
 
 #define NEVENTS 16
 using std::cout;
@@ -38,10 +39,10 @@ Webserv::Webserv(const std::vector<std::string> ports)epfd(0)
 
 Webserv::Webserv(Config& config) : _epfd(0), _config(config)
 {
-    std::vector<std::string> ports;
+    std::set<std::string> ports;
     size_t server_cnt = config.http->server.size();
     for (size_t i = 0; i < server_cnt; i++) {
-        ports.push_back(config.http->server[i]->listen);
+        ports.insert(config.http->server[i]->listen);
     }
     init_socket(ports);
 }
@@ -68,11 +69,13 @@ const Config& Webserv::get_config()
     return (this->_config);
 }
 
-void Webserv::init_socket(std::vector<std::string> vec)
+void Webserv::init_socket(std::set<std::string> ports)
 {
     try {
-        for (size_t i = 0; i < vec.size(); i++) {
-            Socket* sock = new Socket(vec[i], _config);
+        std::set<std::string>::iterator port_ite = ports.begin();
+        std::set<std::string>::iterator port_end = ports.end();
+        for (; port_ite != port_end; port_ite++){
+            Socket* sock = new Socket(*port_ite, _config);
             this->_sockets.push_back(sock);
         }
     } catch (std::exception& e) {
@@ -152,7 +155,10 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // }
 
         Response* res;
-        if (req->is_cgi()) {
+        //if (req->is_cgi()) {
+        if (1){
+            CGI *cgi = new CGI(req);
+            delete cgi;
             res = new Response(*req);
             // cig processing
         } else {
@@ -162,7 +168,6 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         socket->set_response(fd, res);
 
         // socket
-
         if (req->get_content_length() > req->get_loaded_body_size()) {
             cout << "connected_communication not change OUT" << endl;
             return;
