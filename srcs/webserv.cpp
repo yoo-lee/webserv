@@ -128,6 +128,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
     if (event->events & EPOLLIN) {
         std::cout << "get" << std::endl;
         Request* req = socket->recv(fd);
+        req->print_request();
         req->read_body();
         std::cout << "readed" << std::endl;
         if (req->is_full_body_loaded()) {
