@@ -63,8 +63,8 @@ void Request::print_request() const
     cout << " method: " << method_to_str(this->_method) << endl;
     cout << " version: " << this->_version << endl;
 
-    cout << " headers size:" << this->_headers.size() << endl;
-    cout << " path" << this->_path << endl;
+    cout << " headers size: " << this->_headers.size() << endl;
+    cout << " path: " << this->_path << endl;
     map<string, string>::const_iterator ite = this->_headers.begin();
     map<string, string>::const_iterator end = this->_headers.end();
     for (; ite != end; ite++) {
@@ -198,16 +198,22 @@ vector<path> Request::get_body_tmp_file_list()
     return _tmp_body_file_list;
 }
 
+// reading body from socket(fd)
 ByteVector Request::read_body()
 {
     ByteVector bytes = this->_buf.get_extra_buf();
     if (bytes.size() > 0) {
-        std::cout << bytes.get_array() << std::endl;
+        std::cout << "read_body[buf]: " << bytes.get_array() << std::endl;
         _body.insert(_body.end(), bytes.begin(), bytes.end());
         return bytes;
     }
     ByteVector tmp = _buf.get_body(BUF_MAX);
-    _body.insert(_body.end(), bytes.begin(), bytes.end());
+    vector<char>::iterator end;
+    if (tmp.size() > _content_length - _body.size())
+        end = tmp.begin() + (_content_length - _body.size());
+    else
+        end = tmp.end();
+    _body.insert(_body.end(), tmp.begin(), end);
     return tmp;
 }
 
@@ -337,6 +343,7 @@ bool Request::is_full_body_loaded() const
 {
     // TODO: Transfer-Encoding: chunked
     // TODO: _body.size() == _content_length;
+    cout << _body.size() << " >=" << static_cast<unsigned long>(_content_length) << endl;
     return _body.size() >= static_cast<unsigned long>(_content_length);
 }
 
