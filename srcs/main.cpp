@@ -27,11 +27,6 @@ void server(Webserv& webserv)
     // }
 }
 
-std::map<std::pair<std::string, std::string>, Server const*> Utility::_cfg_servers;
-std::map<std::pair<std::string, std::string>, std::vector<std::string> > Utility::_cfg_locations;
-std::map<pair<std::pair<std::string, std::string>, std::string>, std::map<std::string, std::vector<std::string> > >
-    Utility::_cfg_locations_content;
-
 int main(int argc, char const* argv[])
 {
     (void)argc;
