@@ -36,6 +36,14 @@ Config::~Config()
     delete http;
 }
 
+Server const& Config::get_default_server() const
+{
+    for (size_t i = 0; i < http->server.size(); i++)
+        if (http->server[i]->is_default_server)
+            return *http->server[i];
+    return *http->server[0];
+}
+
 #ifdef UNIT_TEST
 #include "doctest.h"
 
@@ -129,6 +137,21 @@ TEST_CASE("Config: empty")
         CHECK_THROWS_AS(Config("./srcs/config/config/unit-test/multiple_default_server.conf"), exception);
     else
         CHECK_THROWS_AS(Config("./config/unit-test/multiple_default_server.conf"), exception);
+}
+
+TEST_CASE("Config: get_default_server")
+{
+    CHECK_THROWS_AS(Config config("", true), exception);
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos) {
+        Config config("./srcs/config/config/unit-test/multiple_server.nginx.conf");
+        CHECK(config.get_default_server().listen == "8080");
+    } else {
+        Config config("./config/unit-test/multiple_server.nginx.conf");
+        CHECK(config.get_default_server().listen == "8080");
+    }
 }
 
 #endif /* UNIT_TEST */
