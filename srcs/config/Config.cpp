@@ -36,6 +36,14 @@ Config::~Config()
     delete http;
 }
 
+Server Config::get_default_server() const
+{
+    for (size_t i = 0; i < http->server.size(); i++)
+        if (http->server[i]->listen == "80")
+            return *http->server[i];
+    return *http->server[0];
+}
+
 #ifdef UNIT_TEST
 #include "doctest.h"
 
