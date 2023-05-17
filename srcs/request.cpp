@@ -121,7 +121,7 @@ void Request::parse_header_field()
     string key;
     string value;
     std::string::size_type split_pos;
-    string line;
+    string line = _buf.getline();
     while ((line != _buf.last_str)) {
         line = _buf.getline();
         split_pos = line.find(":");
