@@ -191,6 +191,11 @@ std::string Utility::delete_duplicated_slash(std::string str)
     return (only_one_slash);
 }
 
+std::map<std::pair<std::string, std::string>, Server const*> Utility::_cfg_servers;
+std::map<std::pair<std::string, std::string>, std::vector<std::string> > Utility::_cfg_locations;
+std::map<pair<std::pair<std::string, std::string>, std::string>, std::map<std::string, std::vector<std::string> > >
+    Utility::_cfg_locations_content;
+
 #ifdef UNIT_TEST
 TEST_CASE("trim_white_space")
 {

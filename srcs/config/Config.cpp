@@ -1,4 +1,7 @@
 #include "Config.hpp"
+#ifdef UNIT_TEST
+#include "doctest.h"
+#endif
 
 using std::ifstream;
 using std::istreambuf_iterator;
@@ -77,9 +80,10 @@ http {
 TEST_CASE("Config: Total test")
 {
     char cwd[1024];
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
     getcwd(cwd, sizeof(cwd));
     if (string(cwd).find("config") == string::npos) {
-        Config config("./srcs/config/config/subject.nginx.conf");
+        Config config("./srcs/config/config/unit-test/subject.nginx.conf");
         CHECK(config.http->client_max_body_size == 10);
         CHECK(config.http->server[0]->listen == "80");
         CHECK(config.http->server[0]->server_name == "example.com");
@@ -118,6 +122,13 @@ TEST_CASE("Config: Total test")
 TEST_CASE("Config: empty")
 {
     CHECK_THROWS_AS(Config config("", true), exception);
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos)
+        CHECK_THROWS_AS(Config("./srcs/config/config/unit-test/multiple_default_server.conf"), exception);
+    else
+        CHECK_THROWS_AS(Config("./config/unit-test/multiple_default_server.conf"), exception);
 }
 
 #endif /* UNIT_TEST */
