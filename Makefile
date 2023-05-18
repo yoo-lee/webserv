@@ -1,8 +1,8 @@
 NAME	:= webserv
-LIB		:= ./lib/
+LIB		:= ./lib
 OBJDIR	:= ./obj
-SRCDIR	:= ./srcs/
-CFGDIR	:= config/
+SRCDIR	:= ./srcs
+CFGDIR	:= config
 
 CONFIG := \
 				 AST.cpp \
@@ -22,14 +22,15 @@ CONFIG := \
 				 Http.cpp \
 				 LimitExcept.cpp
 CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
-SOCKET 	:=  fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp
-CGI 	:= 
-SERVER 	:= webserv.cpp
-UTILITY := split.cpp get_next_line.cpp utility.cpp
-SRC			:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
-
+SOCKET 				:= fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp content_type.cpp
+CGI 				:= cgi.cpp base64.cpp
+SERVER 				:= webserv.cpp
+UTILITY 			:= splitted_string.cpp raw_request_reader.cpp byte_vector.cpp utility.cpp
+SRC					:= $(CONFIG_SRCS) $(SOCKET) $(CGI) $(SERVER) $(UTILITY)
+UNIT_SRCS 			:= $(addprefix $(SRCDIR)/, $(SRC))
 MANDATORY	:= main.cpp
 BONUS		:= main_bonus.cpp
+
 
 
 ifdef WITH_BONUS
@@ -40,18 +41,19 @@ SRC	+= $(MANDATORY)
 DELENTRY	:= $(addprefix $(OBJDIR)/, $(BONUS))
 endif
 
-INCS	:= ./include ./srcs/config
-IFLAGS	:= $(addprefix -I,$(INCS))
-SRCS	:= $(addprefix $(SRCDIR), $(SRC))
-OBJS	:= $(SRCS:.cpp=.o)
-OBJECTS	:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o))
-DEPS	:= $(OBJECTS:.o=.d)
+INCS			:= ./include ./srcs/config
+IFLAGS			:= $(addprefix -I,$(INCS))
+SRCS			:= $(addprefix $(SRCDIR)/, $(SRC))
+OBJS			:= $(SRCS:.cpp=.o)
+OBJECTS			:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o))
+DEPS			:= $(OBJECTS:.o=.d)
 
 CXX			:= c++
-CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98
+CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98 -g3
+UNIT_CXXFLAGS := -Wall -Wextra -Werror -std=c++11 -g3 -D UNIT_TEST
 
 all:
-	@make $(NAME)	
+	@make $(NAME)
 
 $(NAME)	:	$(OBJECTS) | $(OBJDIR)
 		$(CXX)  $(OBJECTS) -o $@
@@ -75,12 +77,25 @@ fclean	:	clean
 
 re	:		fclean all
 
-bonus	:	
+bonus	:
 			@make WITH_BONUS=1
+
+r: run
+run:
+	./webserv ./srcs/config/config/mini.nginx.conf
+
+mr: make_run
+make_run:
+	@make re
+	@make run
+
+ut: unit_test
+unit_test: $(UNIT_SRCS)
+	$(CXX) $(UNIT_CXXFLAGS) $(IFLAGS) -D UNIT_TEST -o unit_test $(UNIT_SRCS)
+	./unit_test
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
 -include $(DEPS)
 endif
 
 .PHONY: all clean fclean bonus re
-

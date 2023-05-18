@@ -1,57 +1,56 @@
 #include "fd_manager.hpp"
+#include "Config.hpp"
 #include <unistd.h>
 
-FDManager::FDManager(int fd) : _fd(fd), req(NULL), res(NULL)
-{
-}
+FDManager::FDManager(int fd, Config const& config) : SocketData(config), _fd(fd), _req(NULL), _res(NULL) {}
 
 FDManager::~FDManager()
 {
-    delete req;
-    delete res;
+    delete _req;
+    delete _res;
 }
 
 void FDManager::insert(Request* req)
 {
-    if (this->req){
-        delete this->req;
+    if (this->_req) {
+        delete this->_req;
     }
-    this->req = req;
+    this->_req = req;
 }
 
 void FDManager::insert(Response* res)
 {
-    if (this->res){
-        delete this->res;
+    if (this->_res) {
+        delete this->_res;
     }
-    this->res = res;
+    this->_res = res;
 }
 
 Request* FDManager::get_req()
 {
-    return (this->req);
+    return (this->_req);
 }
 
 Response* FDManager::get_res()
 {
-    return (this->res);
+    return (this->_res);
 }
 
 void FDManager::delete_req()
 {
-    delete (this->req);
-    this->req = NULL;
+    delete (this->_req);
+    this->_req = NULL;
 }
 
 void FDManager::delete_res()
 {
-    delete (this->res);
-    this->res = NULL;
+    delete (this->_res);
+    this->_res = NULL;
 }
 
 void FDManager::close_fd()
 {
     close(_fd);
-    //this->delete_res();
-    //this->delete_req();
+    // this->delete_res();
+    // this->delete_req();
 }

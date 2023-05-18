@@ -20,6 +20,7 @@ class Config
     Config(const char* file_path);
     void init(string file_text);
     ~Config();
+    Server const& get_default_server() const;
 };
 
 #endif /* CONFIG_H */

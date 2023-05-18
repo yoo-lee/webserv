@@ -5,7 +5,9 @@
 #include <string>
 
 #include "Config.hpp"
-#include "split.hpp"
+#include "base64.hpp"
+#include "splitted_string.hpp"
+#include "utility.hpp"
 #include "webserv.hpp"
 
 using std::cout;
@@ -18,11 +20,11 @@ std::string base_path = "srcs/dir";
 
 void server(Webserv& webserv)
 {
-    try {
-        webserv.communication();
-    } catch (std::exception& e) {
-        cout << e.what() << endl;
-    }
+    // try {
+    webserv.process_communication();
+    // } catch (std::exception& e) {
+    // cout << e.what() << endl;
+    // }
 }
 
 int main(int argc, char const* argv[])

@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-SocketData::SocketData() : _timeout_cnt(0)
+SocketData::SocketData(Config const& config) : _timeout_cnt(0), _config(&config)
 {
     ;
 }
@@ -16,7 +16,7 @@ SocketData::~SocketData()
     ;
 }
 
-METHOD SocketData::identify_method(string method)
+METHOD SocketData::str_to_method(string method)
 {
     if (method == "GET") {
         return (GET);
@@ -38,7 +38,7 @@ METHOD SocketData::identify_method(string method)
     return (NG);
 }
 
-std::string SocketData::identify_method(METHOD method)
+std::string SocketData::method_to_str(METHOD method)
 {
     if (method == GET) {
         return ("GET");
@@ -72,9 +72,4 @@ bool SocketData::increment_timeout(int time)
 void SocketData::clear_timeout()
 {
     _timeout_cnt = 0;
-}
-
-void SocketData::set_config(Config const& config)
-{
-    this->_config = &config;
 }

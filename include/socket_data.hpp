@@ -2,10 +2,12 @@
 #define SOCKET_DATA_HPP
 
 #include "Config.hpp"
-#include "get_next_line.hpp"
-#include "split.hpp"
+#include "raw_request_reader.hpp"
+#include "splitted_string.hpp"
 #include <map>
 #include <string>
+
+using std::string;
 
 enum E_METHOD {
     GET,
@@ -25,11 +27,11 @@ typedef enum E_METHOD METHOD;
 class SocketData
 {
   public:
-    SocketData();
+    SocketData(Config const& config);
     ~SocketData();
 
-    static std::string identify_method(METHOD method);
-    static METHOD identify_method(std::string method);
+    static string method_to_str(METHOD method);
+    static METHOD str_to_method(string method);
     bool increment_timeout(int time);
     void clear_timeout();
 
@@ -38,7 +40,6 @@ class SocketData
     int _timeout_cnt;
 
     Config const* _config;
-    void set_config(Config const& config);
 };
 
 #endif
