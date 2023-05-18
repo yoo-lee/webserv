@@ -28,7 +28,6 @@ class Request : public SocketData
     const string& get_version() const;
     ByteVector get_body() const;
     vector<ByteVector> get_body_splitted() const;
-    ssize_t get_loaded_body_size() const;
     const string& get_body_size() const;
     METHOD get_method() const;
     const string get_method_string() const;

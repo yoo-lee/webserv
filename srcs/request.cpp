@@ -296,11 +296,6 @@ vector<ByteVector> Request::get_body_splitted() const
     return body_list;
 }
 
-ssize_t Request::get_loaded_body_size() const
-{
-    return (_body.size());
-}
-
 void Request::add_loaded_body_size(size_t size)
 {
     this->_loaded_body_size += size;
