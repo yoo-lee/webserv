@@ -1,5 +1,6 @@
 #include "response.hpp"
 #include "Config.hpp"
+#include "http_method.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <utility.hpp>
@@ -15,8 +16,8 @@ Response::Response()
 Response::Response(Request& request) : SocketData(*(request.get_config())), _request(request)
 {
     // Set the status code based on the request method
-    METHOD method = request.get_method();
-    if (method == GET) {
+    HttpMethod method = request.get_method();
+    if (method == HttpMethod::GET) {
         set_status(200);
     } else {
         set_status(501);
@@ -76,50 +77,6 @@ void Response::build_response()
 
     // Terminate response
     _res += "\r\n";
-}
-
-METHOD Response::str_to_method(std::string method)
-{
-    if (method == "GET") {
-        return GET;
-    } else if (method == "POST") {
-        return POST;
-    } else if (method == "PUT") {
-        return PUT;
-    } else if (method == "HEAD") {
-        return HEAD;
-    } else if (method == "DELETE") {
-        return DELETE;
-    } else if (method == "OPTIONS") {
-        return OPTIONS;
-    } else if (method == "TRACE") {
-        return TRACE;
-    } else if (method == "CONNECT") {
-        return CONNECT;
-    }
-    return INVALID;
-}
-
-std::string Response::method_to_str(METHOD method)
-{
-    if (method == GET) {
-        return ("GET");
-    } else if (method == POST) {
-        return ("POST");
-    } else if (method == PUT) {
-        return ("PUT");
-    } else if (method == HEAD) {
-        return ("HEAD");
-    } else if (method == DELETE) {
-        return ("DELETE");
-    } else if (method == OPTIONS) {
-        return ("OPTIONS");
-    } else if (method == TRACE) {
-        return ("TRACE");
-    } else if (method == CONNECT) {
-        return ("CONNECT");
-    }
-    return ("NG");
 }
 
 // Get HTTP response status message for a given status code

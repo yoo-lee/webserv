@@ -28,7 +28,7 @@ Request::Request(int fd_, Config const& config)
       _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
-      _method(NG),
+      _method(HttpMethod::NG),
       _err_line("")
 {
     this->parse();
@@ -44,7 +44,7 @@ Request::Request(int fd_, Config const& config, string& port)
       _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
-      _method(NG),
+      _method(HttpMethod::NG),
       _err_line(""),
       _port(port)
 {
@@ -61,7 +61,7 @@ void Request::print_request() const
 {
     cout << "|-- Print Request Header --|" << endl;
     cout << " fd: " << _fd << endl;
-    cout << " method: " << method_to_str(_method) << endl;
+    cout << " method: " << _method.get_str() << endl;
     cout << " version: " << _version << endl;
 
     cout << " headers size: " << _headers.size() << endl;
@@ -111,7 +111,7 @@ void Request::parse_request_line()
     }
     std::cout << request_line_words << std::endl;
     SplittedString::iterator request_line_words_it = request_line_words.begin();
-    _method = str_to_method(*request_line_words_it);
+    _method = HttpMethod(*request_line_words_it);
     _path = Utility::trim_white_space(*(++request_line_words_it));
     _version = Utility::trim_white_space(*(++request_line_words_it));
 }
@@ -166,14 +166,9 @@ void Request::save_tmp_file(ByteVector bytes)
     std::cout << "save_tmp_file: " << bytes << std::endl;
 }
 
-METHOD Request::get_method() const
+HttpMethod Request::get_method() const
 {
-    return (this->_method);
-}
-
-const std::string Request::get_method_string() const
-{
-    return (method_to_str(this->_method));
+    return this->_method;
 }
 
 const string& Request::get_version() const

@@ -4,6 +4,7 @@
 #include "Config.hpp"
 #include "byte_vector.hpp"
 #include "content_type.hpp"
+#include "http_method.hpp"
 #include "raw_request_reader.hpp"
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
@@ -29,7 +30,7 @@ class Request : public SocketData
     ByteVector get_body() const;
     vector<ByteVector> get_body_splitted() const;
     const string& get_body_size() const;
-    METHOD get_method() const;
+    HttpMethod get_method() const;
     const string get_method_string() const;
     const map<string, string>& get_headers() const;
     void print_request() const;
@@ -47,8 +48,6 @@ class Request : public SocketData
     vector<path> get_body_tmp_file_list();
     Server const* get_server_config() const;
     Location const* get_location_config() const;
-    void parse_server_config();
-    void parse_location_config();
     bool is_full_body_loaded() const;
     std::string& get_port();
     std::string& get_host();
@@ -63,6 +62,8 @@ class Request : public SocketData
     const static int BUF_MAX = 1600;
     void parse();
     string& get_next_line(int fd);
+    void parse_server_config();
+    void parse_location_config();
     void parse_request_line();
     void parse_header_field();
     void parse_content_length();
@@ -80,7 +81,7 @@ class Request : public SocketData
     string _transfer_encoding;
 
     map<string, string> _headers;
-    METHOD _method;
+    HttpMethod _method;
     string _path;
     ByteVector _body;
     string _version;

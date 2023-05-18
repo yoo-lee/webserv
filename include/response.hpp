@@ -24,8 +24,6 @@ class Response : public SocketData
     // HTTP レスポンスのバイト数を返す
     int getLen() const;
     string get_status_message(int code);
-    METHOD str_to_method(string method);
-    string method_to_str(METHOD method);
 
   private:
     string _file_path;
