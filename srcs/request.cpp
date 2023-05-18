@@ -25,7 +25,6 @@ using std::vector;
 Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
-      _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
       _method(HttpMethod::NG),
@@ -41,7 +40,6 @@ Request::Request(int fd_, Config const& config)
 Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
-      _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
       _method(HttpMethod::NG),
@@ -89,7 +87,6 @@ void Request::parse()
     // TODO: tmpファイルに保存する場合はここにif文を作り分岐させる
     _loaded_packet_body = tmp_loaded_packet_body;
 
-    this->add_loaded_body_size(tmp_loaded_packet_body.size());
     validate();
 }
 
@@ -289,11 +286,6 @@ vector<ByteVector> Request::get_body_splitted() const
         its++;
     }
     return body_list;
-}
-
-void Request::add_loaded_body_size(size_t size)
-{
-    this->_loaded_body_size += size;
 }
 
 // そもそもvalidateが必要なのか？

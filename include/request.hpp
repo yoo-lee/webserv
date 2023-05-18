@@ -40,7 +40,6 @@ class Request : public SocketData
     string get_ip_address() const;
     ssize_t get_content_length() const;
     string get_transfer_encoding() const;
-    void add_loaded_body_size(size_t size);
     void validate();
     bool is_cgi() const;
     bool is_cgi(string path) const;
@@ -72,7 +71,6 @@ class Request : public SocketData
     void save_tmp_file(ByteVector bytes);
 
     const int _fd;
-    ssize_t _loaded_body_size;
     ByteVector _loaded_packet_body;
     RawRequestReader _buf;
     vector<path> _tmp_body_file_list;
