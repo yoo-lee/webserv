@@ -126,11 +126,9 @@ Socket* Webserv::find_listen_socket(int socket_fd)
 void Webserv::process_connected_communication(int fd, struct epoll_event* event, Socket* socket)
 {
     if (event->events & EPOLLIN) {
-        std::cout << "get" << std::endl;
         Request* req = socket->recv(fd);
         req->print_request();
         req->read_body();
-        std::cout << "readed" << std::endl;
         if (req->is_full_body_loaded()) {
             std::cout << "full" << std::endl;
             event->events = EPOLLOUT;
@@ -234,12 +232,10 @@ void Webserv::process_communication()
             cout << "Epoll Wait Error:" << strerror(errno) << endl;
             return;
         }
-        std::cout << "nfds:" << nfds << std::endl;
         for (int i = 0; i < nfds; i++) {
             std::map<int, Socket*>::iterator tmp_fd = this->_fd_sockets.find(sock_event[i].data.fd);
             if (tmp_fd != this->_fd_sockets.end()) {
                 Socket* socket = tmp_fd->second;
-                std::cout << "find" << std::endl;
                 process_connected_communication(tmp_fd->first, &(sock_event[i]), socket);
                 continue;
             }
