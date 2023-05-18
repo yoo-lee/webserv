@@ -25,10 +25,9 @@ using std::vector;
 Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
-      _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
-      _method(NG),
+      _method(HttpMethod::NG),
       _err_line("")
 {
     this->parse();
@@ -41,10 +40,9 @@ Request::Request(int fd_, Config const& config)
 Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
-      _loaded_body_size(0),
       _buf(this->_fd),
       _content_length(0),
-      _method(NG),
+      _method(HttpMethod::NG),
       _err_line(""),
       _port(port)
 {
@@ -61,7 +59,7 @@ void Request::print_request() const
 {
     cout << "|-- Print Request Header --|" << endl;
     cout << " fd: " << _fd << endl;
-    cout << " method: " << method_to_str(_method) << endl;
+    cout << " method: " << _method.get_str() << endl;
     cout << " version: " << _version << endl;
 
     cout << " headers size: " << _headers.size() << endl;
@@ -86,10 +84,9 @@ void Request::parse()
     parse_content_type();
 
     ByteVector tmp_loaded_packet_body = this->read_body();
-    // TODO: tmpファイルに保存する場合はここにif文を作り分岐させる
+    // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
 
-    this->add_loaded_body_size(tmp_loaded_packet_body.size());
     validate();
 }
 
@@ -111,7 +108,7 @@ void Request::parse_request_line()
     }
     std::cout << request_line_words << std::endl;
     SplittedString::iterator request_line_words_it = request_line_words.begin();
-    _method = str_to_method(*request_line_words_it);
+    _method = HttpMethod(*request_line_words_it);
     _path = Utility::trim_white_space(*(++request_line_words_it));
     _version = Utility::trim_white_space(*(++request_line_words_it));
 }
@@ -161,19 +158,14 @@ void Request::parse_content_type()
     _content_type = ContentType(_headers);
 }
 
-void Request::save_tmp_file(ByteVector bytes)
-{
-    std::cout << "save_tmp_file: " << bytes << std::endl;
-}
+// void Request::save_tmp_file(ByteVector bytes) // 未実装(#39)
+// {
+//     std::cout << "save_tmp_file: " << bytes << std::endl;
+// }
 
-METHOD Request::get_method() const
+HttpMethod Request::get_method() const
 {
-    return (this->_method);
-}
-
-const std::string Request::get_method_string() const
-{
-    return (method_to_str(this->_method));
+    return this->_method;
 }
 
 const string& Request::get_version() const
@@ -188,15 +180,13 @@ const map<string, string>& Request::get_headers() const
 
 ByteVector Request::get_body_text()
 {
-    if (!this->_content_type.is_multipart())
-        return _loaded_packet_body;
-    throw std::runtime_error("Request::get_body_text() does not use  multipart/form-data");
+    throw std::runtime_error("This method will be removed So you may use get_body()");
 }
 
-vector<path> Request::get_body_tmp_file_list()
-{
-    return _tmp_body_file_list;
-}
+// vector<path> Request::get_body_tmp_file_list() 未実装(#39)
+// {
+//     return _tmp_body_file_list;
+// }
 
 // reading body from socket(fd)
 ByteVector Request::read_body()
@@ -296,16 +286,6 @@ vector<ByteVector> Request::get_body_splitted() const
     return body_list;
 }
 
-ssize_t Request::get_loaded_body_size() const
-{
-    return (_body.size());
-}
-
-void Request::add_loaded_body_size(size_t size)
-{
-    this->_loaded_body_size += size;
-}
-
 // そもそもvalidateが必要なのか？
 void Request::validate()
 {
@@ -338,7 +318,7 @@ bool is_prefix(const std::string& strA, const std::string& strB)
     return strA.find(strB) == 0;
 }
 
-Location const* Request::get_location_config() const
+Location const* Request::get_location_config() const // 未実装 (sanoさん待ち)
 {
     // vector<Location* const> maybe_current_locations;
     // Server const* server = get_server_config();

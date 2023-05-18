@@ -139,7 +139,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
             std::cout << "not full" << std::endl;
             return;
         }
-        if (req->get_method() == NG) {
+        if (req->get_method() == HttpMethod::NG) {
             cout << "error;connected_communication No.1" << endl;
             return;
         }

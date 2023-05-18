@@ -6,59 +6,9 @@ using std::cout;
 using std::endl;
 using std::string;
 
-SocketData::SocketData(Config const& config) : _timeout_cnt(0), _config(&config)
-{
-    ;
-}
+SocketData::SocketData(Config const& config) : _timeout_cnt(0), _config(&config) {}
 
-SocketData::~SocketData()
-{
-    ;
-}
-
-METHOD SocketData::str_to_method(string method)
-{
-    if (method == "GET") {
-        return (GET);
-    } else if (method == "POST") {
-        return (POST);
-    } else if (method == "PUT") {
-        return (PUT);
-    } else if (method == "HEAD") {
-        return (HEAD);
-    } else if (method == "DELETE") {
-        return (DELETE);
-    } else if (method == "OPTIONS") {
-        return (OPTIONS);
-    } else if (method == "TRACE") {
-        return (TRACE);
-    } else if (method == "CONNECT") {
-        return (CONNECT);
-    }
-    return (NG);
-}
-
-std::string SocketData::method_to_str(METHOD method)
-{
-    if (method == GET) {
-        return ("GET");
-    } else if (method == POST) {
-        return ("POST");
-    } else if (method == PUT) {
-        return ("PUT");
-    } else if (method == HEAD) {
-        return ("HEAD");
-    } else if (method == DELETE) {
-        return ("DELETE");
-    } else if (method == OPTIONS) {
-        return ("OPTIONS");
-    } else if (method == TRACE) {
-        return ("TRACE");
-    } else if (method == CONNECT) {
-        return ("CONNECT");
-    }
-    return ("NG");
-}
+SocketData::~SocketData() {}
 
 bool SocketData::increment_timeout(int time)
 {
