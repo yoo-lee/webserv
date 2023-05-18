@@ -17,13 +17,14 @@ class ByteVector : public vector<char>
     ~ByteVector();
 
     // sizeには返す配列のサイズを格納します
-    string get_array(int* size);
+    string get_array(int* size) const;
 
-    string get_array();
+    string get_array() const;
     // bufにはarrayを最大size分コピーし, コピーしたサイズを返します
-    size_t get_array(char* buf, size_t size);
-    size_t get_length();
+    size_t get_array(char* buf, size_t size) const;
+    size_t get_length() const;
     void load(char const* bytes, size_t size);
+    vector<char>::const_iterator find(ByteVector bv) const;
 
     friend std::ostream& operator<<(ostream& os, ByteVector& bv);
 };

@@ -10,7 +10,7 @@ ContentType::ContentType(map<string, string> const& headers) : _charset(""), _bo
 {
     string value;
     try {
-        value = headers.at("Content-Type");
+        value = headers.at("content-type");
     } catch (std::out_of_range& e) {
         _media_type = "application/octet-stream";
         return;
@@ -29,8 +29,8 @@ ContentType::ContentType(map<string, string> const& headers) : _charset(""), _bo
         throw runtime_error(me + "ContentType() : invalid media_type value: " + _media_type);
     if (_charset == "")
         _charset = get_default_mime_type(_media_type);
-    if (_media_type == "multipart/form-data" && _boundary == "")
-        throw runtime_error(me + "ContentType() : invalid Content-Type syntax");
+    if (is_multipart() && _boundary == "")
+        throw runtime_error(me + "ContentType() : multipart Content-Type( " + _media_type + " ) must have boundary");
 }
 
 ContentType::ContentType() {}
@@ -63,9 +63,9 @@ void ContentType::set_directive(vector<string> directives)
     }
 }
 
-bool ContentType::is_form_data()
+bool ContentType::is_multipart() const
 {
-    return _media_type == "multipart/form-data";
+    return _media_type.find("multipart/") == 0;
 }
 
 #include <iostream>
@@ -111,11 +111,19 @@ string const& ContentType::get_boundary() const
     return _boundary;
 }
 
+std::ostream& operator<<(std::ostream& os, ContentType const& ct)
+{
+    os << "media_type: '" << ct.get_media_type() << "', ";
+    os << "charset: '" << ct.get_charset() << "', ";
+    os << "boundary: '" << ct.get_boundary() << "'";
+    return os;
+}
+
 #ifdef UNIT_TEST
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "text/html; charset=ISO-8859-4";
+    headers["content-type"] = "text/html; charset=ISO-8859-4";
     ContentType ct = ContentType(headers);
     CHECK(ct.get_media_type() == "text/html");
     CHECK(ct.get_charset() == "iso-8859-4");
@@ -125,14 +133,14 @@ TEST_CASE("ContentType::ContentType()")
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "; charset=ISO-8859-4";
+    headers["content-type"] = "; charset=ISO-8859-4";
     CHECK_THROWS_AS((ContentType(headers)), std::runtime_error);
 }
 
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "text/html; charset=";
+    headers["content-type"] = "text/html; charset=";
     ContentType ct = ContentType(headers);
     CHECK(ct.get_media_type() == "text/html");
     CHECK(ct.get_charset() == "US-ASCII");
@@ -142,7 +150,7 @@ TEST_CASE("ContentType::ContentType()")
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "text/html";
+    headers["content-type"] = "text/html";
     ContentType ct = ContentType(headers);
     CHECK(ct.get_media_type() == "text/html");
     CHECK(ct.get_charset() == "US-ASCII");
@@ -152,7 +160,7 @@ TEST_CASE("ContentType::ContentType()")
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "multipart/form-data; charset=ISO-8859-4; boundary=1234567890";
+    headers["content-type"] = "multipart/form-data; charset=ISO-8859-4; boundary=1234567890";
     ContentType ct(headers);
     CHECK(ct.get_media_type() == "multipart/form-data");
     CHECK(ct.get_charset() == "iso-8859-4");
@@ -162,7 +170,14 @@ TEST_CASE("ContentType::ContentType()")
 TEST_CASE("ContentType::ContentType()")
 {
     map<string, string> headers;
-    headers["Content-Type"] = "";
+    headers["content-type"] = "multipart/form-data";
+    CHECK_THROWS_AS((ContentType(headers)), std::runtime_error);
+}
+
+TEST_CASE("ContentType::ContentType()")
+{
+    map<string, string> headers;
+    headers["content-type"] = "";
     CHECK_THROWS_AS((ContentType(headers)), std::runtime_error);
 }
 

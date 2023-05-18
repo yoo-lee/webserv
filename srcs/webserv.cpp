@@ -147,7 +147,15 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // Body Test
         // Test (will remove)
         req->print_request();
-        std::cout << req->get_body().get_array() << std::endl;
+        if (req->get_content_type().is_multipart()) {
+            vector<ByteVector> list = req->get_body_splitted();
+            for (size_t i = 0; i < list.size(); i++) {
+                cout << "body[" << i << "]:" << list[i] << endl;
+            }
+        } else {
+            std::cout << "body:" << req->get_body().get_array() << std::endl;
+        }
+
         // bool read_all = true;
         // if (req->have_data_in_body() == false) {
         //     return;
@@ -167,7 +175,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         socket->set_response(fd, res);
 
         // socket
-        if (req->get_content_length() > req->get_loaded_body_size()) {
+        if (req->get_content_length() > static_cast<ssize_t>(req->get_body().size())) {
             cout << "connected_communication not change OUT" << endl;
             return;
         }

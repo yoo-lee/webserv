@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -37,7 +38,8 @@ class ContentType
     string const& get_charset() const;
     string const& get_boundary() const;
 
-    bool is_form_data();
+    bool is_multipart() const;
+    friend std::ostream& operator<<(std::ostream& os, ContentType const& ct);
 };
 
 #endif /* CONTENT_TYPE_H */
