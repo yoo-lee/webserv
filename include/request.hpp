@@ -27,6 +27,8 @@ class Request : public SocketData
     vector<string> get_path_list() const;
     const string& get_version() const;
     ByteVector get_body() const;
+    vector<ByteVector> get_body_splitted() const;
+    ssize_t get_loaded_body_size() const;
     const string& get_body_size() const;
     METHOD get_method() const;
     const string get_method_string() const;
@@ -37,7 +39,6 @@ class Request : public SocketData
     string get_domain() const;
     string get_ip_address() const;
     ssize_t get_content_length() const;
-    ssize_t get_loaded_body_size() const;
     string get_transfer_encoding() const;
     void add_loaded_body_size(size_t size);
     void validate();
@@ -52,6 +53,7 @@ class Request : public SocketData
     bool is_full_body_loaded() const;
     std::string& get_port();
     std::string& get_host();
+    ContentType get_content_type() const;
     // static string identify_method(METHOD method);
     // static METHOD identify_method(string method);
     // bool increment_timeout(int time);

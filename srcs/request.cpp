@@ -59,18 +59,19 @@ Request::~Request() {}
 void Request::print_request() const
 {
     cout << "|-- Print Request Header --|" << endl;
-    cout << " fd: " << this->_fd << endl;
-    cout << " method: " << method_to_str(this->_method) << endl;
-    cout << " version: " << this->_version << endl;
+    cout << " fd: " << _fd << endl;
+    cout << " method: " << method_to_str(_method) << endl;
+    cout << " version: " << _version << endl;
 
-    cout << " headers size: " << this->_headers.size() << endl;
-    cout << " path: " << this->_path << endl;
-    map<string, string>::const_iterator ite = this->_headers.begin();
-    map<string, string>::const_iterator end = this->_headers.end();
-    for (; ite != end; ite++) {
-        cout << " " << (*ite).first << ": " << (*ite).second << endl;
-    }
+    cout << " headers size: " << _headers.size() << endl;
+    cout << " path: " << _path << endl;
     cout << " path dep: " << get_path_list().size() << endl;
+    cout << " content-type: " << _content_type << endl;
+    map<string, string>::const_iterator ite = _headers.begin();
+    map<string, string>::const_iterator end = _headers.end();
+    for (; ite != end; ite++) {
+        cout << " _headers:" << (*ite).first << ": " << (*ite).second << endl;
+    }
     cout << "|--------------------------|" << endl;
 }
 
@@ -84,10 +85,8 @@ void Request::parse()
     parse_content_type();
 
     ByteVector tmp_loaded_packet_body = this->read_body();
-    if (_content_type.is_form_data())
-        save_tmp_file(tmp_loaded_packet_body);
-    else
-        _loaded_packet_body = tmp_loaded_packet_body;
+    // TODO: tmpファイルに保存する場合はここにif文を作り分岐させる
+    _loaded_packet_body = tmp_loaded_packet_body;
 
     this->add_loaded_body_size(tmp_loaded_packet_body.size());
     validate();
@@ -188,7 +187,7 @@ const map<string, string>& Request::get_headers() const
 
 ByteVector Request::get_body_text()
 {
-    if (!this->_content_type.is_form_data())
+    if (!this->_content_type.is_multipart())
         return _loaded_packet_body;
     throw std::runtime_error("Request::get_body_text() does not use  multipart/form-data");
 }
@@ -263,12 +262,42 @@ string Request::get_transfer_encoding() const
 
 ByteVector Request::get_body() const
 {
+    if (!is_full_body_loaded())
+        throw std::runtime_error("Request::get_body() body is not loaded");
     return _body;
+}
+
+vector<ByteVector> Request::get_body_splitted() const
+{
+    if (!is_full_body_loaded())
+        throw std::runtime_error("Request::get_body_splitted() body is not loaded");
+    if (!_content_type.is_multipart())
+        throw std::runtime_error("Request::get_body_splitted() can only use  multipart/*. This content-type is " +
+                                 _content_type.get_media_type());
+
+    string boundary = _content_type.get_boundary();
+    vector<ByteVector> body_list;
+    string body = _body.get_array();
+
+    std::cout << "boundary: " << boundary << std::endl;
+    std::cout << "body: " << body << std::endl;
+    if (body.find(boundary) == string::npos) {
+        throw std::runtime_error("Request::get_body_splitted() boundary is not found");
+    }
+
+    SplittedString ss(body, boundary + "\r\n");
+    vector<string>::iterator its = ss.begin();
+    vector<string>::iterator ite = ss.end();
+    while (its != ite) {
+        body_list.push_back(ByteVector((*its).c_str(), (*its).length()));
+        its++;
+    }
+    return body_list;
 }
 
 ssize_t Request::get_loaded_body_size() const
 {
-    return (this->_loaded_body_size);
+    return (_body.size());
 }
 
 void Request::add_loaded_body_size(size_t size)
@@ -276,10 +305,14 @@ void Request::add_loaded_body_size(size_t size)
     this->_loaded_body_size += size;
 }
 
+// そもそもvalidateが必要なのか？
 void Request::validate()
 {
-    if (get_content_length() == get_loaded_body_size())
-        throw std::runtime_error("Request::validate() content_length != loaded_body_size");
+    // if (get_content_length() != get_loaded_body_size()) {
+    //     std::cerr << "Request::validate() content_length" << get_content_length() << " == loaded_body_size("
+    //               << get_loaded_body_size() << ")" << std::endl;
+    //     throw std::runtime_error("Request::validate() content_length != loaded_body_size");
+    // }
 }
 
 bool Request::is_cgi() const
@@ -341,9 +374,6 @@ Config const* Request::get_config() const
 
 bool Request::is_full_body_loaded() const
 {
-    // TODO: Transfer-Encoding: chunked
-    // TODO: _body.size() == _content_length;
-    cout << _body.size() << " >=" << static_cast<unsigned long>(_content_length) << endl;
     return _body.size() >= static_cast<unsigned long>(_content_length);
 }
 
@@ -355,4 +385,9 @@ std::string& Request::get_port()
 std::string& Request::get_host()
 {
     return _host;
+}
+
+ContentType Request::get_content_type() const
+{
+    return _content_type;
 }
