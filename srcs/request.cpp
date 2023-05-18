@@ -17,6 +17,7 @@ using std::cout;
 using std::endl;
 using std::map;
 using std::string;
+using std::tolower;
 using std::vector;
 
 #define BODY_TMP_DIRECTORY_PATH "/tmp/webserv_body_tmp/"
