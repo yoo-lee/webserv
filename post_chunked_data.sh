@@ -1,0 +1,1 @@
+curl -H "Transfer-Encoding: chunked" -d $1 localhost:8080

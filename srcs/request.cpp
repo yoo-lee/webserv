@@ -28,7 +28,8 @@ Request::Request(int fd_, Config const& config)
       _buf(this->_fd),
       _content_length(0),
       _method(HttpMethod::NG),
-      _err_line("")
+      _err_line(""),
+      _is_full_body_chunk_loaded(false),
 {
     this->parse();
     // parse_server_config(); 未実装
@@ -44,7 +45,8 @@ Request::Request(int fd_, Config const& config, string& port)
       _content_length(0),
       _method(HttpMethod::NG),
       _err_line(""),
-      _port(port)
+      _port(port),
+      _is_full_body_chunk_loaded(false),
 {
     this->parse();
     // parse_server_config(); 未実装
@@ -289,11 +291,8 @@ vector<ByteVector> Request::get_body_splitted() const
 // そもそもvalidateが必要なのか？
 void Request::validate()
 {
-    // if (get_content_length() != get_loaded_body_size()) {
-    //     std::cerr << "Request::validate() content_length" << get_content_length() << " == loaded_body_size("
-    //               << get_loaded_body_size() << ")" << std::endl;
-    //     throw std::runtime_error("Request::validate() content_length != loaded_body_size");
-    // }
+    if (_content_length == -1 && _transfer_encoding != "chunked")
+        throw std::runtime_error("Request::validate() content-length is not found");
 }
 
 bool Request::is_cgi() const
@@ -355,7 +354,10 @@ Config const* Request::get_config() const
 
 bool Request::is_full_body_loaded() const
 {
-    return _body.size() >= static_cast<unsigned long>(_content_length);
+    if (_content_length != -1)
+        return _body.size() >= static_cast<unsigned long>(_content_length);
+    else
+        return _is_full_body_chunk_loaded;
 }
 
 std::string& Request::get_port()

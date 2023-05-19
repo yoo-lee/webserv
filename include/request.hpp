@@ -80,6 +80,7 @@ class Request : public SocketData
     ByteVector _loaded_packet_body;
     RawRequestReader _buf;
     vector<path> _tmp_body_file_list;
+    bool _is_full_body_chunk_loaded;
 
     // -- request line --
     string _path;
