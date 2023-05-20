@@ -9,10 +9,8 @@ using std::string;
 class TransferEncoding
 {
   private:
-    const std::string TRANSFER_ENCODING_TYPE_STRS[5] = {
-        "chunked", "compress", "deflate", "gzip", "identity",
-    };
-    const int TYPE_COUNT = 5;
+    static const char* TRANSFER_ENCODING_TYPE_STRS[];
+    static const int TYPE_COUNT = 6;
 
   public:
     typedef enum E_TRANSFER_ENCODING_TYPE {
@@ -20,7 +18,8 @@ class TransferEncoding
         COMPRESS,
         DEFLATE,
         GZIP,
-        IDENTITY
+        IDENTITY,
+        NONE
     } TRANSFER_ENCODING_TYPE;
 
     TRANSFER_ENCODING_TYPE _type;
@@ -28,7 +27,7 @@ class TransferEncoding
     TransferEncoding();
     TransferEncoding(string transfer_encoding_str);
     TRANSFER_ENCODING_TYPE get_type() const;
-    string get_transfer_encoding_str() const;
+    string get_str() const;
 
     TransferEncoding const& operator=(TransferEncoding const& x);
     bool operator==(string type) const;

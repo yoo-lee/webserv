@@ -153,7 +153,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
                 cout << "body[" << i << "]:" << list[i] << endl;
             }
         } else {
-            std::cout << "body:" << req->get_body().get_array() << std::endl;
+            std::cout << "body:" << req->get_body().get_str() << std::endl;
         }
 
         // bool read_all = true;

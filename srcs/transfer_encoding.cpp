@@ -1,5 +1,10 @@
 #include "transfer_encoding.hpp"
 
+const char* TransferEncoding::TRANSFER_ENCODING_TYPE_STRS[] = {"chunked", "compress", "deflate",
+                                                               "gzip",    "identity", ""};
+
+TransferEncoding::TransferEncoding() {}
+
 TransferEncoding::TransferEncoding(string transfer_encoding_str)
 {
     for (int i = 0; i < TYPE_COUNT; i++) {
@@ -8,7 +13,7 @@ TransferEncoding::TransferEncoding(string transfer_encoding_str)
             return;
         }
     }
-    throw std::runtime_error("unsupported transfer encoding type");
+    throw std::runtime_error("unsupported transfer encoding type: '" + transfer_encoding_str + "'");
 }
 
 TransferEncoding::TRANSFER_ENCODING_TYPE TransferEncoding::get_type() const
@@ -16,7 +21,7 @@ TransferEncoding::TRANSFER_ENCODING_TYPE TransferEncoding::get_type() const
     return _type;
 }
 
-string TransferEncoding::get_transfer_encoding_str() const
+string TransferEncoding::get_str() const
 {
     return TRANSFER_ENCODING_TYPE_STRS[_type];
 }
@@ -32,7 +37,7 @@ TransferEncoding const& TransferEncoding::operator=(TransferEncoding const& x)
 
 bool TransferEncoding::operator==(string type) const
 {
-    return get_transfer_encoding_str() == type;
+    return get_str() == type;
 }
 
 bool TransferEncoding::operator==(TransferEncoding te) const
@@ -57,5 +62,5 @@ bool TransferEncoding::operator!=(TransferEncoding te) const
 
 bool TransferEncoding::operator!=(TransferEncoding::TRANSFER_ENCODING_TYPE te) const
 {
-    return !((*_type) == te);
+    return !((*this) == te);
 }

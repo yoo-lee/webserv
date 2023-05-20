@@ -26,10 +26,10 @@ Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
-      _content_length(0),
-      _method(HttpMethod::NG),
-      _err_line(""),
       _is_full_body_chunk_loaded(false),
+      _method(HttpMethod::NG),
+      _content_length(0),
+      _err_line("")
 {
     this->parse();
     // parse_server_config(); 未実装
@@ -42,11 +42,11 @@ Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
-      _content_length(0),
-      _method(HttpMethod::NG),
-      _err_line(""),
-      _port(port),
       _is_full_body_chunk_loaded(false),
+      _method(HttpMethod::NG),
+      _content_length(0),
+      _err_line(""),
+      _port(port)
 {
     this->parse();
     // parse_server_config(); 未実装
@@ -82,13 +82,15 @@ void Request::parse()
     parse_header_field();
 
     parse_content_length();
-    _transfer_encoding = _headers["transfer-encoding"];
-    parse_content_type();
+    _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
+    _content_type = ContentType(_headers);
+    if (_transfer_encoding != TransferEncoding::CHUNKED && _content_length == -1)
+        throw std::runtime_error("Transfer_encoding(: " + _transfer_encoding.get_str() +
+                                 ") is not chunked. But content_length is not found. ");
 
     ByteVector tmp_loaded_packet_body = this->read_body();
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
-
     validate();
 }
 
@@ -98,7 +100,7 @@ void Request::parse_request_line()
     if (request_line == _buf.last_str) {
         return;
     }
-    std::cout << "str: " << request_line << std::endl;
+    std::cout << "request line: " << request_line << std::endl;
     SplittedString request_line_words(request_line, " ");
     if (request_line_words.size() != 3) {
         cout << "size:" << request_line_words.size() << endl;
@@ -155,11 +157,6 @@ void Request::parse_content_length()
     this->_content_length = size;
 }
 
-void Request::parse_content_type()
-{
-    _content_type = ContentType(_headers);
-}
-
 // void Request::save_tmp_file(ByteVector bytes) // 未実装(#39)
 // {
 //     std::cout << "save_tmp_file: " << bytes << std::endl;
@@ -190,23 +187,44 @@ ByteVector Request::get_body_text()
 //     return _tmp_body_file_list;
 // }
 
+bool is_end_chunk(ByteVector bytes)
+{
+    string non_spitted = bytes.get_str();
+    vector<string> splitted;
+    while (non_spitted.find("\r\n") != string::npos) {
+        splitted.push_back(non_spitted.substr(0, non_spitted.find("\r\n")));
+        non_spitted = non_spitted.substr(non_spitted.find("\r\n") + 2);
+    }
+    cout << "non_splitted: " << non_spitted << endl;
+    cout << "splitted.size():" << splitted.size() << endl;
+    for (size_t i = 0; i < splitted.size(); i++) {
+        cout << "splitted[" << i << "]:" << splitted[i] << endl;
+    }
+    return false;
+}
+
 // reading body from socket(fd)
 ByteVector Request::read_body()
 {
-    ByteVector bytes = this->_buf.get_extra_buf();
-    if (bytes.size() > 0) {
-        std::cout << "read_body[buf]: " << bytes.get_array() << std::endl;
-        _body.insert(_body.end(), bytes.begin(), bytes.end());
-        return bytes;
-    }
-    ByteVector tmp = _buf.get_body(BUF_MAX);
-    vector<char>::iterator end;
-    if (tmp.size() > _content_length - _body.size())
-        end = tmp.begin() + (_content_length - _body.size());
+    if (is_full_body_loaded())
+        return ByteVector();
+    ByteVector bytes;
+    if (_buf.get_extra_buf().size() > 0)
+        bytes = this->_buf.get_extra_buf();
     else
-        end = tmp.end();
-    _body.insert(_body.end(), tmp.begin(), end);
-    return tmp;
+        bytes = this->_buf.get_body(BUF_MAX);
+    vector<char>::iterator end;
+
+    // content-length以上にsocketから読み込んでしまっていた場合に、その分を切り捨てる
+    if (bytes.size() > _content_length - _body.size())
+        end = bytes.begin() + (_content_length - _body.size());
+    else
+        end = bytes.end();
+    _body.insert(_body.end(), bytes.begin(), end);
+
+    if (_transfer_encoding == TransferEncoding::CHUNKED)
+        _is_full_body_chunk_loaded = is_end_chunk(bytes);
+    return bytes;
 }
 
 string const& Request::get_path() const
@@ -250,7 +268,7 @@ ssize_t Request::get_content_length() const
 
 string Request::get_transfer_encoding() const
 {
-    return (this->_transfer_encoding);
+    return (this->_transfer_encoding.get_str());
 }
 
 ByteVector Request::get_body() const
@@ -270,10 +288,8 @@ vector<ByteVector> Request::get_body_splitted() const
 
     string boundary = _content_type.get_boundary();
     vector<ByteVector> body_list;
-    string body = _body.get_array();
+    string body = _body.get_str();
 
-    std::cout << "boundary: " << boundary << std::endl;
-    std::cout << "body: " << body << std::endl;
     if (body.find(boundary) == string::npos) {
         throw std::runtime_error("Request::get_body_splitted() boundary is not found");
     }
@@ -354,10 +370,9 @@ Config const* Request::get_config() const
 
 bool Request::is_full_body_loaded() const
 {
-    if (_content_length != -1)
-        return _body.size() >= static_cast<unsigned long>(_content_length);
-    else
+    if (_transfer_encoding == TransferEncoding::CHUNKED)
         return _is_full_body_chunk_loaded;
+    return _body.size() >= static_cast<unsigned long>(_content_length);
 }
 
 std::string& Request::get_port()

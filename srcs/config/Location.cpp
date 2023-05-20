@@ -91,16 +91,16 @@ Location::Location(Statement const* directive) : limit_except(0)
     }
 }
 
-Location::Location(Location const* location)
-    : urls(location->urls),
-      properties(location->properties),
+Location::Location(Location const& location)
+    : urls(location.urls),
+      properties(location.properties),
       limit_except(NULL),
-      index(location->index),
-      autoindex(location->autoindex),
-      error_page(location->error_page)
+      index(location.index),
+      autoindex(location.autoindex),
+      error_page(location.error_page)
 {
     if (this->limit_except != NULL)
-        limit_except = new LimitExcept(location->limit_except);
+        limit_except = new LimitExcept(*(location.limit_except));
 }
 
 Location::~Location()
@@ -145,7 +145,7 @@ TEST_CASE("Location: copy constructor")
     statements.push_back(new SimpleStatement("index", "index.html"));
     BlockStatement const* location_directive = new BlockStatement("location", params, statements);
     Location* location = new Location(location_directive);
-    Location location2(location);
+    Location location2(*location);
     CHECK(location2.urls[0] == "/hello");
     CHECK(location2.urls[1] == "/world");
     CHECK(location2.properties["root"].size() == 1);

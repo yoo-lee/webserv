@@ -16,7 +16,7 @@ class LimitExcept
     bool allow_all;
     LimitExcept();
     LimitExcept(Statement const* limit_except_directive);
-    LimitExcept(LimitExcept const* l);
+    LimitExcept(LimitExcept const& l);
     ~LimitExcept();
 };
 

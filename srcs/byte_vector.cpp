@@ -13,19 +13,19 @@ ByteVector::ByteVector(const char* bytes, size_t size)
 
 ByteVector::~ByteVector() {}
 
-string ByteVector::get_array() const
+string ByteVector::get_str() const
 {
     return string(this->begin(), this->end());
 }
 
-string ByteVector::get_array(int* size) const
+string ByteVector::get_str(int* size) const
 {
     string bytes = string(this->begin(), this->end());
     *size = this->size();
     return (bytes);
 }
 
-size_t ByteVector::get_array(char* buf, size_t size) const
+size_t ByteVector::get_str(char* buf, size_t size) const
 {
     size_t i = 0;
     vector<char>::const_iterator it = this->begin();

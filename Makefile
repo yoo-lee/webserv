@@ -22,7 +22,7 @@ CONFIG := \
 				 Http.cpp \
 				 LimitExcept.cpp
 CONFIG_SRCS = $(addprefix $(CFGDIR)/,$(CONFIG))
-SOCKET 				:= fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp content_type.cpp
+SOCKET 				:= fd_manager.cpp socket_data.cpp request.cpp response.cpp socket.cpp tcp_socket.cpp content_type.cpp transfer_encoding.cpp
 CGI 				:= cgi.cpp base64.cpp
 SERVER 				:= webserv.cpp
 UTILITY 			:= splitted_string.cpp raw_request_reader.cpp byte_vector.cpp utility.cpp http_method.cpp

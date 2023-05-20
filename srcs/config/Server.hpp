@@ -25,7 +25,7 @@ class Server
     Location const& operator[](size_t index) const;
 
     Server(Statement const* server);
-    Server(Server const* server);
+    Server(Server const& server);
     ~Server();
 };
 
