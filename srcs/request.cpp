@@ -27,7 +27,7 @@ Request::Request(int fd_, Config const& config)
       _fd(fd_),
       _buf(this->_fd),
       _is_full_body_chunk_loaded(false),
-      _method(HttpMethod::NG),
+      _method(HttpMethod::INVALID),
       _content_length(0),
       _err_line("")
 {
@@ -43,7 +43,7 @@ Request::Request(int fd_, Config const& config, string& port)
       _fd(fd_),
       _buf(this->_fd),
       _is_full_body_chunk_loaded(false),
-      _method(HttpMethod::NG),
+      _method(HttpMethod::INVALID),
       _content_length(0),
       _err_line(""),
       _port(port)
@@ -96,14 +96,15 @@ void Request::parse()
     parse_content_length();
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
     _content_type = ContentType(_headers);
-    ByteVector tmp_loaded_packet_body = this->read_body();
-    if (_transfer_encoding == TransferEncoding::CHUNKED && _content_length == -1) {
+    ByteVector tmp_loaded_packet_body = read_body();
+    cout << "DEBUG tmp_loaded_packet_body: " << tmp_loaded_packet_body << endl;
+    if (_transfer_encoding == TransferEncoding::CHUNKED && _content_length == -1 && _method == HttpMethod::POST) {
         // transfer encodingは最初の行にlenが書いてあるので、それを読み込む
         try {
             _content_length = get_content_length_from_chunk(tmp_loaded_packet_body);
         } catch (std::exception& e) {
-            throw std::runtime_error("Transfer_encoding is chunked and content-length is not found. But chunked length "
-                                     "is not found in body.");
+            throw std::runtime_error("This Post Request's Transfer-Encoding is chunked and Content-Length is not "
+                                     "found. But chunked length is not found in body.");
         }
     }
 
@@ -231,18 +232,9 @@ ByteVector Request::read_body()
         bytes = this->_buf.get_extra_buf();
     else
         bytes = this->_buf.get_body(BUF_MAX);
-    vector<char>::iterator end;
 
-    // content-length以上にsocketから読み込んでしまっていた場合に、その分を切り捨てる
-    if (bytes.size() > _content_length - _body.size())
-        end = bytes.begin() + (_content_length - _body.size());
-    else
-        end = bytes.end();
-    _body.insert(_body.end(), bytes.begin(), end);
-
-    if (_transfer_encoding == TransferEncoding::CHUNKED)
-        _is_full_body_chunk_loaded = is_end_chunk(bytes);
-    return ByteVector(bytes.begin(), end);
+    _body.insert(_body.end(), bytes.begin(), bytes.end());
+    return bytes;
 }
 
 string const& Request::get_path() const
@@ -323,11 +315,7 @@ vector<ByteVector> Request::get_body_splitted() const
 }
 
 // そもそもvalidateが必要なのか？
-void Request::validate()
-{
-    if (_content_length == -1 && _transfer_encoding != "chunked")
-        throw std::runtime_error("Request::validate() content-length is not found");
-}
+void Request::validate() {}
 
 bool Request::is_cgi() const
 {
@@ -388,6 +376,8 @@ Config const* Request::get_config() const
 
 bool Request::is_full_body_loaded() const
 {
+    if (_method == HttpMethod::GET)
+        return true; // ここは例外を発生させたほうが誤用が少なくなってよいかも？
     if (_transfer_encoding == TransferEncoding::CHUNKED)
         return _is_full_body_chunk_loaded;
     return _body.size() >= static_cast<unsigned long>(_content_length);

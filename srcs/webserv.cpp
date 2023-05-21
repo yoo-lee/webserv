@@ -139,10 +139,6 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
             std::cout << "not full" << std::endl;
             return;
         }
-        if (req->get_method() == HttpMethod::NG) {
-            cout << "error;connected_communication No.1" << endl;
-            return;
-        }
 
         // Body Test
         // Test (will remove)
@@ -153,7 +149,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
                 cout << "body[" << i << "]:" << list[i] << endl;
             }
         } else {
-            std::cout << "body:" << req->get_body().get_str() << std::endl;
+            std::cout << "body: <--" << req->get_body().get_str() << "-->" << std::endl;
         }
 
         // bool read_all = true;
