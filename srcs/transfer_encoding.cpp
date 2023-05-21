@@ -3,7 +3,7 @@
 const char* TransferEncoding::TRANSFER_ENCODING_TYPE_STRS[] = {"chunked", "compress", "deflate",
                                                                "gzip",    "identity", ""};
 
-TransferEncoding::TransferEncoding() {}
+TransferEncoding::TransferEncoding() : _type(NONE) {}
 
 TransferEncoding::TransferEncoding(string transfer_encoding_str)
 {

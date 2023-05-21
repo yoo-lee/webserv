@@ -11,6 +11,8 @@ ByteVector::ByteVector(const char* bytes, size_t size)
     }
 }
 
+ByteVector::ByteVector(vector<char>::iterator begin, vector<char>::iterator end) : vector<char>(begin, end) {}
+
 ByteVector::~ByteVector() {}
 
 string ByteVector::get_str() const

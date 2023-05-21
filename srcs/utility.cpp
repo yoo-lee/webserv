@@ -1,6 +1,7 @@
 
 #include "utility.hpp"
 #include "splitted_string.hpp"
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -189,6 +190,19 @@ std::string Utility::delete_duplicated_slash(std::string str)
         only_one_slash.erase(only_one_slash.end() - 1, only_one_slash.end());
     }
     return (only_one_slash);
+}
+
+int Utility::hex_string_to_int(const std::string& hex_string)
+{
+    // 16進数の文字列をintに変換
+    char* endPtr;
+    long int result = strtol(hex_string.c_str(), &endPtr, 16);
+
+    // 変換が成功したかどうかを確認
+    if (*endPtr != '\0')
+        throw std::invalid_argument("hex_string_to_int: invalid argument");
+
+    return static_cast<int>(result);
 }
 
 std::map<std::pair<std::string, std::string>, Server const*> Utility::_cfg_servers;

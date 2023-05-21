@@ -7,7 +7,7 @@
 class SplittedString
 {
   public:
-    SplittedString(std::string& str, std::string delimiter);
+    SplittedString(std::string const& str, std::string delimiter);
     typedef std::vector<std::string>::iterator iterator;
     iterator begin();
     iterator end();
@@ -18,7 +18,7 @@ class SplittedString
 
   private:
     std::vector<std::string> _splitted_string;
-    void split(std::string& str, std::string delimiter);
+    void split(std::string const& str, std::string delimiter);
 };
 
 #endif /* SPLITTED_STRING_H */

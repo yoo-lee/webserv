@@ -68,12 +68,24 @@ void Request::print_request() const
     cout << " path: " << _path << endl;
     cout << " path dep: " << get_path_list().size() << endl;
     cout << " content-type: " << _content_type << endl;
+    cout << " content-length: " << _content_length << endl;
     map<string, string>::const_iterator ite = _headers.begin();
     map<string, string>::const_iterator end = _headers.end();
     for (; ite != end; ite++) {
         cout << " _headers:" << (*ite).first << ": " << (*ite).second << endl;
     }
     cout << "|--------------------------|" << endl;
+}
+
+ssize_t get_content_length_from_chunk(ByteVector str)
+{
+    cout << "DEBUG str length: " << str.size() << endl;
+    cout << "DEBUG str: " << str << endl;
+    SplittedString ss(str.get_str(), "\r\n");
+    cout << "DEBUG split: " << ss << endl;
+    if (ss.size() < 2)
+        throw std::runtime_error("check_body_contain_hex_length() size is not enough");
+    return static_cast<ssize_t>(Utility::hex_string_to_int(ss[0]));
 }
 
 void Request::parse()
@@ -84,11 +96,17 @@ void Request::parse()
     parse_content_length();
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
     _content_type = ContentType(_headers);
-    if (_transfer_encoding != TransferEncoding::CHUNKED && _content_length == -1)
-        throw std::runtime_error("Transfer_encoding(: " + _transfer_encoding.get_str() +
-                                 ") is not chunked. But content_length is not found. ");
-
     ByteVector tmp_loaded_packet_body = this->read_body();
+    if (_transfer_encoding == TransferEncoding::CHUNKED && _content_length == -1) {
+        // transfer encodingは最初の行にlenが書いてあるので、それを読み込む
+        try {
+            _content_length = get_content_length_from_chunk(tmp_loaded_packet_body);
+        } catch (std::exception& e) {
+            throw std::runtime_error("Transfer_encoding is chunked and content-length is not found. But chunked length "
+                                     "is not found in body.");
+        }
+    }
+
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
     validate();
@@ -195,11 +213,11 @@ bool is_end_chunk(ByteVector bytes)
         splitted.push_back(non_spitted.substr(0, non_spitted.find("\r\n")));
         non_spitted = non_spitted.substr(non_spitted.find("\r\n") + 2);
     }
-    cout << "non_splitted: " << non_spitted << endl;
-    cout << "splitted.size():" << splitted.size() << endl;
-    for (size_t i = 0; i < splitted.size(); i++) {
-        cout << "splitted[" << i << "]:" << splitted[i] << endl;
-    }
+    // cout << "non_splitted: " << non_spitted << endl;
+    // cout << "splitted.size():" << splitted.size() << endl;
+    // for (size_t i = 0; i < splitted.size(); i++) {
+    //     cout << "splitted[" << i << "]:" << splitted[i] << endl;
+    // }
     return false;
 }
 
@@ -224,7 +242,7 @@ ByteVector Request::read_body()
 
     if (_transfer_encoding == TransferEncoding::CHUNKED)
         _is_full_body_chunk_loaded = is_end_chunk(bytes);
-    return bytes;
+    return ByteVector(bytes.begin(), end);
 }
 
 string const& Request::get_path() const

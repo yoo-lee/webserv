@@ -14,6 +14,7 @@ class ByteVector : public vector<char>
   public:
     ByteVector();
     ByteVector(const char* bytes, size_t size);
+    ByteVector(vector<char>::iterator begin, vector<char>::iterator end);
     ~ByteVector();
 
     // sizeには返す配列のサイズを格納します

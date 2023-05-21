@@ -227,7 +227,6 @@ void Webserv::process_communication()
         return;
     }
     while (1) {
-        std::cout << "inf loop start" << std::endl;
         int time_msec = -1;
         if (this->_fd_sockets.size() > 0) {
             time_msec = 5;
@@ -259,6 +258,5 @@ void Webserv::process_communication()
                 }
             }
         }
-        std::cout << "end" << std::endl;
     }
 }

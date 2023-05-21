@@ -8,7 +8,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
-void SplittedString::split(std::string& str, std::string delimiter)
+void SplittedString::split(std::string const& str, std::string delimiter)
 {
     size_t del_len = delimiter.size();
     std::string::size_type offset = std::string::size_type(0);
@@ -29,7 +29,7 @@ void SplittedString::split(std::string& str, std::string delimiter)
     }
 }
 
-SplittedString::SplittedString(std::string& str, std::string delimiter)
+SplittedString::SplittedString(std::string const& str, std::string delimiter)
 {
     size_t del_len = delimiter.size();
     if (del_len == 0) {
