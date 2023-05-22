@@ -1,5 +1,5 @@
-#ifndef LIMITEXCEPT_H
-#define LIMITEXCEPT_H
+#ifndef LIMIT_EXCEPT_H
+#define LIMIT_EXCEPT_H
 #include "Statement.hpp"
 #include <string>
 #include <vector>
@@ -20,4 +20,4 @@ class LimitExcept
     ~LimitExcept();
 };
 
-#endif /* LIMITEXCEPT_H */
+#endif /* LIMIT_EXCEPT_H */
