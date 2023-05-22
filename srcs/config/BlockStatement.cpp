@@ -35,7 +35,7 @@ BlockStatement::BlockStatement(Statement const* s) : Statement(*s)
     for (size_t i = 0; i < b->_child_statements.size(); i++)
         _child_statements.push_back((new SimpleStatement(b->_child_statements[i]))->clone());
 }
-// #include <iostream>
+
 BlockStatement::~BlockStatement()
 {
     for (size_t i = 0; i < _child_statements.size(); i++)
