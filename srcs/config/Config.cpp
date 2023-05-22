@@ -1,8 +1,13 @@
 #include "Config.hpp"
+#ifdef UNIT_TEST
+#include "doctest.h"
+#endif
 
 using std::ifstream;
 using std::istreambuf_iterator;
 using std::runtime_error;
+
+Config::Config() {}
 
 Config::Config(string file_text, bool is_file_text)
 {
@@ -31,6 +36,96 @@ void Config::init(string file_text)
 Config::~Config()
 {
     delete http;
+}
+
+Server const& Config::get_default_server() const
+{
+    for (size_t i = 0; i < http->server.size(); i++)
+        if (http->server[i]->is_default_server)
+            return *http->server[i];
+    return *http->server[0];
+}
+
+Config const& Config::operator=(Config const& c)
+{
+    http = new HTTP(*(c.http));
+    return *this;
+}
+
+map<pair<string, string>, Server const*> Config::_servers_cache;
+map<pair<string, string>, vector<string> > Config::_locations_cache;
+map<pair<pair<string, string>, string>, map<string, vector<string> > > Config::_locations_content_cache;
+
+Server const* Config::get_server(string const& port, string const& host)
+{
+    map<pair<string, string>, Server const*>::iterator cash_ite = _servers_cache.find(make_pair(port, host));
+    if (cash_ite != _servers_cache.end())
+        return (cash_ite->second);
+
+    vector<Server const*> servers;
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port && http->server[i]->server_name == host) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port && http->server[i]->is_default_server) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+    return (NULL);
+}
+
+vector<string> Config::get_location_paths(string const& port, string const& host)
+{
+    map<pair<string, string>, vector<string> >::iterator cash_ite = _locations_cache.find(make_pair(port, host));
+    if (cash_ite != _locations_cache.end()) {
+        return (cash_ite->second);
+    }
+    Server const* servers = get_server(port, host);
+    vector<string> locations;
+
+    for (size_t j = 0; j < servers->location.size(); j++) {
+        for (size_t k = 0; k < servers->location[j]->urls.size(); k++) {
+            locations.push_back(servers->location[j]->urls[k]);
+        }
+    }
+    _locations_cache.insert(make_pair(make_pair(port, host), locations));
+    return (locations);
+}
+
+map<string, vector<string> > Config::get_locations_contents(string const& port, string const& host,
+                                                            string const& location)
+{
+    map<pair<pair<string, string>, string>, map<string, vector<string> > >::iterator cash_ite =
+        _locations_content_cache.find(make_pair(make_pair(port, host), location));
+    if (cash_ite != _locations_content_cache.end()) {
+        return (cash_ite->second);
+    }
+
+    vector<map<string, vector<string> > > properties;
+    Server const* servers = get_server(port, host);
+    for (size_t j = 0; j < servers->location.size(); j++) {
+        for (size_t k = 0; k < servers->location[j]->urls.size(); k++) {
+            if (servers->location[j]->urls[k] == location) {
+                _locations_content_cache.insert(
+                    make_pair(make_pair(make_pair(port, host), location), servers->location[j]->properties));
+
+                return (servers->location[j]->properties);
+            }
+        }
+    }
+    map<string, vector<string> > rval;
+    return (rval);
 }
 
 #ifdef UNIT_TEST
@@ -72,29 +167,75 @@ http {
 }
 */
 
+#include <unistd.h>
+
 TEST_CASE("Config: Total test")
 {
-    Config config("./config/subject.nginx.conf");
-    CHECK(config.http->client_max_body_size == 10);
-    CHECK(config.http->server[0]->listen == "80");
-    CHECK(config.http->server[0]->server_name == "example.com");
-    CHECK(config.http->server[0]->location.size() == 3);
-    CHECK(config.http->server[0]->location[0]->urls[0] == "/");
-    CHECK(config.http->server[0]->location[0]->autoindex == true);
-    CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
-    CHECK(config.http->server[0]->location[0]->index == "index.html");
-    CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
-    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
-    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
-    CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
-    CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
-    CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
-    CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    char cwd[1024];
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos) {
+        Config config("./srcs/config/config/unit-test/subject.nginx.conf");
+        CHECK(config.http->client_max_body_size == 10);
+        CHECK(config.http->server[0]->listen == "80");
+        CHECK(config.http->server[0]->server_name == "example.com");
+        CHECK(config.http->server[0]->location.size() == 3);
+        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
+        CHECK(config.http->server[0]->location[0]->autoindex == true);
+        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
+        CHECK(config.http->server[0]->location[0]->index == "index.html");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
+        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
+        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
+        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
+        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    } else {
+        Config config("./config/subject.nginx.conf");
+        CHECK(config.http->client_max_body_size == 10);
+        CHECK(config.http->server[0]->listen == "80");
+        CHECK(config.http->server[0]->server_name == "example.com");
+        CHECK(config.http->server[0]->location.size() == 3);
+        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
+        CHECK(config.http->server[0]->location[0]->autoindex == true);
+        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
+        CHECK(config.http->server[0]->location[0]->index == "index.html");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
+        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
+        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
+        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
+        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
+        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
+    }
 }
 
 TEST_CASE("Config: empty")
 {
     CHECK_THROWS_AS(Config config("", true), exception);
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos)
+        CHECK_THROWS_AS(Config("./srcs/config/config/unit-test/multiple_default_server.conf"), exception);
+    else
+        CHECK_THROWS_AS(Config("./config/unit-test/multiple_default_server.conf"), exception);
+}
+
+TEST_CASE("Config: get_default_server")
+{
+    CHECK_THROWS_AS(Config config("", true), exception);
+    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    if (string(cwd).find("config") == string::npos) {
+        Config config("./srcs/config/config/unit-test/multiple_server.nginx.conf");
+        CHECK(config.get_default_server().listen == "8080");
+    } else {
+        Config config("./config/unit-test/multiple_server.nginx.conf");
+        CHECK(config.get_default_server().listen == "8080");
+    }
 }
 
 #endif /* UNIT_TEST */

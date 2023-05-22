@@ -67,13 +67,26 @@
         "thread": "cpp",
         "complex": "cpp",
         "semaphore": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "ios": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     },
     "cSpell.words": [
+        "clientinfo",
         "DQUOTE",
+        "envirton",
+        "EPOLLIN",
+        "EPOLLOUT",
+        "hogehugahoge",
         "LCURLY",
         "RCURLY",
-        "SQUOTE"
+        "sano",
+        "SQUOTE",
+        "venv"
     ],
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools",

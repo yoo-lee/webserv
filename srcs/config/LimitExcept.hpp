@@ -1,5 +1,5 @@
-#ifndef LIMITEXCEPT_H
-#define LIMITEXCEPT_H
+#ifndef LIMIT_EXCEPT_H
+#define LIMIT_EXCEPT_H
 #include "Statement.hpp"
 #include <string>
 #include <vector>
@@ -16,8 +16,8 @@ class LimitExcept
     bool allow_all;
     LimitExcept();
     LimitExcept(Statement const* limit_except_directive);
-    LimitExcept(LimitExcept const* l);
+    LimitExcept(LimitExcept const& l);
     ~LimitExcept();
 };
 
-#endif /* LIMITEXCEPT_H */
+#endif /* LIMIT_EXCEPT_H */

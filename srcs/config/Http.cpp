@@ -25,10 +25,21 @@ HTTP::HTTP(Statement const* directive)
                           ".");
     client_max_body_size = get_client_max_body_size(http_directive);
     vector<Statement const*> server_directives = http_directive.get_children("server");
-    for (size_t i = 0; i < server_directives.size(); i++)
+    bool has_default_server = false;
+    for (size_t i = 0; i < server_directives.size(); i++) {
         server.push_back(new Server(server_directives[i]));
+        if (server[i]->is_default_server && has_default_server)
+            throw SyntaxError("HTTP: There are more than one default server.");
+        if (server[i]->is_default_server)
+            has_default_server = true;
+    }
 }
 
+HTTP::HTTP(HTTP const& h) : client_max_body_size(h.client_max_body_size)
+{
+    for (size_t i = 0; i < h.server.size(); i++)
+        server.push_back(new Server(*h.server[i]));
+}
 HTTP::~HTTP()
 {
     for (size_t i = 0; i < server.size(); i++)

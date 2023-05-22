@@ -40,22 +40,22 @@ LimitExcept::LimitExcept(Statement const* directive) : deny_all(false), allow_al
     }
 }
 
-LimitExcept::LimitExcept(LimitExcept const* l)
+LimitExcept::LimitExcept(LimitExcept const& l)
 {
-    methods = l->methods;
-    deny_list = l->deny_list;
-    allow_list = l->allow_list;
+    methods = l.methods;
+    deny_list = l.deny_list;
+    allow_list = l.allow_list;
 }
 
 #include <iostream>
 LimitExcept::~LimitExcept() {}
 
 #ifdef UNIT_TEST
-// TEST_CASE("LimitExcept: default")
-// {
-//     LimitExcept limit_except;
-//     CHECK(limit_except.methods.size() == 0);
-//     CHECK(limit_except.deny_list.size() == 0);
-//     CHECK(limit_except.allow_list.size() == 0);
-// }
+TEST_CASE("LimitExcept: default")
+{
+    LimitExcept limit_except;
+    CHECK(limit_except.methods.size() == 0);
+    CHECK(limit_except.deny_list.size() == 0);
+    CHECK(limit_except.allow_list.size() == 0);
+}
 #endif
