@@ -8,6 +8,7 @@
 #include "raw_request_reader.hpp"
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
+#include "transfer_encoding.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -68,7 +69,6 @@ class Request : public SocketData
     void parse_request_line();
     void parse_header_field();
     void parse_content_length();
-    void parse_content_type();
     void validate(); // いらなくない？
     // void save_tmp_file(ByteVector bytes); // 未実装(実装予定 #39)
 
@@ -88,7 +88,7 @@ class Request : public SocketData
 
     // -- request header --
     ssize_t _content_length;
-    string _transfer_encoding;
+    TransferEncoding _transfer_encoding;
     map<string, string> _headers;
     ByteVector _body;
     string _err_line;

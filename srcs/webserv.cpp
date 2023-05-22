@@ -139,10 +139,6 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
             std::cout << "not full" << std::endl;
             return;
         }
-        if (req->get_method() == HttpMethod::NG) {
-            cout << "error;connected_communication No.1" << endl;
-            return;
-        }
 
         // Body Test
         // Test (will remove)
@@ -153,7 +149,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
                 cout << "body[" << i << "]:" << list[i] << endl;
             }
         } else {
-            std::cout << "body:" << req->get_body().get_array() << std::endl;
+            std::cout << "body: <--" << req->get_body().get_str() << "-->" << std::endl;
         }
 
         // bool read_all = true;
@@ -227,7 +223,6 @@ void Webserv::process_communication()
         return;
     }
     while (1) {
-        std::cout << "inf loop start" << std::endl;
         int time_msec = -1;
         if (this->_fd_sockets.size() > 0) {
             time_msec = 5;
@@ -259,6 +254,5 @@ void Webserv::process_communication()
                 }
             }
         }
-        std::cout << "end" << std::endl;
     }
 }

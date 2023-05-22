@@ -36,7 +36,13 @@ int main(int argc, char const* argv[])
         return (EXIT_FAILURE);
     }
     // config読み込み
-    Config config(argv[1]);
+    Config config;
+    try {
+        config = Config(argv[1]);
+    } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+        return (EXIT_FAILURE);
+    }
 
     // ソケットの初期設定
     Webserv webserv = Webserv(config);

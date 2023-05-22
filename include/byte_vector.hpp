@@ -14,15 +14,17 @@ class ByteVector : public vector<char>
   public:
     ByteVector();
     ByteVector(const char* bytes, size_t size);
+    ByteVector(vector<char>::iterator begin, vector<char>::iterator end);
     ~ByteVector();
 
     // sizeには返す配列のサイズを格納します
-    string get_array(int* size) const;
+    string get_str(int* size) const;
 
-    string get_array() const;
+    string get_str() const;
     // bufにはarrayを最大size分コピーし, コピーしたサイズを返します
-    size_t get_array(char* buf, size_t size) const;
+    size_t get_str(char* buf, size_t size) const;
     size_t get_length() const;
+    bool end_with(string str) const;
     void load(char const* bytes, size_t size);
     vector<char>::const_iterator find(ByteVector bv) const;
 

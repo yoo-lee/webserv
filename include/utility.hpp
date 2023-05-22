@@ -1,5 +1,5 @@
-#ifndef Utility_HPP
-#define Utility_HPP
+#ifndef UTILITY_H
+#define UTILITY_H
 #include "Config.hpp"
 #include "Server.hpp"
 #include "utility.hpp"
@@ -39,6 +39,7 @@ class Utility
                     std::map<std::string, std::vector<std::string> > >
         _cfg_locations_content;
     static std::string delete_duplicated_slash(std::string str);
+    static int hex_string_to_int(const std::string& hex_string);
 };
 
 template <typename T>
@@ -53,4 +54,4 @@ std::string Utility::to_string(T value)
     return (str);
 }
 
-#endif
+#endif /* UTILITY_H */

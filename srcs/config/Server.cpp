@@ -60,6 +60,15 @@ Server::Server(Statement const* server) : is_default_server(false)
         location.push_back(new Location(server_directive.get_children("location")[i]));
 }
 
+Server::Server(Server const& server)
+    : listen(server.listen),
+      is_default_server(server.is_default_server),
+      server_name(server.server_name)
+{
+    for (size_t i = 0; 0 < location.size(); i++)
+        this->location[i] = new Location(*server.location[i]);
+}
+
 Location const& Server::operator[](size_t index) const
 {
     if (index < location.size())

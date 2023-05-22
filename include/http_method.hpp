@@ -12,13 +12,7 @@ class HttpMethod
     typedef enum E_METHOD {
         GET,
         POST,
-        PUT,
-        HEAD,
         DELETE,
-        OPTIONS,
-        TRACE,
-        CONNECT,
-        NG,
         INVALID,
     } METHOD;
     METHOD get_method() const;

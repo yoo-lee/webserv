@@ -35,6 +35,11 @@ HTTP::HTTP(Statement const* directive)
     }
 }
 
+HTTP::HTTP(HTTP const& h) : client_max_body_size(h.client_max_body_size)
+{
+    for (size_t i = 0; i < h.server.size(); i++)
+        server.push_back(new Server(*h.server[i]));
+}
 HTTP::~HTTP()
 {
     for (size_t i = 0; i < server.size(); i++)

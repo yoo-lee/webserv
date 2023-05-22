@@ -19,6 +19,7 @@ class HTTP
     vector<Server const*> server;
     HTTP();
     HTTP(Statement const* directive);
+    HTTP(HTTP const& h);
     ~HTTP();
     Server const* get_server(string server_name) const;
     Server const& operator[](size_t index);

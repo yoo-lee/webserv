@@ -7,6 +7,8 @@ using std::ifstream;
 using std::istreambuf_iterator;
 using std::runtime_error;
 
+Config::Config() {}
+
 Config::Config(string file_text, bool is_file_text)
 {
     (void)is_file_text;
@@ -42,6 +44,12 @@ Server const& Config::get_default_server() const
         if (http->server[i]->is_default_server)
             return *http->server[i];
     return *http->server[0];
+}
+
+Config const& Config::operator=(Config const& c)
+{
+    http = new HTTP(*(c.http));
+    return *this;
 }
 
 #ifdef UNIT_TEST

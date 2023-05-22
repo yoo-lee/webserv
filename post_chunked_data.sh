@@ -1,0 +1,1 @@
+curl -v -X POST -d "$(cat README.md)" http://localhost:8090/

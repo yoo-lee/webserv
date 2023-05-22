@@ -26,8 +26,8 @@ Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
+      _method(HttpMethod::INVALID),
       _content_length(0),
-      _method(HttpMethod::NG),
       _err_line("")
 {
     this->parse();
@@ -41,8 +41,8 @@ Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
+      _method(HttpMethod::INVALID),
       _content_length(0),
-      _method(HttpMethod::NG),
       _err_line(""),
       _port(port)
 {
@@ -66,11 +66,12 @@ void Request::print_request() const
     cout << " path: " << _path << endl;
     cout << " path dep: " << get_path_list().size() << endl;
     cout << " content-type: " << _content_type << endl;
+    cout << " content-length: " << _content_length << endl;
+    cout << " transfer-encoding: " << _transfer_encoding.get_str() << endl;
     map<string, string>::const_iterator ite = _headers.begin();
     map<string, string>::const_iterator end = _headers.end();
-    for (; ite != end; ite++) {
+    for (; ite != end; ite++)
         cout << " _headers:" << (*ite).first << ": " << (*ite).second << endl;
-    }
     cout << "|--------------------------|" << endl;
 }
 
@@ -80,13 +81,12 @@ void Request::parse()
     parse_header_field();
 
     parse_content_length();
-    _transfer_encoding = _headers["transfer-encoding"];
-    parse_content_type();
+    _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
+    _content_type = ContentType(_headers);
+    ByteVector tmp_loaded_packet_body = read_body();
 
-    ByteVector tmp_loaded_packet_body = this->read_body();
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
-
     validate();
 }
 
@@ -96,7 +96,7 @@ void Request::parse_request_line()
     if (request_line == _buf.last_str) {
         return;
     }
-    std::cout << "str: " << request_line << std::endl;
+    std::cout << "request line: " << request_line << std::endl;
     SplittedString request_line_words(request_line, " ");
     if (request_line_words.size() != 3) {
         cout << "size:" << request_line_words.size() << endl;
@@ -153,11 +153,6 @@ void Request::parse_content_length()
     this->_content_length = size;
 }
 
-void Request::parse_content_type()
-{
-    _content_type = ContentType(_headers);
-}
-
 // void Request::save_tmp_file(ByteVector bytes) // 未実装(#39)
 // {
 //     std::cout << "save_tmp_file: " << bytes << std::endl;
@@ -191,20 +186,17 @@ ByteVector Request::get_body_text()
 // reading body from socket(fd)
 ByteVector Request::read_body()
 {
-    ByteVector bytes = this->_buf.get_extra_buf();
-    if (bytes.size() > 0) {
-        std::cout << "read_body[buf]: " << bytes.get_array() << std::endl;
-        _body.insert(_body.end(), bytes.begin(), bytes.end());
-        return bytes;
-    }
-    ByteVector tmp = _buf.get_body(BUF_MAX);
-    vector<char>::iterator end;
-    if (tmp.size() > _content_length - _body.size())
-        end = tmp.begin() + (_content_length - _body.size());
+    if (is_full_body_loaded())
+        return ByteVector();
+    ByteVector bytes;
+    ByteVector tmp = _buf.get_extra_buf();
+    if (tmp.size() > 0)
+        bytes = tmp;
     else
-        end = tmp.end();
-    _body.insert(_body.end(), tmp.begin(), end);
-    return tmp;
+        bytes = _buf.get_body(BUF_MAX);
+
+    _body.insert(_body.end(), bytes.begin(), bytes.end());
+    return bytes;
 }
 
 string const& Request::get_path() const
@@ -212,7 +204,7 @@ string const& Request::get_path() const
     return _path;
 }
 
-// hoge/fuga/piyo -> hoge, fuga, piyo
+// path/to/file -> path, to, file
 vector<string> Request::get_path_list() const
 {
     vector<string> path_list;
@@ -248,7 +240,7 @@ ssize_t Request::get_content_length() const
 
 string Request::get_transfer_encoding() const
 {
-    return (this->_transfer_encoding);
+    return (this->_transfer_encoding.get_str());
 }
 
 ByteVector Request::get_body() const
@@ -268,10 +260,8 @@ vector<ByteVector> Request::get_body_splitted() const
 
     string boundary = _content_type.get_boundary();
     vector<ByteVector> body_list;
-    string body = _body.get_array();
+    string body = _body.get_str();
 
-    std::cout << "boundary: " << boundary << std::endl;
-    std::cout << "body: " << body << std::endl;
     if (body.find(boundary) == string::npos) {
         throw std::runtime_error("Request::get_body_splitted() boundary is not found");
     }
@@ -287,14 +277,7 @@ vector<ByteVector> Request::get_body_splitted() const
 }
 
 // そもそもvalidateが必要なのか？
-void Request::validate()
-{
-    // if (get_content_length() != get_loaded_body_size()) {
-    //     std::cerr << "Request::validate() content_length" << get_content_length() << " == loaded_body_size("
-    //               << get_loaded_body_size() << ")" << std::endl;
-    //     throw std::runtime_error("Request::validate() content_length != loaded_body_size");
-    // }
-}
+void Request::validate() {}
 
 bool Request::is_cgi() const
 {
@@ -355,6 +338,10 @@ Config const* Request::get_config() const
 
 bool Request::is_full_body_loaded() const
 {
+    if (_method == HttpMethod::GET)
+        return true; // ここは例外を発生させたほうが誤用が少なくなってよいかも？
+    if (_transfer_encoding == TransferEncoding::CHUNKED)
+        return _body.end_with("0\r\n\r\n");
     return _body.size() >= static_cast<unsigned long>(_content_length);
 }
 

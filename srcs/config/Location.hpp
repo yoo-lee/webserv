@@ -23,7 +23,7 @@ class Location
     bool autoindex;
     map<string, string> error_page;
     Location(Statement const* location_directive);
-    Location(Location const* location);
+    Location(Location const& location);
     ~Location();
     vector<string> operator[](string index);
 };

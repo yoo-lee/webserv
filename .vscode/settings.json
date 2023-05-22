@@ -72,9 +72,15 @@
     "cSpell.words": [
         "clientinfo",
         "DQUOTE",
+        "envirton",
+        "EPOLLIN",
+        "EPOLLOUT",
+        "hogehugahoge",
         "LCURLY",
         "RCURLY",
-        "SQUOTE"
+        "sano",
+        "SQUOTE",
+        "venv"
     ],
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools",

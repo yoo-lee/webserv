@@ -23,6 +23,10 @@ HttpMethod::HttpMethod(METHOD method)
 HttpMethod::HttpMethod(string method)
 {
     _method = str_to_method(method);
+    if (_method == HttpMethod::INVALID) {
+        throw std::invalid_argument(
+            "Invalid HTTP method. (webserv is not support HEAD, PUT, CONNECT, OPTIONS, TRACE, PATCH method)");
+    }
 }
 
 HttpMethod::HttpMethod(const HttpMethod& h) : _method(h._method) {}
@@ -35,20 +39,10 @@ std::string HttpMethod::method_to_str(HttpMethod::METHOD method)
         return ("GET");
     } else if (method == HttpMethod::POST) {
         return ("POST");
-    } else if (method == HttpMethod::PUT) {
-        return ("PUT");
-    } else if (method == HttpMethod::HEAD) {
-        return ("HEAD");
     } else if (method == HttpMethod::DELETE) {
         return ("DELETE");
-    } else if (method == HttpMethod::OPTIONS) {
-        return ("OPTIONS");
-    } else if (method == HttpMethod::TRACE) {
-        return ("TRACE");
-    } else if (method == HttpMethod::CONNECT) {
-        return ("CONNECT");
     }
-    return ("NG");
+    return "INVALID";
 }
 
 HttpMethod::METHOD HttpMethod::str_to_method(std::string method)
@@ -57,18 +51,8 @@ HttpMethod::METHOD HttpMethod::str_to_method(std::string method)
         return HttpMethod::GET;
     } else if (method == "POST") {
         return HttpMethod::POST;
-    } else if (method == "PUT") {
-        return HttpMethod::PUT;
-    } else if (method == "HEAD") {
-        return HttpMethod::HEAD;
     } else if (method == "DELETE") {
         return HttpMethod::DELETE;
-    } else if (method == "OPTIONS") {
-        return HttpMethod::OPTIONS;
-    } else if (method == "TRACE") {
-        return HttpMethod::TRACE;
-    } else if (method == "CONNECT") {
-        return HttpMethod::CONNECT;
     }
     return HttpMethod::INVALID;
 }
