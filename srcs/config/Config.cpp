@@ -52,6 +52,82 @@ Config const& Config::operator=(Config const& c)
     return *this;
 }
 
+map<pair<string, string>, Server const*> Config::_servers_cache;
+map<pair<string, string>, vector<string> > Config::_locations_cache;
+map<pair<pair<string, string>, string>, map<string, vector<string> > > Config::_locations_content_cache;
+
+Server const* Config::get_server(string const& port, string const& host)
+{
+    map<pair<string, string>, Server const*>::iterator cash_ite = _servers_cache.find(make_pair(port, host));
+    if (cash_ite != _servers_cache.end())
+        return (cash_ite->second);
+
+    vector<Server const*> servers;
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port && http->server[i]->server_name == host) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port && http->server[i]->is_default_server) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+    for (size_t i = 0; i < http->server.size(); i++) {
+        if (http->server[i]->listen == port) {
+            _servers_cache.insert(make_pair(make_pair(port, host), http->server[i]));
+            return (http->server[i]);
+        }
+    }
+    return (NULL);
+}
+
+vector<string> Config::get_location_paths(string const& port, string const& host)
+{
+    map<pair<string, string>, vector<string> >::iterator cash_ite = _locations_cache.find(make_pair(port, host));
+    if (cash_ite != _locations_cache.end()) {
+        return (cash_ite->second);
+    }
+    Server const* servers = get_server(port, host);
+    vector<string> locations;
+
+    for (size_t j = 0; j < servers->location.size(); j++) {
+        for (size_t k = 0; k < servers->location[j]->urls.size(); k++) {
+            locations.push_back(servers->location[j]->urls[k]);
+        }
+    }
+    _locations_cache.insert(make_pair(make_pair(port, host), locations));
+    return (locations);
+}
+
+map<string, vector<string> > Config::get_locations_contents(string const& port, string const& host,
+                                                            string const& location)
+{
+    map<pair<pair<string, string>, string>, map<string, vector<string> > >::iterator cash_ite =
+        _locations_content_cache.find(make_pair(make_pair(port, host), location));
+    if (cash_ite != _locations_content_cache.end()) {
+        return (cash_ite->second);
+    }
+
+    vector<map<string, vector<string> > > properties;
+    Server const* servers = get_server(port, host);
+    for (size_t j = 0; j < servers->location.size(); j++) {
+        for (size_t k = 0; k < servers->location[j]->urls.size(); k++) {
+            if (servers->location[j]->urls[k] == location) {
+                _locations_content_cache.insert(
+                    make_pair(make_pair(make_pair(port, host), location), servers->location[j]->properties));
+
+                return (servers->location[j]->properties);
+            }
+        }
+    }
+    map<string, vector<string> > rval;
+    return (rval);
+}
+
 #ifdef UNIT_TEST
 #include "doctest.h"
 

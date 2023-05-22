@@ -9,11 +9,18 @@
 #include <string>
 #include <vector>
 
+using std::map;
+using std::pair;
 using std::string;
+using std::vector;
 
 class Config
 {
   private:
+    static map<pair<string, string>, Server const*> _servers_cache;
+    static map<pair<string, string>, vector<string> > _locations_cache;
+    static map<pair<pair<string, string>, string>, map<string, vector<string> > > _locations_content_cache;
+
   public:
     HTTP const* http;
     Config();
@@ -24,6 +31,10 @@ class Config
     Server const& get_default_server() const;
 
     Config const& operator=(Config const& c);
+
+    Server const* get_server(string const& port, string const& host);
+    vector<string> get_location_paths(string const& port, string const& host);
+    map<string, vector<string> > get_locations_contents(string const& port, string const& host, string const& location);
 };
 
 #endif /* CONFIG_H */
