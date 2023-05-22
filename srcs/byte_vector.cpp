@@ -45,6 +45,19 @@ size_t ByteVector::get_length() const
     return this->size();
 }
 
+bool ByteVector::end_with(string str) const
+{
+    if (str.size() > this->size()) {
+        return false;
+    }
+    for (size_t i = 0; i < str.size(); i++) {
+        if (str[str.size() - i - 1] != this->at(this->size() - i - 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ByteVector::load(char const* bytes, size_t size)
 {
     for (size_t i = 0; i < size; i++) {
@@ -126,5 +139,12 @@ TEST_CASE("ByteVector::find find not found")
     ByteVector bv("hogehuga", 8);
     ByteVector bv2("test", 4);
     CHECK_THROWS_AS(bv.find(bv2), std::runtime_error);
+}
+
+TEST_CASE("ByteVector::end_with")
+{
+    ByteVector bv("hogehuga", 8);
+    CHECK(bv.end_with("huga") == true);
+    CHECK(bv.end_with("hoge") == false);
 }
 #endif

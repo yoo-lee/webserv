@@ -39,14 +39,12 @@ void RawRequestReader::read_line()
         cout << "read_line() test No.0 escape loop() recv error" << endl;
         return;
     }
-    std::cout << "READ <--" << _buf << "-->" << std::endl;
     this->_buf_size = size;
 
     this->_buf_body_pos = Utility::strnstr(this->_buf, "\r\n\r\n", size);
     if (this->_buf_body_pos) {
         *this->_buf_body_pos = '\0';
         this->_buf_body_pos += 4;
-        std::cout << "READ <--" << _buf_body_pos << "-->" << std::endl;
         this->_buf_body_size = size - (this->_buf_body_pos - this->_buf);
     }
     string str = string(this->_buf);

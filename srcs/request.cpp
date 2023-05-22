@@ -26,7 +26,6 @@ Request::Request(int fd_, Config const& config)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
-      _is_full_body_chunk_loaded(false),
       _method(HttpMethod::INVALID),
       _content_length(0),
       _err_line("")
@@ -42,7 +41,6 @@ Request::Request(int fd_, Config const& config, string& port)
     : SocketData(config),
       _fd(fd_),
       _buf(this->_fd),
-      _is_full_body_chunk_loaded(false),
       _method(HttpMethod::INVALID),
       _content_length(0),
       _err_line(""),
@@ -69,6 +67,7 @@ void Request::print_request() const
     cout << " path dep: " << get_path_list().size() << endl;
     cout << " content-type: " << _content_type << endl;
     cout << " content-length: " << _content_length << endl;
+    cout << " transfer-encoding: " << _transfer_encoding.get_str() << endl;
     map<string, string>::const_iterator ite = _headers.begin();
     map<string, string>::const_iterator end = _headers.end();
     for (; ite != end; ite++) {
@@ -79,10 +78,7 @@ void Request::print_request() const
 
 ssize_t get_content_length_from_chunk(ByteVector str)
 {
-    cout << "DEBUG str length: " << str.size() << endl;
-    cout << "DEBUG str: " << str << endl;
     SplittedString ss(str.get_str(), "\r\n");
-    cout << "DEBUG split: " << ss << endl;
     if (ss.size() < 2)
         throw std::runtime_error("check_body_contain_hex_length() size is not enough");
     return static_cast<ssize_t>(Utility::hex_string_to_int(ss[0]));
@@ -97,7 +93,6 @@ void Request::parse()
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
     _content_type = ContentType(_headers);
     ByteVector tmp_loaded_packet_body = read_body();
-    cout << "DEBUG tmp_loaded_packet_body: " << tmp_loaded_packet_body << endl;
     if (_transfer_encoding == TransferEncoding::CHUNKED && _content_length == -1 && _method == HttpMethod::POST) {
         // transfer encodingは最初の行にlenが書いてあるので、それを読み込む
         try {
@@ -206,32 +201,17 @@ ByteVector Request::get_body_text()
 //     return _tmp_body_file_list;
 // }
 
-bool is_end_chunk(ByteVector bytes)
-{
-    string non_spitted = bytes.get_str();
-    vector<string> splitted;
-    while (non_spitted.find("\r\n") != string::npos) {
-        splitted.push_back(non_spitted.substr(0, non_spitted.find("\r\n")));
-        non_spitted = non_spitted.substr(non_spitted.find("\r\n") + 2);
-    }
-    // cout << "non_splitted: " << non_spitted << endl;
-    // cout << "splitted.size():" << splitted.size() << endl;
-    // for (size_t i = 0; i < splitted.size(); i++) {
-    //     cout << "splitted[" << i << "]:" << splitted[i] << endl;
-    // }
-    return false;
-}
-
 // reading body from socket(fd)
 ByteVector Request::read_body()
 {
     if (is_full_body_loaded())
         return ByteVector();
     ByteVector bytes;
-    if (_buf.get_extra_buf().size() > 0)
-        bytes = this->_buf.get_extra_buf();
+    ByteVector tmp = _buf.get_extra_buf();
+    if (tmp.size() > 0)
+        bytes = tmp;
     else
-        bytes = this->_buf.get_body(BUF_MAX);
+        bytes = _buf.get_body(BUF_MAX);
 
     _body.insert(_body.end(), bytes.begin(), bytes.end());
     return bytes;
@@ -379,7 +359,7 @@ bool Request::is_full_body_loaded() const
     if (_method == HttpMethod::GET)
         return true; // ここは例外を発生させたほうが誤用が少なくなってよいかも？
     if (_transfer_encoding == TransferEncoding::CHUNKED)
-        return _is_full_body_chunk_loaded;
+        return _body.end_with("0\r\n\r\n");
     return _body.size() >= static_cast<unsigned long>(_content_length);
 }
 

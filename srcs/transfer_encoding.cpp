@@ -1,15 +1,18 @@
 #include "transfer_encoding.hpp"
+#include "utility.hpp"
 
 const char* TransferEncoding::TRANSFER_ENCODING_TYPE_STRS[] = {"chunked", "compress", "deflate",
                                                                "gzip",    "identity", ""};
 
 TransferEncoding::TransferEncoding() : _type(NONE) {}
 
+#include <iostream>
 TransferEncoding::TransferEncoding(string transfer_encoding_str)
 {
     for (int i = 0; i < TYPE_COUNT; i++) {
         if (TRANSFER_ENCODING_TYPE_STRS[i] == transfer_encoding_str) {
             _type = static_cast<TRANSFER_ENCODING_TYPE>(i);
+            std::cout << "set: " << i << std::endl;
             return;
         }
     }
@@ -30,7 +33,7 @@ TransferEncoding::~TransferEncoding() {}
 
 TransferEncoding const& TransferEncoding::operator=(TransferEncoding const& x)
 {
-    if (this == &x)
+    if (this != &x)
         _type = x.get_type();
     return *this;
 }
