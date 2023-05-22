@@ -72,8 +72,12 @@
     "cSpell.words": [
         "clientinfo",
         "DQUOTE",
+        "EPOLLIN",
+        "EPOLLOUT",
+        "hogehugahoge",
         "LCURLY",
         "RCURLY",
+        "sano",
         "SQUOTE"
     ],
     "[cpp]": {

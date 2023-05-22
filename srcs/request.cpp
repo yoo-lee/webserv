@@ -70,18 +70,9 @@ void Request::print_request() const
     cout << " transfer-encoding: " << _transfer_encoding.get_str() << endl;
     map<string, string>::const_iterator ite = _headers.begin();
     map<string, string>::const_iterator end = _headers.end();
-    for (; ite != end; ite++) {
+    for (; ite != end; ite++)
         cout << " _headers:" << (*ite).first << ": " << (*ite).second << endl;
-    }
     cout << "|--------------------------|" << endl;
-}
-
-ssize_t get_content_length_from_chunk(ByteVector str)
-{
-    SplittedString ss(str.get_str(), "\r\n");
-    if (ss.size() < 2)
-        throw std::runtime_error("check_body_contain_hex_length() size is not enough");
-    return static_cast<ssize_t>(Utility::hex_string_to_int(ss[0]));
 }
 
 void Request::parse()
@@ -93,15 +84,6 @@ void Request::parse()
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
     _content_type = ContentType(_headers);
     ByteVector tmp_loaded_packet_body = read_body();
-    if (_transfer_encoding == TransferEncoding::CHUNKED && _content_length == -1 && _method == HttpMethod::POST) {
-        // transfer encodingは最初の行にlenが書いてあるので、それを読み込む
-        try {
-            _content_length = get_content_length_from_chunk(tmp_loaded_packet_body);
-        } catch (std::exception& e) {
-            throw std::runtime_error("This Post Request's Transfer-Encoding is chunked and Content-Length is not "
-                                     "found. But chunked length is not found in body.");
-        }
-    }
 
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
@@ -222,7 +204,7 @@ string const& Request::get_path() const
     return _path;
 }
 
-// hoge/fuga/piyo -> hoge, fuga, piyo
+// path/to/file -> path, to, file
 vector<string> Request::get_path_list() const
 {
     vector<string> path_list;
