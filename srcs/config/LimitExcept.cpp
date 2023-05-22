@@ -51,11 +51,11 @@ LimitExcept::LimitExcept(LimitExcept const& l)
 LimitExcept::~LimitExcept() {}
 
 #ifdef UNIT_TEST
-// TEST_CASE("LimitExcept: default")
-// {
-//     LimitExcept limit_except;
-//     CHECK(limit_except.methods.size() == 0);
-//     CHECK(limit_except.deny_list.size() == 0);
-//     CHECK(limit_except.allow_list.size() == 0);
-// }
+TEST_CASE("LimitExcept: default")
+{
+    LimitExcept limit_except;
+    CHECK(limit_except.methods.size() == 0);
+    CHECK(limit_except.deny_list.size() == 0);
+    CHECK(limit_except.allow_list.size() == 0);
+}
 #endif

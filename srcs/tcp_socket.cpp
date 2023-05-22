@@ -5,8 +5,6 @@
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
-// #include <netdb.h>
-// #include <sys/types.h>
 
 using std::cout;
 using std::endl;

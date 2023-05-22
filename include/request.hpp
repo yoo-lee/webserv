@@ -58,7 +58,6 @@ class Request : public SocketData
     ByteVector get_body() const;
     vector<ByteVector> get_body_splitted() const;
     bool is_full_body_loaded() const;
-    // vector<path> get_body_tmp_file_list(); // 未実装(実装予定 #39)
 
   private:
     const static int BUF_MAX = 1600;
@@ -69,8 +68,6 @@ class Request : public SocketData
     void parse_request_line();
     void parse_header_field();
     void parse_content_length();
-    void validate(); // いらなくない？
-    // void save_tmp_file(ByteVector bytes); // 未実装(実装予定 #39)
 
     // -- util --
     bool is_contents_upload_file(string const& content_type);

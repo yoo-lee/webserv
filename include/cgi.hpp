@@ -27,9 +27,7 @@ class CGI
     void parse();
     void check_executable_path();
     void get_config_path();
-    // std::string exe_command;
     std::string _cgi_filepath;
-    // std::string _cgi_extension;
     std::string _query;
     std::string _path_info;
     std::map<std::string, std::string> args;

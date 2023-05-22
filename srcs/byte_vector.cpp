@@ -39,12 +39,6 @@ size_t ByteVector::get_str(char* buf, size_t size) const
     return (i);
 }
 
-// Vector::size()と同じ、文脈上lengthの適切な場合はこちらをお使いください
-size_t ByteVector::get_length() const
-{
-    return this->size();
-}
-
 bool ByteVector::end_with(string str) const
 {
     if (str.size() > this->size()) {

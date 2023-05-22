@@ -31,9 +31,6 @@ Request::Request(int fd_, Config const& config)
       _err_line("")
 {
     this->parse();
-    // parse_server_config(); 未実装
-    // parse_location_config(); 未実装
-
     const vector<Server const*> server_list = _config->http->server;
 }
 
@@ -47,9 +44,6 @@ Request::Request(int fd_, Config const& config, string& port)
       _port(port)
 {
     this->parse();
-    // parse_server_config(); 未実装
-    // parse_location_config(); 未実装
-
     const vector<Server const*> server_list = _config->http->server;
 }
 
@@ -87,7 +81,6 @@ void Request::parse()
 
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
-    validate();
 }
 
 void Request::parse_request_line()
@@ -153,11 +146,6 @@ void Request::parse_content_length()
     this->_content_length = size;
 }
 
-// void Request::save_tmp_file(ByteVector bytes) // 未実装(#39)
-// {
-//     std::cout << "save_tmp_file: " << bytes << std::endl;
-// }
-
 HttpMethod Request::get_method() const
 {
     return this->_method;
@@ -177,11 +165,6 @@ ByteVector Request::get_body_text()
 {
     throw std::runtime_error("This method will be removed So you may use get_body()");
 }
-
-// vector<path> Request::get_body_tmp_file_list() 未実装(#39)
-// {
-//     return _tmp_body_file_list;
-// }
 
 // reading body from socket(fd)
 ByteVector Request::read_body()
@@ -276,9 +259,6 @@ vector<ByteVector> Request::get_body_splitted() const
     return body_list;
 }
 
-// そもそもvalidateが必要なのか？
-void Request::validate() {}
-
 bool Request::is_cgi() const
 {
     return is_cgi(_path);
@@ -299,22 +279,6 @@ bool is_prefix(const std::string& strA, const std::string& strB)
         return false;
     }
     return strA.find(strB) == 0;
-}
-
-Location const* Request::get_location_config() const // 未実装 (sanoさん待ち)
-{
-    // vector<Location* const> maybe_current_locations;
-    // Server const* server = get_server_config();
-    // for (size_t j = 0; j < server->location.size(); j++) {
-    //     Location* current = const_cast<Location*>(server->location[j]);
-    //     for (size_t k = 0; k < current->urls.size(); k++)
-    //         if (is_prefix(current->urls[k], _path) && _port == current->properties["listen"])
-    //             maybe_current_locations.push_back(current);
-    // }
-    // if (maybe_current_locations.size() == 0)
-    //     return 0;
-    // if (maybe_current_locations.size() == 1)
-    return 0;
 }
 
 bool Request::is_cgi(string path) const

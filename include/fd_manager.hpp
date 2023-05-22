@@ -20,7 +20,6 @@ class FDManager : public SocketData
 
   private:
     int _fd;
-    // SocketData* socket_data;
     Request* _req;
     Response* _res;
 };

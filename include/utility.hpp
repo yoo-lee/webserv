@@ -13,7 +13,6 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-// template<typename T>
 class Utility
 {
   public:

@@ -9,10 +9,6 @@
 #include <string>
 #include <sys/epoll.h>
 #include <sys/socket.h>
-// #include <sys/types.h>
-// #include <netinet/in.h>
-//
-//
 
 typedef struct clientinfo {
     int fd;

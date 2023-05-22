@@ -355,7 +355,6 @@ TEST_CASE("AST: nginx.conf")
                   "}\n")
                 .get_token_list());
     REQUIRE(ast.get_root().size() == 2);
-    // ast.print_tree();
 }
 #include <fstream>
 #include <iostream>
@@ -384,7 +383,6 @@ TEST_CASE("AST: subject.nginx.conf")
                   "}\n")
                 .get_token_list());
     REQUIRE(ast.get_root().size() == 1);
-    // ast.print_tree();
 }
 
 /** BAD TEST CASE **/

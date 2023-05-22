@@ -102,11 +102,7 @@ Token::Type Lexer::get_state(char c) const
 
 void Lexer::set_state()
 {
-    // cout << "'" << Token::get_typename(_state) << "' =>";
     _state = get_state(_text[0]);
-    // cout << "'" << Token::get_typename(_state) << "' (" << _text[0] <<
-    // ")"
-    //   << endl;
 }
 
 char Lexer::update_state()

@@ -20,11 +20,11 @@ std::string base_path = "srcs/dir";
 
 void server(Webserv& webserv)
 {
-    // try {
-    webserv.process_communication();
-    // } catch (std::exception& e) {
-    // cout << e.what() << endl;
-    // }
+    try {
+        webserv.process_communication();
+    } catch (std::exception& e) {
+        cout << e.what() << endl;
+    }
 }
 
 int main(int argc, char const* argv[])

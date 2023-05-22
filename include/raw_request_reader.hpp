@@ -12,7 +12,6 @@ class RawRequestReader
     RawRequestReader(int fd);
     ~RawRequestReader();
     std::string& getline();
-    // int get_body(char* buf, size_t size);
     ByteVector get_body(size_t size);
     std::string last_str;
     size_t size();
@@ -24,14 +23,11 @@ class RawRequestReader
     ssize_t _buf_body_size;
     char _buf[BUF_MAX];
     ssize_t _buf_size;
-    // ssize_t buf_pos;
     const int _fd;
     SplittedString* _sp;
-    // std::vector<std::string> vec;
     size_t _pos;
     void read_line();
     int read(char* buf, int size);
-    // void read_line(char *buf);
 };
 
 #endif /* RAW_REQUEST_READER_H */
