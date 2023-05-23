@@ -43,7 +43,7 @@ class Request : public SocketData
     bool is_cgi() const;
     bool is_cgi(string path) const;
     std::string& get_host();
-    ContentType get_content_type() const;
+    ContentType const& get_content_type() const;
     std::string& get_port();
 
     // -- config --

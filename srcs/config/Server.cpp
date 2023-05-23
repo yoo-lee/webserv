@@ -60,13 +60,16 @@ Server::Server(Statement const* server) : is_default_server(false)
         location.push_back(new Location(server_directive.get_children("location")[i]));
 }
 
+#include <iostream>
 Server::Server(Server const& server)
     : listen(server.listen),
       is_default_server(server.is_default_server),
       server_name(server.server_name)
 {
-    for (size_t i = 0; 0 < location.size(); i++)
-        this->location[i] = new Location(*server.location[i]);
+    for (size_t i = 0; i < server.location.size(); i++) {
+        if (server.location[i] != NULL)
+            this->location.push_back(new Location(*server.location[i]));
+    }
 }
 
 Location const& Server::operator[](size_t index) const
@@ -101,6 +104,21 @@ TEST_CASE("Server: constructor")
     Parser parser("server { listen 80; server_name localhost; location / { root /; } }");
     vector<Statement const*> server_directive = parser.get_root();
     Server server(server_directive[0]);
+    CHECK(server.listen == "80");
+    CHECK(server.server_name == "localhost");
+    CHECK(server.location.size() == 1);
+    CHECK(server.location[0]->urls.size() == 1);
+    CHECK(server.location[0]->urls[0] == "/");
+}
+
+TEST_CASE("Server: copy constructor")
+{
+    Parser parser("server { listen 80; server_name localhost; location / { root /; } }");
+    vector<Statement const*> server_directive = parser.get_root();
+    Server server_parent(server_directive[0]);
+    std::cout << "uncopyed" << endl;
+    Server server(server_parent);
+    std::cout << "copyed" << endl;
     CHECK(server.listen == "80");
     CHECK(server.server_name == "localhost");
     CHECK(server.location.size() == 1);

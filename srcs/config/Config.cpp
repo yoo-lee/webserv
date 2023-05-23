@@ -56,7 +56,7 @@ map<pair<string, string>, Server const*> Config::_servers_cache;
 map<pair<string, string>, vector<string> > Config::_locations_cache;
 map<pair<pair<string, string>, string>, map<string, vector<string> > > Config::_locations_content_cache;
 
-Server const* Config::get_server(string const& port, string const& host)
+Server const* Config::get_server(string const& port, string const& host) const
 {
     map<pair<string, string>, Server const*>::iterator cash_ite = _servers_cache.find(make_pair(port, host));
     if (cash_ite != _servers_cache.end())
@@ -85,7 +85,7 @@ Server const* Config::get_server(string const& port, string const& host)
     return (NULL);
 }
 
-vector<string> Config::get_location_paths(string const& port, string const& host)
+vector<string> Config::get_location_paths(string const& port, string const& host) const
 {
     map<pair<string, string>, vector<string> >::iterator cash_ite = _locations_cache.find(make_pair(port, host));
     if (cash_ite != _locations_cache.end()) {
@@ -104,7 +104,7 @@ vector<string> Config::get_location_paths(string const& port, string const& host
 }
 
 map<string, vector<string> > Config::get_locations_contents(string const& port, string const& host,
-                                                            string const& location)
+                                                            string const& location) const
 {
     map<pair<pair<string, string>, string>, map<string, vector<string> > >::iterator cash_ite =
         _locations_content_cache.find(make_pair(make_pair(port, host), location));
@@ -236,6 +236,52 @@ TEST_CASE("Config: get_default_server")
         Config config("./config/unit-test/multiple_server.nginx.conf");
         CHECK(config.get_default_server().listen == "8080");
     }
+}
+
+TEST_CASE("Config: get_server from single server")
+{
+    Config config("http { client_max_body_size 90;server { listen 80; server_name test;} }", true);
+    Server const* s = config.get_server("80", "test");
+    CHECK(s->listen == "80");
+    CHECK(s->server_name == "test");
+}
+
+TEST_CASE("Config: get_server from multi server")
+{
+    Config config("http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 90; "
+                  "server_name test2;} }",
+                  true);
+    Server const* s = config.get_server("90", "test2");
+    CHECK(s->listen == "90");
+    CHECK(s->server_name == "test2");
+}
+
+TEST_CASE("Config: get_server from multi server same name")
+{
+    Config config(
+        "http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 90; server_name test;} }",
+        true);
+    Server const* s = config.get_server("90", "test");
+    CHECK(s->listen == "90");
+    CHECK(s->server_name == "test");
+}
+
+TEST_CASE("Config: get_server from multi server same port")
+{
+    Config config("http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 80; "
+                  "server_name test2;} }",
+                  true);
+    Server const* s = config.get_server("80", "test2");
+    CHECK(s->listen == "80");
+    CHECK(s->server_name == "test2");
+}
+
+TEST_CASE("Config: get_server not found")
+{
+    Config config("http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 80; "
+                  "server_name test21;} }",
+                  true);
+    CHECK(config.get_server("900", "test2") == NULL);
 }
 
 #endif /* UNIT_TEST */

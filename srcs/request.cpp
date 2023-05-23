@@ -355,7 +355,7 @@ std::string& Request::get_host()
     return _host;
 }
 
-ContentType Request::get_content_type() const
+ContentType const& Request::get_content_type() const
 {
     return _content_type;
 }
