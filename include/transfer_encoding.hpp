@@ -26,6 +26,7 @@ class TransferEncoding
 
     TransferEncoding();
     TransferEncoding(string transfer_encoding_str);
+    TransferEncoding(TransferEncoding const& t);
     TRANSFER_ENCODING_TYPE get_type() const;
     string get_str() const;
 
