@@ -149,8 +149,8 @@ string Utility::get_cwd()
     }
 }
 
-static string read_file_text(const string& path) {}
-static ByteVector read_file_binary(const string& path) {}
+// static string read_file_text(const string& path) {}
+// static ByteVector read_file_binary(const string& path) {}
 
 #ifdef UNIT_TEST
 TEST_CASE("trim_white_space")
@@ -164,9 +164,9 @@ TEST_CASE("trim_white_space")
 
 TEST_CASE("is_file_exist")
 {
-    CHECK(is_file_exist("Makefile") == true);
-    CHECK(is_file_exist("Makefile2") == false);
-    CHECK(is_file_exist(Utility::get_cwd() + "/Makefile") == true);
-    CHECK(is_file_exist(Utility::get_cwd() + "/Makefile2") == false);
+    CHECK(Utility::is_file_exist("Makefile") == true);
+    CHECK(Utility::is_file_exist("Makefile2") == false);
+    CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile") == true);
+    CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile2") == false);
 }
 #endif

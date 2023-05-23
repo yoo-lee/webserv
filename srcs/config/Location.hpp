@@ -25,7 +25,7 @@ class Location
     Location(Statement const* location_directive);
     Location(Location const& location);
     ~Location();
-    vector<string> operator[](string index);
+    vector<string> operator[](string index) const;
 };
 
 #endif /* LOCATION_H */

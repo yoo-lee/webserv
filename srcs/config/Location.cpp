@@ -108,9 +108,9 @@ Location::~Location()
     delete limit_except;
 }
 
-vector<string> Location::operator[](string index)
+vector<string> Location::operator[](string index) const
 {
-    return properties[index];
+    return properties.at(index);
 }
 
 #ifdef UNIT_TEST
@@ -126,6 +126,7 @@ TEST_CASE("Location: constructor")
     statements.push_back(new SimpleStatement("index", "index.html"));
     BlockStatement const* location_directive = new BlockStatement("location", params, statements);
     Location location(location_directive);
+    CHECK(location.urls.size() == 2);
     CHECK(location.urls[0] == "/hello");
     CHECK(location.urls[1] == "/world");
     CHECK(location.properties["root"].size() == 1);

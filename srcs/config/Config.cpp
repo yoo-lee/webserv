@@ -85,6 +85,32 @@ Server const* Config::get_server(string const& port, string const& host) const
     return (NULL);
 }
 
+Location const* Config::get_location(string const& port, string const& host, string const& path) const
+{
+    Server const* server = get_server(port, host);
+    if (server == NULL)
+        throw runtime_error("Config: Server(port: " + port + " , host: " + host + " ) not found");
+    vector<Location*> locations = server->location;
+    vector<pair<Location*, string> > candidate;
+    for (size_t i = 0; i < locations.size(); i++) {
+        for (size_t j = 0; j < locations[i]->urls.size(); j++) {
+            if (locations[i]->urls[j].find(path) == 0 && locations[i]->urls[j].size() > path.size()) {
+                candidate.push_back(make_pair(locations[i], locations[i]->urls[j]));
+                continue;
+            }
+        }
+    }
+    size_t max_match_character_count = 0;
+    Location const* max_match_location = NULL;
+    for (size_t i = 0; i < candidate.size(); i++) {
+        if (candidate[i].second.size() > max_match_character_count) {
+            max_match_character_count = candidate[i].second.size();
+            max_match_location = candidate[i].first;
+        }
+    }
+    return max_match_location;
+}
+
 vector<string> Config::get_location_paths(string const& port, string const& host) const
 {
     map<pair<string, string>, vector<string> >::iterator cash_ite = _locations_cache.find(make_pair(port, host));
@@ -282,6 +308,89 @@ TEST_CASE("Config: get_server not found")
                   "server_name test21;} }",
                   true);
     CHECK(config.get_server("900", "test2") == NULL);
+}
+
+TEST_CASE("Config: get_location")
+{
+    Config config("http {"
+                  "    client_max_body_size 10M;"
+                  ""
+                  "    server {"
+                  "        listen 80 default_server;"
+                  "        server_name example.com;"
+                  ""
+                  "        location / {"
+                  "            autoindex on;"
+                  "            error_page 404 /404.html;"
+                  "            index index.html;"
+                  "            limit_except GET {"
+                  "                deny all;"
+                  "            }"
+                  "        }"
+                  ""
+                  "        location /static {"
+                  "            root /var/www/html;"
+                  "        }"
+                  ""
+                  "        location \\.php$ {"
+                  "            cgi_pass /var/run/php/php;"
+                  "        }"
+                  "    }"
+                  "    server {"
+                  "        listen 8080;"
+                  "        server_name example.com;"
+                  ""
+                  "        location / {"
+                  "            autoindex on;"
+                  "            error_page 404 /404.html;"
+                  "            index index2.html;"
+                  "            limit_except GET {"
+                  "                deny all;"
+                  "            }"
+                  "        }"
+                  ""
+                  "        location /static {"
+                  "            root /var/www/html;"
+                  "        }"
+                  ""
+                  "        location \\.php$ {"
+                  "            cgi_pass /var/run/php/php;"
+                  "        }"
+                  "    }"
+                  "}",
+                  true);
+    std::cout << "not get location" << std::endl;
+    Location const* l = config.get_location("80", "example.com", "/");
+    std::cout << "get location" << std::endl;
+    CHECK(l != NULL);
+    CHECK(l->urls.size() == 1);
+    CHECK(l->urls[0] == "/");
+    CHECK(l->autoindex == true);
+    CHECK(l->error_page.at("404") == "/404.html");
+    CHECK(l->index == "index.html");
+    CHECK(l->limit_except->methods[0] == "GET");
+    CHECK(l->limit_except->deny_all == true);
+    CHECK(l->limit_except->deny_list.size() == 0);
+    l = config.get_location("80", "example.com", "/static/test.html");
+    CHECK(l != NULL);
+    CHECK(l->urls.size() == 1);
+    CHECK(l->urls[0] == "/static");
+    CHECK((*l)["root"][0] == "/var/www/html");
+    l = config.get_location("80", "example.com", "/test.php");
+    CHECK(l != NULL);
+    CHECK(l->urls.size() == 1);
+    CHECK(l->urls[0] == "\\.php$");
+    CHECK((*l)["cgi_pass"][0] == "/var/run/php/php");
+    l = config.get_location("8080", "example.com", "/");
+    CHECK(l != NULL);
+    CHECK(l->urls.size() == 1);
+    CHECK(l->urls[0] == "/");
+    CHECK(l->autoindex == true);
+    CHECK(l->error_page.at("404") == "/404.html");
+    CHECK(l->index == "index2.html");
+    CHECK(l->limit_except[0].methods[0] == "GET");
+    CHECK(l->limit_except[0].deny_all == true);
+    CHECK(l->limit_except[0].deny_list.size() == 0);
 }
 
 #endif /* UNIT_TEST */

@@ -34,6 +34,7 @@ class Config
     Config const& operator=(Config const& c);
 
     Server const* get_server(string const& port, string const& host) const;
+    Location const* get_location(string const& port, string const& host, string const& path) const;
     vector<string> get_location_paths(string const& port, string const& host) const;
     map<string, vector<string> > get_locations_contents(string const& port, string const& host,
                                                         string const& location) const;

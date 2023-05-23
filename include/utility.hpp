@@ -2,6 +2,7 @@
 #define UTILITY_H
 #include "Config.hpp"
 #include "Server.hpp"
+#include "byte_vector.hpp"
 #include "utility.hpp"
 #include <sstream>
 #include <string>
