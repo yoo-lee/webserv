@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <sys/stat.h>
 
 #ifdef UNIT_TEST
 #include "doctest.h"
@@ -131,6 +132,26 @@ int Utility::hex_string_to_int(const std::string& hex_string)
     return static_cast<int>(result);
 }
 
+bool Utility::is_file_exist(const string& path)
+{
+    struct stat fileInfo;
+    return (stat(path.c_str(), &fileInfo) == 0);
+}
+
+string Utility::get_cwd()
+{
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        return string(cwd);
+    } else {
+        perror("getcwd() error");
+        return "";
+    }
+}
+
+static string read_file_text(const string& path) {}
+static ByteVector read_file_binary(const string& path) {}
+
 #ifdef UNIT_TEST
 TEST_CASE("trim_white_space")
 {
@@ -139,5 +160,13 @@ TEST_CASE("trim_white_space")
     CHECK(Utility::trim_white_space("a  \t\n\v\f\r  ") == "a");
     CHECK(Utility::trim_white_space("  \t\n\v\f\r  a  \t\n\v\f\r  ") == "a");
     CHECK(Utility::trim_white_space("  \t\n\v\f\r  a  \t\n\v\f\r  b  \t\n\v\f\r  ") == "a  \t\n\v\f\r  b");
+}
+
+TEST_CASE("is_file_exist")
+{
+    CHECK(is_file_exist("Makefile") == true);
+    CHECK(is_file_exist("Makefile2") == false);
+    CHECK(is_file_exist(Utility::get_cwd() + "/Makefile") == true);
+    CHECK(is_file_exist(Utility::get_cwd() + "/Makefile2") == false);
 }
 #endif

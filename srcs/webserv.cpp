@@ -158,13 +158,40 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // }
 
         Response* res;
-        // if (req->is_cgi()) {
+        // get_location実装待ち
+        // if (_config->get_location()["is_cgi"]=="on") {
         if (1) {
             CGI* cgi = new CGI(req);
             delete cgi;
             res = new Response(*req);
             // cig processing
         } else {
+            // if(is_redirect())
+            if (req->get_method() == HttpMethod::GET) {
+                // GETの場合は、リクエストされたファイルを返す
+                string path;
+                if (_config.get_location().get_error_page("404"))
+                    path = _config.get_location().get_error_page("404") + req->get_path();
+                else
+                    path = Utility::get_cwd() + req->get_path();
+
+                string body;
+                string status_code;
+                if (Utility::is_file_exist(path)) {
+                    body = Utility::read_file_text(path);
+                    status_code = "200";
+                } else {
+                    body = _config->get_error_page(404);
+                    status_code = "404";
+                }
+            } else if (req->get_method() == HttpMethod::POST) {
+            } else /* DELETE */ {
+
+                find_file();
+                delete_file();
+                // DELETEの場合はファイルを削除する
+            }
+
             res = new Response(*req);
             // server processing except cgi
         }

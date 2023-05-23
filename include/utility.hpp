@@ -29,6 +29,11 @@ class Utility
 
     static string delete_duplicated_slash(string str);
     static int hex_string_to_int(const string& hex_string);
+
+    static bool is_file_exist(const string& path);
+    static string get_cwd();
+    static string read_file_text(const string& path);
+    static ByteVector read_file_binary(const string& path);
 };
 
 template <typename T>

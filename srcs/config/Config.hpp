@@ -29,6 +29,7 @@ class Config
     void init(string file_text);
     ~Config();
     Server const& get_default_server() const;
+    bool is_cgi(string path) const;
 
     Config const& operator=(Config const& c);
 
