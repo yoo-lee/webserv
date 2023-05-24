@@ -94,7 +94,14 @@ Location const* Config::get_location(string const& port, string const& host, str
     vector<pair<Location*, string> > candidate;
     for (size_t i = 0; i < locations.size(); i++) {
         for (size_t j = 0; j < locations[i]->urls.size(); j++) {
-            if (locations[i]->urls[j].find(path) == 0 && locations[i]->urls[j].size() > path.size()) {
+            std::cout << "urls:" << locations[i]->urls[j] << ", path: " << path << std::endl;
+            std::cout << "locations[i]->urls[j].size() <= path.size(): "
+                      << (locations[i]->urls[j].size() <= path.size()) << std::endl;
+            std::cout << "locations[i]->urls[j].substr(0, path.size()): '"
+                      << (locations[i]->urls[j].substr(0, path.size())) << "'" << std::endl;
+            std::cout << "locations[i]->urls[j].substr(0, path.size() == path: "
+                      << (locations[i]->urls[j].substr(0, path.size()) == path) << std::endl;
+            if (locations[i]->urls[j].size() <= path.size() && locations[i]->urls[j].substr(0, path.size()) == path) {
                 candidate.push_back(make_pair(locations[i], locations[i]->urls[j]));
                 continue;
             }
@@ -362,7 +369,7 @@ TEST_CASE("Config: get_location")
     std::cout << "not get location" << std::endl;
     Location const* l = config.get_location("80", "example.com", "/");
     std::cout << "get location" << std::endl;
-    CHECK(l != NULL);
+    REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/");
     CHECK(l->autoindex == true);
@@ -372,17 +379,17 @@ TEST_CASE("Config: get_location")
     CHECK(l->limit_except->deny_all == true);
     CHECK(l->limit_except->deny_list.size() == 0);
     l = config.get_location("80", "example.com", "/static/test.html");
-    CHECK(l != NULL);
+    REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/static");
     CHECK((*l)["root"][0] == "/var/www/html");
     l = config.get_location("80", "example.com", "/test.php");
-    CHECK(l != NULL);
+    REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "\\.php$");
     CHECK((*l)["cgi_pass"][0] == "/var/run/php/php");
     l = config.get_location("8080", "example.com", "/");
-    CHECK(l != NULL);
+    REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/");
     CHECK(l->autoindex == true);
