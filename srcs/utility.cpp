@@ -3,6 +3,7 @@
 #include "splitted_string.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <istream>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -149,8 +150,25 @@ string Utility::get_cwd()
     }
 }
 
-// static string read_file_text(const string& path) {}
-// static ByteVector read_file_binary(const string& path) {}
+string read_file_text(const string& path)
+{
+    ifstream ifs(path.c_str());
+    if (ifs.is_open() == false)
+        throw std::runtime_error("read_file_text: file open error");
+
+    string buf = "";
+    string result = "";
+    while (getline(ifs, buf)) {
+        cout << buf << endl;
+        result += buf + "\n";
+    }
+    std::cout << Utility::get_cwd() << std::endl;
+    return (result);
+}
+ByteVector read_file_binary(const string& path)
+{
+    return ByteVector(Utility::read_file_text(path));
+}
 
 #ifdef UNIT_TEST
 TEST_CASE("trim_white_space")
@@ -168,5 +186,11 @@ TEST_CASE("is_file_exist")
     CHECK(Utility::is_file_exist("Makefile2") == false);
     CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile") == true);
     CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile2") == false);
+}
+
+TEST_CASE("read_file_text")
+{
+    CHECK(read_file_text("./static/readfile1") == "");
+    CHECK(read_file_text("./static/readfile2") == "test\n");
 }
 #endif

@@ -4,6 +4,13 @@
 #endif
 ByteVector::ByteVector() {}
 
+ByteVector::ByteVector(string str)
+{
+    for (size_t i = 0; i < str.size(); i++) {
+        this->push_back(str[i]);
+    }
+}
+
 ByteVector::ByteVector(const char* bytes, size_t size)
 {
     for (size_t i = 0; i < size; i++) {

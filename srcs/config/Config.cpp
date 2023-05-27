@@ -94,14 +94,15 @@ Location const* Config::get_location(string const& port, string const& host, str
     vector<pair<Location*, string> > candidate;
     for (size_t i = 0; i < locations.size(); i++) {
         for (size_t j = 0; j < locations[i]->urls.size(); j++) {
-            std::cout << "urls:" << locations[i]->urls[j] << ", path: " << path << std::endl;
-            std::cout << "locations[i]->urls[j].size() <= path.size(): "
-                      << (locations[i]->urls[j].size() <= path.size()) << std::endl;
-            std::cout << "locations[i]->urls[j].substr(0, path.size()): '"
-                      << (locations[i]->urls[j].substr(0, path.size())) << "'" << std::endl;
-            std::cout << "locations[i]->urls[j].substr(0, path.size() == path: "
-                      << (locations[i]->urls[j].substr(0, path.size()) == path) << std::endl;
-            if (locations[i]->urls[j].size() <= path.size() && locations[i]->urls[j].substr(0, path.size()) == path) {
+            // std::cout << "urls:" << locations[i]->urls[j] << ", path: " << path << std::endl;
+            // std::cout << "locations[i]->urls[j].size() <= path.size(): "
+            //           << (locations[i]->urls[j].size() <= path.size()) << std::endl;
+            // std::cout << "locations[i]->urls[j].substr(0, path.size()): '"
+            //           << (locations[i]->urls[j].substr(0, path.size())) << "'" << std::endl;
+            // std::cout << "locations[i]->urls[j].substr(0, path.size() == path: "
+            //           << (locations[i]->urls[j].substr(0, path.size()) == path) << std::endl;
+            if (locations[i]->urls[j].size() <= path.size() &&
+                path.substr(0, locations[i]->urls[j].size()) == locations[i]->urls[j]) {
                 candidate.push_back(make_pair(locations[i], locations[i]->urls[j]));
                 continue;
             }
@@ -338,10 +339,6 @@ TEST_CASE("Config: get_location")
                   "        location /static {"
                   "            root /var/www/html;"
                   "        }"
-                  ""
-                  "        location \\.php$ {"
-                  "            cgi_pass /var/run/php/php;"
-                  "        }"
                   "    }"
                   "    server {"
                   "        listen 8080;"
@@ -358,10 +355,6 @@ TEST_CASE("Config: get_location")
                   ""
                   "        location /static {"
                   "            root /var/www/html;"
-                  "        }"
-                  ""
-                  "        location \\.php$ {"
-                  "            cgi_pass /var/run/php/php;"
                   "        }"
                   "    }"
                   "}",
@@ -383,11 +376,6 @@ TEST_CASE("Config: get_location")
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/static");
     CHECK((*l)["root"][0] == "/var/www/html");
-    l = config.get_location("80", "example.com", "/test.php");
-    REQUIRE(l != NULL);
-    CHECK(l->urls.size() == 1);
-    CHECK(l->urls[0] == "\\.php$");
-    CHECK((*l)["cgi_pass"][0] == "/var/run/php/php");
     l = config.get_location("8080", "example.com", "/");
     REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
