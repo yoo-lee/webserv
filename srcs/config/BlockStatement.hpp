@@ -1,5 +1,6 @@
 #ifndef BLOCK_STATEMENT_H
 #define BLOCK_STATEMENT_H
+#include "SimpleStatement.hpp"
 #include "Statement.hpp"
 #include <string>
 #include <vector>
@@ -23,6 +24,8 @@ class BlockStatement : public Statement
     void print(ostream& os, string indent) const;
     friend ostream& operator<<(ostream& os, const BlockStatement& statement);
     vector<Statement const*> get_children() const;
+    vector<SimpleStatement const*> get_simple_statement_children() const;
+    vector<BlockStatement const*> get_block_statement_children() const;
     vector<Statement const*> get_children(string directive) const;
     Statement const* operator[](string directive) const;
     virtual Statement* clone() const;
