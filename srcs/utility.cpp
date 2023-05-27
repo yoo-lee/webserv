@@ -150,7 +150,7 @@ string Utility::get_cwd()
     }
 }
 
-string read_file_text(const string& path)
+string Utility::read_file_text(const string& path)
 {
     ifstream ifs(path.c_str());
     if (ifs.is_open() == false)
@@ -165,7 +165,8 @@ string read_file_text(const string& path)
     std::cout << Utility::get_cwd() << std::endl;
     return (result);
 }
-ByteVector read_file_binary(const string& path)
+
+ByteVector Utility::read_file_binary(const string& path)
 {
     return ByteVector(Utility::read_file_text(path));
 }
@@ -190,7 +191,14 @@ TEST_CASE("is_file_exist")
 
 TEST_CASE("read_file_text")
 {
-    CHECK(read_file_text("./static/readfile1") == "");
-    CHECK(read_file_text("./static/readfile2") == "test\n");
+    CHECK(Utility::read_file_text("./statics/readfile1") == "");
+    CHECK(Utility::read_file_text("./statics/readfile2") == "test\n");
+    CHECK_THROWS_AS(Utility::read_file_text("not_found_path"), std::runtime_error);
+}
+
+TEST_CASE("read_file_bytes")
+{
+    CHECK(Utility::read_file_binary("./statics/readfile1") == ByteVector(""));
+    CHECK(Utility::read_file_binary("./statics/readfile2") == ByteVector("test\n"));
 }
 #endif
