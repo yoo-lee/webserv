@@ -1,5 +1,5 @@
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#ifndef WEBSERV_H
+#define WEBSERV_H
 #include "Config.hpp"
 #include "tcp_socket.hpp"
 #include <climits>
@@ -35,5 +35,7 @@ class Webserv
     map<int, Socket*> _fd_sockets;
     void timeout(int time_sec);
     const Config& _config;
+
+    string get_auto_index_page(string const& path) const;
 };
-#endif
+#endif /* WEBSERV_H */

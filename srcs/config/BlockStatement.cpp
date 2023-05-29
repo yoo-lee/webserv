@@ -67,7 +67,7 @@ vector<Statement const*> BlockStatement::get_children() const
 vector<SimpleStatement const*> BlockStatement::get_simple_statement_children() const
 {
     vector<SimpleStatement const*> simple_children;
-    for (size_t i; i < _child_statements.size(); i++;) {
+    for (size_t i = 0; i < _child_statements.size(); i++) {
         if (dynamic_cast<SimpleStatement const*>(_child_statements[i]))
             simple_children.push_back(dynamic_cast<SimpleStatement const*>(_child_statements[i]));
     }
@@ -77,7 +77,7 @@ vector<SimpleStatement const*> BlockStatement::get_simple_statement_children() c
 vector<BlockStatement const*> BlockStatement::get_block_statement_children() const
 {
     vector<BlockStatement const*> block_children;
-    for (size_t i; i < _child_statements.size(); i++;) {
+    for (size_t i = 0; i < _child_statements.size(); i++) {
         if (dynamic_cast<BlockStatement const*>(_child_statements[i]))
             block_children.push_back(dynamic_cast<BlockStatement const*>(_child_statements[i]));
     }

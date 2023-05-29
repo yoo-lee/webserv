@@ -17,7 +17,6 @@ using std::map;
 using std::string;
 using std::vector;
 
-typedef string path;
 class Request : public SocketData
 {
   public:
@@ -76,7 +75,7 @@ class Request : public SocketData
     const int _fd;
     ByteVector _loaded_packet_body;
     RawRequestReader _buf;
-    vector<path> _tmp_body_file_list;
+    vector<string> _tmp_body_file_list;
 
     // -- request line --
     string _path;

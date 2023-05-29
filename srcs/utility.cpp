@@ -2,6 +2,7 @@
 #include "utility.hpp"
 #include "splitted_string.hpp"
 #include <cstdlib>
+#include <dirent.h>
 #include <iostream>
 #include <istream>
 #include <sstream>
@@ -139,6 +140,33 @@ bool Utility::is_file_exist(const string& path)
     return (stat(path.c_str(), &fileInfo) == 0);
 }
 
+bool Utility::is_directory_exist(const string& path)
+{
+    struct stat fileInfo;
+    if (stat(path.c_str(), &fileInfo) != 0)
+        return false;
+    return (fileInfo.st_mode & S_IFDIR);
+}
+
+vector<string> Utility::get_entries_in_directory(const string& path)
+{
+    vector<string> entries;
+    DIR* dir;
+    struct dirent* dp;
+    if ((dir = opendir(path.c_str())) == NULL) {
+        perror("opendir");
+        return entries;
+    }
+    while ((dp = readdir(dir)) != NULL) {
+        if (dp->d_name[0] == '.')
+            continue;
+        entries.push_back(dp->d_name);
+    }
+
+    closedir(dir);
+    return entries;
+}
+
 string Utility::get_cwd()
 {
     char cwd[1024];
@@ -169,6 +197,84 @@ string Utility::read_file_text(const string& path)
 ByteVector Utility::read_file_binary(const string& path)
 {
     return ByteVector(Utility::read_file_text(path));
+}
+
+bool Utility::delete_file(const string& path)
+{
+    return (remove(path.c_str()) == 0);
+}
+
+// 存在しないステータスコードを指定すると、空文字列を返す
+string Utility::get_http_status_message(string status_code)
+{
+    map<string, string> status_codes;
+    // 1xx
+    status_codes.insert(make_pair("100", "Continue"));
+    status_codes.insert(make_pair("101", "Switching Protocols"));
+    status_codes.insert(make_pair("102", "Processing"));
+    // 2xx
+    status_codes.insert(make_pair("200", "OK"));
+    status_codes.insert(make_pair("201", "Created"));
+    status_codes.insert(make_pair("202", "Accepted"));
+    status_codes.insert(make_pair("203", "Non-Authoritative Information"));
+    status_codes.insert(make_pair("204", "No Content"));
+    status_codes.insert(make_pair("205", "Reset Content"));
+    status_codes.insert(make_pair("206", "Partial Content"));
+    status_codes.insert(make_pair("207", "Multi-Status"));
+    status_codes.insert(make_pair("208", "Already Reported"));
+    status_codes.insert(make_pair("226", "IM Used"));
+    // 3xx
+    status_codes.insert(make_pair("300", "Multiple Choices"));
+    status_codes.insert(make_pair("301", "Moved Permanently"));
+    status_codes.insert(make_pair("302", "Found"));
+    status_codes.insert(make_pair("303", "See Other"));
+    status_codes.insert(make_pair("304", "Not Modified"));
+    status_codes.insert(make_pair("305", "Use Proxy"));
+    status_codes.insert(make_pair("307", "Temporary Redirect"));
+    status_codes.insert(make_pair("308", "Permanent Redirect"));
+    // 4xx
+    status_codes.insert(make_pair("400", "Bad Request"));
+    status_codes.insert(make_pair("401", "Unauthorized"));
+    status_codes.insert(make_pair("402", "Payment Required"));
+    status_codes.insert(make_pair("403", "Forbidden"));
+    status_codes.insert(make_pair("404", "Not Found"));
+    status_codes.insert(make_pair("405", "Method Not Allowed"));
+    status_codes.insert(make_pair("406", "Not Acceptable"));
+    status_codes.insert(make_pair("407", "Proxy Authentication Required"));
+    status_codes.insert(make_pair("408", "Request Timeout"));
+    status_codes.insert(make_pair("409", "Conflict"));
+    status_codes.insert(make_pair("410", "Gone"));
+    status_codes.insert(make_pair("411", "Length Required"));
+    status_codes.insert(make_pair("412", "Precondition Failed"));
+    status_codes.insert(make_pair("413", "Payload Too Large"));
+    status_codes.insert(make_pair("414", "URI Too Long"));
+    status_codes.insert(make_pair("415", "Unsupported Media Type"));
+    status_codes.insert(make_pair("416", "Range Not Satisfiable"));
+    status_codes.insert(make_pair("417", "Expectation Failed"));
+    status_codes.insert(make_pair("418", "I'm a teapot"));
+    status_codes.insert(make_pair("421", "Misdirected Request"));
+    status_codes.insert(make_pair("422", "Unprocessable Entity"));
+    status_codes.insert(make_pair("423", "Locked"));
+    status_codes.insert(make_pair("424", "Failed Dependency"));
+    status_codes.insert(make_pair("425", "Too Early"));
+    status_codes.insert(make_pair("426", "Upgrade Required"));
+    status_codes.insert(make_pair("428", "Precondition Required"));
+    status_codes.insert(make_pair("429", "Too Many Requests"));
+    status_codes.insert(make_pair("431", "Request Header Fields Too Large"));
+    status_codes.insert(make_pair("451", "Unavailable For Legal Reasons"));
+    // 5xx
+    status_codes.insert(make_pair("500", "Internal Server Error"));
+    status_codes.insert(make_pair("501", "Not Implemented"));
+    status_codes.insert(make_pair("502", "Bad Gateway"));
+    status_codes.insert(make_pair("503", "Service Unavailable"));
+    status_codes.insert(make_pair("504", "Gateway Timeout"));
+    status_codes.insert(make_pair("505", "HTTP Version Not Supported"));
+    status_codes.insert(make_pair("506", "Variant Also Negotiates"));
+    status_codes.insert(make_pair("507", "Insufficient Storage"));
+    status_codes.insert(make_pair("508", "Loop Detected"));
+    status_codes.insert(make_pair("510", "Not Extended"));
+    status_codes.insert(make_pair("511", "Network Authentication Required"));
+    return status_codes[status_code];
 }
 
 #ifdef UNIT_TEST

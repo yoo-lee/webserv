@@ -2,6 +2,7 @@
 #include "BlockStatement.hpp"
 #include "LimitExcept.hpp"
 #include "SyntaxError.hpp"
+#include "utility.hpp"
 #include <iostream>
 #ifdef UNIT_TEST
 #include "doctest.h"
@@ -66,13 +67,43 @@ string Location::parse_root(vector<SimpleStatement const*> statements) const
             vector<string> params = statements[i]->get_params();
             if (params.size() != 1)
                 throw SyntaxError("Location: Root must be single paramater");
-            string root = params[params.size() - 1];
+            root = params[params.size() - 1];
         }
     }
     return root;
 }
 
-Location::Location(Statement const* directive) : limit_except(0)
+string Location::parse_cgi_pass(vector<SimpleStatement const*> statements) const
+{
+    for (size_t i = 0; i < statements.size(); i++) {
+        if (statements[i]->get_directive() == "cgi_pass") {
+            if (statements[i]->get_params().size() == 1)
+                return statements[i]->get_params()[0];
+            else if (statements[i]->get_params().size() == 0)
+                return "";
+            else
+                throw SyntaxError("Location: Invalid cgi_pass param count(must be 0 or 1))");
+        }
+    }
+    return "";
+}
+
+string Location::get_default_error_page(string status_code) const
+{
+    return "<!DOCTYPE html><html lang=\"ja\"><head>    <meta charset=\"UTF-8\">"
+           "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+           "    <title>Document</title></head><body>" +
+           status_code + " : " + Utility::get_http_status_message(status_code) + "</body></html>";
+}
+
+string Location::get_error_page(string status_code) const
+{
+    if (error_page.count(status_code) == 0)
+        return get_default_error_page(status_code);
+    return error_page.at(status_code);
+}
+
+Location::Location(Statement const* directive) : limit_except(0), cgi_pass("")
 {
     if (directive == NULL)
         throw SyntaxError("Location: Taken directive is NULL");
@@ -88,35 +119,32 @@ Location::Location(Statement const* directive) : limit_except(0)
     vector<SimpleStatement const*> location_simple_statements = location_directive->get_simple_statement_children();
     vector<BlockStatement const*> location_block_statements = location_directive->get_block_statement_children();
 
-    limit_except = parse_limit_except(locatioin_block_statements);
-    index = parse_index(location_simple_staements);
-    autoindex = parse_autoindex(location_simple_staements);
-    error_page = parse_error_pages(location_simple_staements);
-    root = parse_root(location_simple_staements);
+    limit_except = parse_limit_except(location_block_statements);
+    index = parse_index(location_simple_statements);
+    autoindex = parse_autoindex(location_simple_statements);
+    error_page = parse_error_pages(location_simple_statements);
+    root = parse_root(location_simple_statements);
+    cgi_pass = parse_cgi_pass(location_simple_statements);
 
-    for (size_t i = 0; i < location_simple_staements.size(); i++) {
-        if (location_simple_staements[i]->get_directive() != "limit_except" &&
-            location_simple_staements[i]->get_directive() != "index" &&
-            location_simple_staements[i]->get_directive() != "autoindex" &&
-            location_simple_staements[i]->get_directive() != "error_page") {
-            if (dynamic_cast<BlockStatement const*>(location_simple_staements[i]))
+    for (size_t i = 0; i < location_simple_statements.size(); i++) {
+        // 特定のディレクティブはpropertiesに入れない
+        // メンバ変数が別途用意しているプロパティは元々入れない予定だったが、rootやcgi_passを
+        // あとから追加したときに後方互換性のためにrootとcgi_passはpropertiesにいる
+        if (location_simple_statements[i]->get_directive() != "limit_except" &&
+            location_simple_statements[i]->get_directive() != "index" &&
+            location_simple_statements[i]->get_directive() != "autoindex" &&
+            location_simple_statements[i]->get_directive() != "error_page") {
+            if (dynamic_cast<BlockStatement const*>(location_simple_statements[i]))
                 throw SyntaxError("Location: Detected Non limit_except BlockStatement. Only limit_except is allowed "
                                   "for block statements in the Location directive.");
-            properties[location_simple_staements[i]->get_directive()] = location_simple_staements[i]->get_params();
+            properties[location_simple_statements[i]->get_directive()] = location_simple_statements[i]->get_params();
         }
     }
 }
 
-Location::Location(Location const& location)
-    : urls(location.urls),
-      properties(location.properties),
-      limit_except(NULL),
-      index(location.index),
-      autoindex(location.autoindex),
-      error_page(location.error_page)
+Location::Location(Location const& location) : limit_except(NULL)
 {
-    if (this->limit_except != NULL)
-        limit_except = new LimitExcept(*(location.limit_except));
+    *this = location;
 }
 
 Location::~Location()
@@ -127,6 +155,25 @@ Location::~Location()
 vector<string> Location::operator[](string index) const
 {
     return properties.at(index);
+}
+
+Location const& Location::operator=(Location const& other)
+{
+    if (this != &other) {
+        urls = other.urls;
+        properties = other.properties;
+        index = other.index;
+        autoindex = other.autoindex;
+        root = other.root;
+        cgi_pass = other.cgi_pass;
+        error_page = other.error_page;
+        delete limit_except;
+        if (other.limit_except != NULL)
+            limit_except = new LimitExcept(*(other.limit_except));
+        else
+            limit_except = NULL;
+    }
+    return *this;
 }
 
 #ifdef UNIT_TEST
@@ -147,6 +194,8 @@ TEST_CASE("Location: constructor")
     CHECK(location.urls[1] == "/world");
     CHECK(location.properties["root"].size() == 1);
     CHECK(location.properties["root"][0] == "/");
+    CHECK(location.root == "/");
+    CHECK(location.cgi_pass == "");
     CHECK(location.index == "index.html");
     delete location_directive;
 }
@@ -167,6 +216,8 @@ TEST_CASE("Location: copy constructor")
     CHECK(location2.urls[1] == "/world");
     CHECK(location2.properties["root"].size() == 1);
     CHECK(location2.properties["root"][0] == "/");
+    CHECK(location2.root == "/");
+    CHECK(location2.cgi_pass == "");
     CHECK(location2.index == "index.html");
 
     delete location;

@@ -32,9 +32,14 @@ class Utility
     static int hex_string_to_int(const string& hex_string);
 
     static bool is_file_exist(const string& path);
+    static bool is_directory_exist(const string& path);
     static string get_cwd();
     static string read_file_text(const string& path);
     static ByteVector read_file_binary(const string& path);
+    static bool delete_file(const string& path);
+    static vector<string> get_entries_in_directory(const string & path);
+
+    static string get_http_status_message(string status_code);
 };
 
 template <typename T>

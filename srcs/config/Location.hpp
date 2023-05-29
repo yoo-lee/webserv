@@ -20,6 +20,8 @@ class Location
     bool parse_autoindex(vector<SimpleStatement const*> statements) const;
     map<string, string> parse_error_pages(vector<SimpleStatement const*> statements) const;
     string parse_root(vector<SimpleStatement const*> statements) const;
+    string parse_cgi_pass(vector<SimpleStatement const*> statements) const;
+    string get_default_error_page(string status_code) const;
 
   public:
     vector<string> urls;
@@ -28,14 +30,16 @@ class Location
     string index;
     bool autoindex;
     string root;
+    string cgi_pass;
 
-    // error_pageには以下のように保存されている
-    // {"404" :"404用のエラーページ","403" :"403用のエラーページ"}
+    // こちらではなくget_error_pageを使ってください
     map<string, string> error_page;
+    string get_error_page(string status_code) const;
     Location(Statement const* location_directive);
     Location(Location const& location);
     ~Location();
     vector<string> operator[](string index) const;
+    Location const& operator=(Location const& other);
 };
 
 #endif /* LOCATION_H */

@@ -94,13 +94,6 @@ Location const* Config::get_location(string const& port, string const& host, str
     vector<pair<Location*, string> > candidate;
     for (size_t i = 0; i < locations.size(); i++) {
         for (size_t j = 0; j < locations[i]->urls.size(); j++) {
-            // std::cout << "urls:" << locations[i]->urls[j] << ", path: " << path << std::endl;
-            // std::cout << "locations[i]->urls[j].size() <= path.size(): "
-            //           << (locations[i]->urls[j].size() <= path.size()) << std::endl;
-            // std::cout << "locations[i]->urls[j].substr(0, path.size()): '"
-            //           << (locations[i]->urls[j].substr(0, path.size())) << "'" << std::endl;
-            // std::cout << "locations[i]->urls[j].substr(0, path.size() == path: "
-            //           << (locations[i]->urls[j].substr(0, path.size()) == path) << std::endl;
             if (locations[i]->urls[j].size() <= path.size() &&
                 path.substr(0, locations[i]->urls[j].size()) == locations[i]->urls[j]) {
                 candidate.push_back(make_pair(locations[i], locations[i]->urls[j]));
@@ -208,47 +201,33 @@ TEST_CASE("Config: Total test")
     char cwd[1024];
     // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
     getcwd(cwd, sizeof(cwd));
-    if (string(cwd).find("config") == string::npos) {
-        Config config("./srcs/config/config/unit-test/subject.nginx.conf");
-        CHECK(config.http->client_max_body_size == 10);
-        CHECK(config.http->server[0]->listen == "80");
-        CHECK(config.http->server[0]->server_name == "example.com");
-        CHECK(config.http->server[0]->location.size() == 3);
-        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
-        CHECK(config.http->server[0]->location[0]->autoindex == true);
-        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
-        CHECK(config.http->server[0]->location[0]->index == "index.html");
-        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
-        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
-        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
-        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
-        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
-        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
-        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
-    } else {
-        Config config("./config/subject.nginx.conf");
-        CHECK(config.http->client_max_body_size == 10);
-        CHECK(config.http->server[0]->listen == "80");
-        CHECK(config.http->server[0]->server_name == "example.com");
-        CHECK(config.http->server[0]->location.size() == 3);
-        CHECK(config.http->server[0]->location[0]->urls[0] == "/");
-        CHECK(config.http->server[0]->location[0]->autoindex == true);
-        CHECK(config.http->server[0]->location[0]->error_page["404"] == "/404.html");
-        CHECK(config.http->server[0]->location[0]->index == "index.html");
-        CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
-        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
-        CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
-        CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
-        CHECK((*(config.http->server[0]->location[1]))["root"][0] == "/var/www/html");
-        CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
-        CHECK((*(config.http->server[0]->location[2]))["cgi_pass"][0] == "/var/run/php/php");
-    }
+    Config config;
+    if (string(cwd).find("config") == string::npos)
+        config = Config("./srcs/config/config/unit-test/subject.nginx.conf");
+    else
+        config = Config("./config/subject.nginx.conf");
+    CHECK(config.http->client_max_body_size == 10);
+    CHECK(config.http->server[0]->listen == "80");
+    CHECK(config.http->server[0]->server_name == "example.com");
+    CHECK(config.http->server[0]->location.size() == 3);
+    CHECK(config.http->server[0]->location[0]->urls[0] == "/");
+    CHECK(config.http->server[0]->location[0]->autoindex == true);
+    CHECK(config.http->server[0]->location[0]->get_error_page("404") == "/404.html");
+    CHECK(config.http->server[0]->location[0]->index == "index.html");
+    REQUIRE(config.http->server[0]->location[0]->limit_except != NULL);
+    REQUIRE(config.http->server[0]->location[0]->limit_except[0].methods.size() == 1);
+    CHECK(config.http->server[0]->location[0]->limit_except[0].methods[0] == "GET");
+    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_all == true);
+    CHECK(config.http->server[0]->location[0]->limit_except[0].deny_list.size() == 0);
+    CHECK(config.http->server[0]->location[1]->urls[0] == "/static");
+    CHECK(config.http->server[0]->location[1]->root == "/var/www/html");
+    CHECK(config.http->server[0]->location[2]->urls[0] == "\\.php$");
+    CHECK(config.http->server[0]->location[2]->cgi_pass == "/var/run/php/php");
 }
 
 TEST_CASE("Config: empty")
 {
     CHECK_THROWS_AS(Config config("", true), exception);
-    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
     if (string(cwd).find("config") == string::npos)
@@ -260,16 +239,15 @@ TEST_CASE("Config: empty")
 TEST_CASE("Config: get_default_server")
 {
     CHECK_THROWS_AS(Config config("", true), exception);
-    // config内でmakeした場合とsrcsでmakeした場合でconfへのパスが変わるので分岐させる
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
+    Config config;
     if (string(cwd).find("config") == string::npos) {
-        Config config("./srcs/config/config/unit-test/multiple_server.nginx.conf");
-        CHECK(config.get_default_server().listen == "8080");
+        config = Config("./srcs/config/config/unit-test/multiple_server.nginx.conf");
     } else {
-        Config config("./config/unit-test/multiple_server.nginx.conf");
-        CHECK(config.get_default_server().listen == "8080");
+        config = Config("./config/unit-test/multiple_server.nginx.conf");
     }
+    CHECK(config.get_default_server().listen == "8080");
 }
 
 TEST_CASE("Config: get_server from single server")
@@ -292,9 +270,9 @@ TEST_CASE("Config: get_server from multi server")
 
 TEST_CASE("Config: get_server from multi server same name")
 {
-    Config config(
-        "http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 90; server_name test;} }",
-        true);
+    Config config("http { client_max_body_size 90;server { listen 80; server_name test;} server{listen 90; "
+                  "server_name test;} }",
+                  true);
     Server const* s = config.get_server("90", "test");
     CHECK(s->listen == "90");
     CHECK(s->server_name == "test");
@@ -359,14 +337,12 @@ TEST_CASE("Config: get_location")
                   "    }"
                   "}",
                   true);
-    std::cout << "not get location" << std::endl;
     Location const* l = config.get_location("80", "example.com", "/");
-    std::cout << "get location" << std::endl;
     REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/");
     CHECK(l->autoindex == true);
-    CHECK(l->error_page.at("404") == "/404.html");
+    CHECK(l->get_error_page("404") == "/404.html");
     CHECK(l->index == "index.html");
     CHECK(l->limit_except->methods[0] == "GET");
     CHECK(l->limit_except->deny_all == true);
@@ -376,12 +352,14 @@ TEST_CASE("Config: get_location")
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/static");
     CHECK((*l)["root"][0] == "/var/www/html");
+    CHECK(l->root == "/var/www/html");
+    CHECK(l->autoindex == false);
     l = config.get_location("8080", "example.com", "/");
     REQUIRE(l != NULL);
     CHECK(l->urls.size() == 1);
     CHECK(l->urls[0] == "/");
     CHECK(l->autoindex == true);
-    CHECK(l->error_page.at("404") == "/404.html");
+    CHECK(l->get_error_page("404") == "/404.html");
     CHECK(l->index == "index2.html");
     CHECK(l->limit_except[0].methods[0] == "GET");
     CHECK(l->limit_except[0].deny_all == true);
