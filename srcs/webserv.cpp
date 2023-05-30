@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "cgi.hpp"
+#include "file_utility.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "tcp_socket.hpp"
@@ -172,13 +173,13 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
             if (l->root != "")
                 path = l->root + req->get_path();
             else
-                path = Utility::get_cwd() + req->get_path();
-            if (!Utility::is_directory_exist(path) && !Utility::is_file_exist(path))
+                path = FileUtility::get_cwd() + req->get_path();
+            if (!FileUtility::is_directory_exist(path) && !FileUtility::is_file_exist(path))
                 status_code = "404";
             else {
                 if (req->get_method() == HttpMethod::GET) {
-                    if (Utility::is_file_exist(path)) {
-                        body = Utility::read_file_text(path);
+                    if (FileUtility::is_file_exist(path)) {
+                        body = FileUtility::read_file_text(path);
                         status_code = "200";
                     } else {
                         if (!l->autoindex) {
@@ -194,7 +195,7 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
                         }
                     }
                 } else if (req->get_method() == HttpMethod::POST) {
-                    if (Utility::is_directory_exist(path)) {
+                    if (FileUtility::is_directory_exist(path)) {
                         try {
                             // create new file
                         } catch (exception& e) {
@@ -206,8 +207,8 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
                         status_code = "404";
 
                 } else /* DELETE */ {
-                    if (Utility::is_file_exist(path)) {
-                        Utility::delete_file(path);
+                    if (FileUtility::is_file_exist(path)) {
+                        FileUtility::delete_file(path);
                         status_code = "200";
                     } else /* path is directory */ {
                         status_code = "405";
@@ -312,7 +313,7 @@ string Webserv::get_auto_index_page(string const& path) const
 {
     string result =
         "<html>\n<head>\n<title>Index of " + path + "</title>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n";
-    vector<string> entries = Utility::get_entries_in_directory(path);
+    vector<string> entries = FileUtility::get_entries_in_directory(path);
     for (size_t i = 0; i < entries.size(); i++) {
         result += "<a href=\"" + entries[i] + "\">" + entries[i] + "</a><br>\n";
     }

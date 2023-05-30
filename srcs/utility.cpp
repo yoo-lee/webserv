@@ -134,76 +134,6 @@ int Utility::hex_string_to_int(const std::string& hex_string)
     return static_cast<int>(result);
 }
 
-bool Utility::is_file_exist(const string& path)
-{
-    struct stat fileInfo;
-    return (stat(path.c_str(), &fileInfo) == 0);
-}
-
-bool Utility::is_directory_exist(const string& path)
-{
-    struct stat fileInfo;
-    if (stat(path.c_str(), &fileInfo) != 0)
-        return false;
-    return (fileInfo.st_mode & S_IFDIR);
-}
-
-vector<string> Utility::get_entries_in_directory(const string& path)
-{
-    vector<string> entries;
-    DIR* dir;
-    struct dirent* dp;
-    if ((dir = opendir(path.c_str())) == NULL) {
-        perror("opendir");
-        return entries;
-    }
-    while ((dp = readdir(dir)) != NULL) {
-        if (dp->d_name[0] == '.')
-            continue;
-        entries.push_back(dp->d_name);
-    }
-
-    closedir(dir);
-    return entries;
-}
-
-string Utility::get_cwd()
-{
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        return string(cwd);
-    } else {
-        perror("getcwd() error");
-        return "";
-    }
-}
-
-string Utility::read_file_text(const string& path)
-{
-    ifstream ifs(path.c_str());
-    if (ifs.is_open() == false)
-        throw std::runtime_error("read_file_text: file open error");
-
-    string buf = "";
-    string result = "";
-    while (getline(ifs, buf)) {
-        cout << buf << endl;
-        result += buf + "\n";
-    }
-    std::cout << Utility::get_cwd() << std::endl;
-    return (result);
-}
-
-ByteVector Utility::read_file_binary(const string& path)
-{
-    return ByteVector(Utility::read_file_text(path));
-}
-
-bool Utility::delete_file(const string& path)
-{
-    return (remove(path.c_str()) == 0);
-}
-
 // 存在しないステータスコードを指定すると、空文字列を返す
 string Utility::get_http_status_message(string status_code)
 {
@@ -287,24 +217,4 @@ TEST_CASE("trim_white_space")
     CHECK(Utility::trim_white_space("  \t\n\v\f\r  a  \t\n\v\f\r  b  \t\n\v\f\r  ") == "a  \t\n\v\f\r  b");
 }
 
-TEST_CASE("is_file_exist")
-{
-    CHECK(Utility::is_file_exist("Makefile") == true);
-    CHECK(Utility::is_file_exist("Makefile2") == false);
-    CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile") == true);
-    CHECK(Utility::is_file_exist(Utility::get_cwd() + "/Makefile2") == false);
-}
-
-TEST_CASE("read_file_text")
-{
-    CHECK(Utility::read_file_text("./statics/readfile1") == "");
-    CHECK(Utility::read_file_text("./statics/readfile2") == "test\n");
-    CHECK_THROWS_AS(Utility::read_file_text("not_found_path"), std::runtime_error);
-}
-
-TEST_CASE("read_file_bytes")
-{
-    CHECK(Utility::read_file_binary("./statics/readfile1") == ByteVector(""));
-    CHECK(Utility::read_file_binary("./statics/readfile2") == ByteVector("test\n"));
-}
 #endif
