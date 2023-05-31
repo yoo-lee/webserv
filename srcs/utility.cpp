@@ -1,13 +1,13 @@
 
 #include "utility.hpp"
 #include "splitted_string.hpp"
+#include <algorithm>
 #include <cstdlib>
 #include <dirent.h>
 #include <iostream>
 #include <istream>
 #include <sstream>
 #include <sys/stat.h>
-#include <algorithm>
 
 #ifdef UNIT_TEST
 #include "doctest.h"

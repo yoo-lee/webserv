@@ -73,7 +73,6 @@ void Request::parse()
 {
     parse_request_line();
     parse_header_field();
-    //_uri = URI(*this);
 
     parse_content_length();
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
@@ -82,10 +81,6 @@ void Request::parse()
 
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
-
-    // uriに関する情報をひとまとめにしたクラスに格納する
-    _uri = URI(this);
-    _uri.print_uri();
 }
 
 void Request::parse_request_line()
@@ -133,6 +128,16 @@ void Request::parse_header_field()
         value = line.substr(split_pos + 1);
         value = Utility::trim_white_space(value);
         this->_headers.insert(make_pair(key, value));
+    }
+
+    // uriに関する情報をひとまとめにしたクラスに格納する
+    try {
+        _uri = URI(this);
+        // テスト用　後で消す
+        _uri.print_uri();
+    } catch (std::invalid_argument& e) {
+        cout << "URI Error" << endl;
+        cout << e.what() << endl;
     }
 }
 
@@ -322,7 +327,6 @@ std::string& Request::get_port()
 std::string& Request::get_host()
 {
     return (this->_headers["host"]);
-    //return _host;
 }
 
 ContentType const& Request::get_content_type() const

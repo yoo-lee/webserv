@@ -1,6 +1,6 @@
 #include "Config.hpp"
-#include "utility.hpp"
 #include "splitted_string.hpp"
+#include "utility.hpp"
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif

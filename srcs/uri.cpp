@@ -1,18 +1,14 @@
 #include "uri.hpp"
 #include "request.hpp"
-#include <sys/stat.h>
-#include <string.h>
-#include <vector>
 #include <map>
+#include <string.h>
+#include <sys/stat.h>
+#include <vector>
 
 using std::string;
 
-URI::URI()
-{
-}
-URI::~URI()
-{
-}
+URI::URI() {}
+URI::~URI() {}
 
 URI::URI(const URI& uri)
 {
@@ -21,7 +17,7 @@ URI::URI(const URI& uri)
 
 URI& URI::operator=(URI const& uri)
 {
-    if (this == &uri){
+    if (this == &uri) {
         return (*this);
     }
     this->_filename = uri._filename;
@@ -35,7 +31,7 @@ URI& URI::operator=(URI const& uri)
 
 static std::string get_root(std::map<std::string, std::vector<std::string> >& props);
 
-URI::URI(Request *req)
+URI::URI(Request* req)
 {
     string path = req->get_path();
     this->retrieve_query(path);
@@ -45,7 +41,7 @@ URI::URI(Request *req)
         cfg->get_locations_properties(req->get_port(), req->get_host(), this->_location_path);
 
     this->_root = get_root(props);
-    this->remove_file_info(_root + "/" +  this->_location_path);
+    this->remove_file_info(_root + "/" + this->_location_path);
     this->print_uri();
 }
 
@@ -110,7 +106,6 @@ void URI::print_uri()
     cout << "_path_info:[" << _path_info << "]" << endl << endl;
 }
 
-
 void URI::remove_file_info(std::string tmp_file_path)
 {
     std::string path = Utility::delete_duplicated_slash(tmp_file_path);
@@ -128,20 +123,20 @@ void URI::remove_file_info(std::string tmp_file_path)
         }
         pos = path.rfind("/", pos - 1);
     }
-    if (!exist_flag){
+    if (!exist_flag) {
         throw std::invalid_argument("Invalid URI");
     }
     this->_path_info = Utility::delete_duplicated_slash(path_info);
-    if (this->_root.size() < path.size()){
+    if (this->_root.size() < path.size()) {
         this->_filepath = _root + path.substr(this->_root.size());
-    }else{
+    } else {
         throw std::invalid_argument("Invalid URI");
     }
 
     pos = this->_filepath.rfind('/');
-    if (pos != std::string::npos){
-        this->_filename = this->_filepath.substr(pos+1);
-    }else{
+    if (pos != std::string::npos) {
+        this->_filename = this->_filepath.substr(pos + 1);
+    } else {
         throw std::invalid_argument("Invalid URI");
     }
 }
