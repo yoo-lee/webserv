@@ -122,7 +122,7 @@ std::string Utility::delete_duplicated_slash(std::string str)
     return (only_one_slash);
 }
 
-bool orderby_string_len(string a, string b)
+static bool orderby_string_len(string a, string b)
 {
     return (a.size() >= b.size());
 }
