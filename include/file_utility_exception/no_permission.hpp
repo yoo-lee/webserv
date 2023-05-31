@@ -1,7 +1,7 @@
-#ifndef NOT_AUTHORIZED_H
-#define NOT_AUTHORIZED_H
+#ifndef NO_PERMISSION_H
+#define NO_PERMISSION_H
 #include <exception>
-class NotAuthrized : public std::exception
+class NoPermission : public std::exception
 {
   public:
     virtual const char* what() const throw()
@@ -10,4 +10,4 @@ class NotAuthrized : public std::exception
     }
 };
 
-#endif /* NOT_AUTHORIZED_H */
+#endif /* NO_PERMISSION_H */
