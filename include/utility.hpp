@@ -2,6 +2,7 @@
 #define UTILITY_H
 #include "Config.hpp"
 #include "Server.hpp"
+#include "byte_vector.hpp"
 #include "utility.hpp"
 #include <sstream>
 #include <string>
@@ -29,6 +30,8 @@ class Utility
 
     static string delete_duplicated_slash(string str);
     static int hex_string_to_int(const string& hex_string);
+
+    static string get_http_status_message(string status_code);
 };
 
 template <typename T>

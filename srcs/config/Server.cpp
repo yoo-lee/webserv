@@ -116,9 +116,7 @@ TEST_CASE("Server: copy constructor")
     Parser parser("server { listen 80; server_name localhost; location / { root /; } }");
     vector<Statement const*> server_directive = parser.get_root();
     Server server_parent(server_directive[0]);
-    std::cout << "uncopyed" << endl;
     Server server(server_parent);
-    std::cout << "copyed" << endl;
     CHECK(server.listen == "80");
     CHECK(server.server_name == "localhost");
     CHECK(server.location.size() == 1);

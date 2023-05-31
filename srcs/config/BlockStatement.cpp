@@ -64,6 +64,26 @@ vector<Statement const*> BlockStatement::get_children() const
     return _child_statements;
 }
 
+vector<SimpleStatement const*> BlockStatement::get_simple_statement_children() const
+{
+    vector<SimpleStatement const*> simple_children;
+    for (size_t i = 0; i < _child_statements.size(); i++) {
+        if (dynamic_cast<SimpleStatement const*>(_child_statements[i]))
+            simple_children.push_back(dynamic_cast<SimpleStatement const*>(_child_statements[i]));
+    }
+    return simple_children;
+}
+
+vector<BlockStatement const*> BlockStatement::get_block_statement_children() const
+{
+    vector<BlockStatement const*> block_children;
+    for (size_t i = 0; i < _child_statements.size(); i++) {
+        if (dynamic_cast<BlockStatement const*>(_child_statements[i]))
+            block_children.push_back(dynamic_cast<BlockStatement const*>(_child_statements[i]));
+    }
+    return block_children;
+}
+
 vector<Statement const*> BlockStatement::get_children(string directive) const
 {
     vector<Statement const*> result;

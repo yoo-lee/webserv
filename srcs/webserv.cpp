@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "cgi.hpp"
+#include "file_utility.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "tcp_socket.hpp"
@@ -158,13 +159,64 @@ void Webserv::process_connected_communication(int fd, struct epoll_event* event,
         // }
 
         Response* res;
-        // if (req->is_cgi()) {
-        if (1) {
+        if (_config.get_location(req->get_port(), req->get_host(), req->get_path())->cgi_pass != "") {
             CGI* cgi = new CGI(req);
             delete cgi;
             res = new Response(*req);
             // cig processing
         } else {
+            // string body;
+            // string status_code;
+            // Location const* l = _config.get_location(req->get_port(), req->get_host(), req->get_path());
+            // // if(is_redirect())
+            // string path;
+            // if (l->root != "")
+            //     path = l->root + req->get_path();
+            // else
+            //     path = FileUtility::get_cwd() + req->get_path();
+            // if (!FileUtility::is_directory_exist(path) && !FileUtility::is_file_exist(path))
+            //     status_code = "404";
+            // else {
+            //     if (req->get_method() == HttpMethod::GET) {
+            //         if (FileUtility::is_file_exist(path)) {
+            //             body = FileUtility::read_file_text(path);
+            //             status_code = "200";
+            //         } else {
+            //             if (!l->autoindex) {
+            //                 status_code = "403";
+            //             } else {
+            //                 try {
+            //                     body = get_auto_index_page(path);
+            //                 } catch (exception& e) {
+            //                     // get_auto_index_pageの返す例外によってstatus_codeを変更
+            //                     // 仮で500
+            //                     status_code = "500";
+            //                 }
+            //             }
+            //         }
+            //     } else if (req->get_method() == HttpMethod::POST) {
+            //         if (FileUtility::is_directory_exist(path)) {
+            //             try {
+            //                 // create new file
+            //             } catch (exception& e) {
+            //                 // create new fileの返す例外によってstatus_codeを変更
+            //                 // 仮で500
+            //                 status_code = "500";
+            //             }
+            //         } else
+            //             status_code = "404";
+
+            //     } else /* DELETE */ {
+            //         if (FileUtility::is_file_exist(path)) {
+            //             FileUtility::delete_file(path);
+            //             status_code = "200";
+            //         } else /* path is directory */ {
+            //             status_code = "405";
+            //         }
+            //     }
+            // }
+            // std::cout << "status code: " << status_code << std::endl;
+
             res = new Response(*req);
             // server processing except cgi
         }
@@ -255,4 +307,16 @@ void Webserv::process_communication()
             }
         }
     }
+}
+
+string Webserv::get_auto_index_page(string const& path) const
+{
+    string result =
+        "<html>\n<head>\n<title>Index of " + path + "</title>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n";
+    vector<string> entries = FileUtility::get_entries_in_directory(path);
+    for (size_t i = 0; i < entries.size(); i++) {
+        result += "<a href=\"" + entries[i] + "\">" + entries[i] + "</a><br>\n";
+    }
+    result += "</body>\n</html>\n";
+    return (result);
 }

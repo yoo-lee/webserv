@@ -13,6 +13,7 @@ class ByteVector : public vector<char>
   private:
   public:
     ByteVector();
+    ByteVector(string str);
     ByteVector(const char* bytes, size_t size);
     ByteVector(vector<char>::iterator begin, vector<char>::iterator end);
     ~ByteVector();
