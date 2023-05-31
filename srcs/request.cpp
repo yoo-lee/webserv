@@ -73,6 +73,7 @@ void Request::parse()
 {
     parse_request_line();
     parse_header_field();
+    //_uri = URI(*this);
 
     parse_content_length();
     _transfer_encoding = TransferEncoding(_headers["transfer-encoding"]);
@@ -81,6 +82,10 @@ void Request::parse()
 
     // tmpファイルに保存する場合はここにif文を作り分岐させる #39
     _loaded_packet_body = tmp_loaded_packet_body;
+
+    // uriに関する情報をひとまとめにしたクラスに格納する
+    _uri = URI(this);
+    _uri.print_uri();
 }
 
 void Request::parse_request_line()
@@ -316,7 +321,8 @@ std::string& Request::get_port()
 
 std::string& Request::get_host()
 {
-    return _host;
+    return (this->_headers["host"]);
+    //return _host;
 }
 
 ContentType const& Request::get_content_type() const

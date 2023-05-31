@@ -9,6 +9,7 @@
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
 #include "transfer_encoding.hpp"
+#include "uri.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -16,6 +17,8 @@
 using std::map;
 using std::string;
 using std::vector;
+
+//class URI;
 
 class Request : public SocketData
 {
@@ -81,6 +84,7 @@ class Request : public SocketData
     string _path;
     HttpMethod _method;
     string _version;
+    URI _uri;
 
     // -- request header --
     ssize_t _content_length;
