@@ -1,5 +1,11 @@
 #include "file_utility.hpp"
 #include <dirent.h>
+#include <errno.h>
+#include <file_utility_exception/no_permission.hpp>
+#include <file_utility_exception/no_read_permission.hpp>
+#include <file_utility_exception/no_write_permission.hpp>
+#include <file_utility_exception/not_exist.hpp>
+#include <file_utility_exception/path_is_not_file.hpp>
 #include <fstream>
 #include <iostream>
 #include <istream>
@@ -19,15 +25,19 @@ using std::ifstream;
 bool FileUtility::is_file_exist(const string& path)
 {
     struct stat fileInfo;
-    return (stat(path.c_str(), &fileInfo) == 0);
+    int result = stat(path.c_str(), &fileInfo);
+    if (errno == EACCES)
+        throw NoPermission();
+    return S_ISREG(fileInfo.st_mode);
 }
 
 bool FileUtility::is_directory_exist(const string& path)
 {
     struct stat fileInfo;
-    if (stat(path.c_str(), &fileInfo) != 0)
-        return false;
-    return (fileInfo.st_mode & S_IFDIR);
+    int result = stat(path.c_str(), &fileInfo);
+    if (errno == EACCES)
+        throw NoPermission();
+    return (S_ISDIR(fileInfo.st_mode));
 }
 
 vector<string> FileUtility::get_entries_in_directory(const string& path)
@@ -44,7 +54,6 @@ vector<string> FileUtility::get_entries_in_directory(const string& path)
             continue;
         entries.push_back(dp->d_name);
     }
-
     closedir(dir);
     return entries;
 }
@@ -52,19 +61,22 @@ vector<string> FileUtility::get_entries_in_directory(const string& path)
 string FileUtility::get_cwd()
 {
     char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        return string(cwd);
-    } else {
-        perror("getcwd() error");
-        return "";
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        if (errno == EACCES)
+            throw NoPermission();
+        if (errno == EIO)
+            throw std::runtime_error("EIO");
     }
+    return string(cwd);
 }
 
 string FileUtility::read_file_text(const string& path)
 {
+    if (FileUtility::is_file_exist(path) == false)
+        throw NotExist();
     ifstream ifs(path.c_str());
     if (ifs.is_open() == false)
-        throw std::runtime_error("read_file_text: file open error");
+        throw NoReadPermission();
 
     string buf = "";
     string result = "";
