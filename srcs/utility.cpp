@@ -7,6 +7,7 @@
 #include <istream>
 #include <sstream>
 #include <sys/stat.h>
+#include <algorithm>
 
 #ifdef UNIT_TEST
 #include "doctest.h"
@@ -119,6 +120,16 @@ std::string Utility::delete_duplicated_slash(std::string str)
         only_one_slash.erase(only_one_slash.end() - 1, only_one_slash.end());
     }
     return (only_one_slash);
+}
+
+bool orderby_string_len(string a, string b)
+{
+    return (a.size() >= b.size());
+}
+
+void Utility::sort_orderby_len(std::vector<std::string>& str)
+{
+    (sort(str.begin(), str.end(), orderby_string_len));
 }
 
 int Utility::hex_string_to_int(const std::string& hex_string)

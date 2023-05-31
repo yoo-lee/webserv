@@ -29,6 +29,7 @@ class Utility
     static string to_string2(int value);
 
     static string delete_duplicated_slash(string str);
+    static void sort_orderby_len(std::vector<std::string>& str);
     static int hex_string_to_int(const string& hex_string);
 
     static string get_http_status_message(string status_code);
