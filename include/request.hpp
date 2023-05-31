@@ -18,8 +18,6 @@ using std::map;
 using std::string;
 using std::vector;
 
-//class URI;
-
 class Request : public SocketData
 {
   public:
