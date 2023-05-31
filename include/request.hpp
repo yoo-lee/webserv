@@ -33,6 +33,7 @@ class Request : public SocketData
     HttpMethod get_method() const;
     const string& get_path() const;
     vector<string> get_path_list() const;
+    const URI& get_uri();
 
     // -- request header --
     const map<string, string>& get_headers() const;

@@ -20,6 +20,7 @@ URI& URI::operator=(URI const& uri)
     if (this == &uri) {
         return (*this);
     }
+    this->_uri = uri._uri;
     this->_filename = uri._filename;
     this->_root = uri._root;
     this->_filepath = uri._filepath;
@@ -29,37 +30,22 @@ URI& URI::operator=(URI const& uri)
     return (*this);
 }
 
-static std::string get_root(std::map<std::string, std::vector<std::string> >& props);
+static std::string get_root_dir(std::map<std::string, std::vector<std::string> >& props);
 
 URI::URI(Request* req)
 {
     string path = req->get_path();
+    this->_uri = path;
     this->retrieve_query(path);
 
     const Config* cfg = req->get_config();
     std::map<std::string, std::vector<std::string> > props =
         cfg->get_locations_properties(req->get_port(), req->get_host(), this->_location_path);
 
-    this->_root = get_root(props);
+    this->_root = get_root_dir(props);
     this->remove_file_info(_root + "/" + this->_location_path);
-    this->print_uri();
+    // this->print_uri();
 }
-
-/*
-URI::URI(Request &req)
-{
-    string path = req.get_path();
-    this->retrieve_query(path);
-
-    const Config* cfg = req.get_config();
-    std::map<std::string, std::vector<std::string> > props =
-        cfg->get_locations_properties(req.get_port(), req.get_host(), this->_location_path);
-
-    this->_root = get_root(props);
-    this->remove_file_info(_root + "/" +  this->_location_path);
-    this->print_uri();
-}
-*/
 
 void URI::retrieve_query(string& uri)
 {
@@ -76,7 +62,7 @@ void URI::retrieve_query(string& uri)
     this->_location_path = Utility::delete_duplicated_slash(path);
 }
 
-static std::string get_root(std::map<std::string, std::vector<std::string> >& props)
+static std::string get_root_dir(std::map<std::string, std::vector<std::string> >& props)
 {
     std::map<std::string, std::vector<std::string> >::iterator ite = props.find("root");
     const char* tmp_path;
@@ -95,7 +81,7 @@ static std::string get_root(std::map<std::string, std::vector<std::string> >& pr
     throw std::invalid_argument("Invalid URI");
 }
 
-void URI::print_uri()
+void URI::print_uri() const
 {
     cout << endl << "print URI" << endl;
     cout << "_filename:[" << _filename << "]" << endl;
@@ -139,4 +125,39 @@ void URI::remove_file_info(std::string tmp_file_path)
     } else {
         throw std::invalid_argument("Invalid URI");
     }
+}
+
+const std::string& URI::get_uri() const
+{
+    return (this->_uri);
+}
+
+const std::string& URI::get_filename() const
+{
+    return (this->_filename);
+}
+
+const std::string& URI::get_root() const
+{
+    return (this->_root);
+}
+
+const std::string& URI::get_filepath() const
+{
+    return (this->_filepath);
+}
+
+const std::string& URI::get_location_path() const
+{
+    return (this->_location_path);
+}
+
+const std::string& URI::get_query() const
+{
+    return (this->_query);
+}
+
+const std::string& URI::get_path_info() const
+{
+    return (this->_path_info);
 }

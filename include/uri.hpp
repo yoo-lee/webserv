@@ -13,7 +13,14 @@ class URI
     URI(const URI& uri);
     URI& operator=(const URI& uri);
     ~URI();
-    void print_uri();
+    void print_uri() const;
+    const std::string& get_uri() const;
+    const std::string& get_filename() const;
+    const std::string& get_root() const;
+    const std::string& get_filepath() const;
+    const std::string& get_location_path() const;
+    const std::string& get_query() const;
+    const std::string& get_path_info() const;
 
   private:
     std::string _uri;

@@ -214,6 +214,11 @@ vector<string> Request::get_path_list() const
     return (path_list);
 }
 
+const URI& Request::get_uri()
+{
+    return (this->_uri);
+}
+
 string Request::get_ip_address() const
 {
     // todo
