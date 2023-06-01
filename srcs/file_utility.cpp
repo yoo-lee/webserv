@@ -1,11 +1,12 @@
 #include "file_utility.hpp"
 #include <dirent.h>
 #include <errno.h>
-#include <file_utility_exception/no_permission.hpp>
-#include <file_utility_exception/no_read_permission.hpp>
-#include <file_utility_exception/no_write_permission.hpp>
-#include <file_utility_exception/not_exist.hpp>
+#include <file_utility_exception/no_such_file_or_directory.hpp>
+#include <file_utility_exception/path_is_not_directory.hpp>
 #include <file_utility_exception/path_is_not_file.hpp>
+#include <file_utility_exception/permission_denied.hpp>
+#include <file_utility_exception/read_permission_denied.hpp>
+#include <file_utility_exception/write_permission_denied.hpp>
 #include <fstream>
 #include <iostream>
 #include <istream>
@@ -25,18 +26,14 @@ using std::ifstream;
 bool FileUtility::is_file_exist(const string& path)
 {
     struct stat fileInfo;
-    int result = stat(path.c_str(), &fileInfo);
-    if (errno == EACCES)
-        throw NoPermission();
+    stat(path.c_str(), &fileInfo);
     return S_ISREG(fileInfo.st_mode);
 }
 
 bool FileUtility::is_directory_exist(const string& path)
 {
     struct stat fileInfo;
-    int result = stat(path.c_str(), &fileInfo);
-    if (errno == EACCES)
-        throw NoPermission();
+    stat(path.c_str(), &fileInfo);
     return (S_ISDIR(fileInfo.st_mode));
 }
 
@@ -46,7 +43,12 @@ vector<string> FileUtility::get_entries_in_directory(const string& path)
     DIR* dir;
     struct dirent* dp;
     if ((dir = opendir(path.c_str())) == NULL) {
-        perror("opendir");
+        if (errno == ENOENT)
+            throw NoSuchFileOrDirectory();
+        if (errno == ENOTDIR)
+            throw PathIsNotDirectory();
+        if (errno == EACCES)
+            throw PermissionDenined();
         return entries;
     }
     while ((dp = readdir(dir)) != NULL) {
@@ -63,7 +65,7 @@ string FileUtility::get_cwd()
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
         if (errno == EACCES)
-            throw NoPermission();
+            throw PermissionDenined();
         if (errno == EIO)
             throw std::runtime_error("EIO");
     }
@@ -73,10 +75,10 @@ string FileUtility::get_cwd()
 string FileUtility::read_file_text(const string& path)
 {
     if (FileUtility::is_file_exist(path) == false)
-        throw NotExist();
+        throw NoSuchFileOrDirectory();
     ifstream ifs(path.c_str());
     if (ifs.is_open() == false)
-        throw NoReadPermission();
+        throw ReadPermissionDenied();
 
     string buf = "";
     string result = "";
@@ -93,9 +95,20 @@ ByteVector FileUtility::read_file_binary(const string& path)
     return ByteVector(FileUtility::read_file_text(path));
 }
 
-bool FileUtility::delete_file(const string& path)
+void FileUtility::delete_file(const string& path)
 {
-    return (remove(path.c_str()) == 0);
+    bool is_success = remove(path.c_str()) == 0;
+    if (is_success == false) {
+        if (errno == EACCES)
+            throw PermissionDenined();
+        if (errno == EIO)
+            throw std::runtime_error("EIO");
+        if (errno == ENOENT)
+            throw NoSuchFileOrDirectory();
+        if (errno == EPERM)
+            throw std::runtime_error("EPERM");
+        throw std::runtime_error("unknown error");
+    }
 }
 
 #ifdef UNIT_TEST

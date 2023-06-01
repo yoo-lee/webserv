@@ -1,7 +1,7 @@
 #ifndef NO_PERMISSION_H
 #define NO_PERMISSION_H
 #include <exception>
-class NoPermission : public std::exception
+class PermissionDenined : public std::exception
 {
   public:
     virtual const char* what() const throw()
