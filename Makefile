@@ -92,6 +92,13 @@ make_run:
 ut: unit_test
 unit_test: $(UNIT_SRCS)
 	$(CXX) $(UNIT_CXXFLAGS) $(IFLAGS) -D UNIT_TEST -o unit_test $(UNIT_SRCS)
+	if [ ! ./statics/no_permission ]; then\
+		touch statics/no_permission;\
+		chmod 000 statics/no_permission;\
+		mkdir statics/no_permission_dir;\
+		chmod 000 statics/no_permission_dir;\
+	fi
+	touch statics/empty_file
 	./unit_test
 
 ifeq ($(findstring clean,$(MAKECMDGOALS)),)
