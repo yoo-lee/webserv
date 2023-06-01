@@ -2,8 +2,8 @@
 #define NO_READ_PERMISSION_H
 
 #include <exception>
-#include <file_utility_exception/no_permission.hpp>
-class NoReadPermission : public PermissionDenined
+#include <file_utility_exception/permission_denied.hpp>
+class ReadPermissionDenied : public PermissionDenined
 {
   public:
     virtual const char* what() const throw()

@@ -1,5 +1,5 @@
-#ifndef NOT_EXIST_H
-#define NOT_EXIST_H
+#ifndef NO_SUCH_FILE_OR_DIRECTORY_H
+#define NO_SUCH_FILE_OR_DIRECTORY_H
 
 #include <exception>
 class NoSuchFileOrDirectory : public std::exception
@@ -11,4 +11,4 @@ class NoSuchFileOrDirectory : public std::exception
     }
 };
 
-#endif /* NOT_EXIST_H */
+#endif /* NO_SUCH_FILE_OR_DIRECTORY_H */

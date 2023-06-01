@@ -73,7 +73,8 @@
         "climits": "cpp",
         "ios": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "*._deniedhpp": "cpp"
     },
     "cSpell.words": [
         "clientinfo",

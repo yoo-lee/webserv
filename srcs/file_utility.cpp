@@ -1,12 +1,12 @@
 #include "file_utility.hpp"
 #include <dirent.h>
 #include <errno.h>
-#include <file_utility_exception/no_permission.hpp>
-#include <file_utility_exception/no_read_permission.hpp>
-#include <file_utility_exception/no_write_permission.hpp>
-#include <file_utility_exception/not_exist.hpp>
+#include <file_utility_exception/no_such_file_or_directory.hpp>
 #include <file_utility_exception/path_is_not_directory.hpp>
 #include <file_utility_exception/path_is_not_file.hpp>
+#include <file_utility_exception/permission_denied.hpp>
+#include <file_utility_exception/read_permission_denied.hpp>
+#include <file_utility_exception/write_permission_denied.hpp>
 #include <fstream>
 #include <iostream>
 #include <istream>
@@ -26,14 +26,14 @@ using std::ifstream;
 bool FileUtility::is_file_exist(const string& path)
 {
     struct stat fileInfo;
-    int result = stat(path.c_str(), &fileInfo);
+    stat(path.c_str(), &fileInfo);
     return S_ISREG(fileInfo.st_mode);
 }
 
 bool FileUtility::is_directory_exist(const string& path)
 {
     struct stat fileInfo;
-    int result = stat(path.c_str(), &fileInfo);
+    stat(path.c_str(), &fileInfo);
     return (S_ISDIR(fileInfo.st_mode));
 }
 
@@ -78,7 +78,7 @@ string FileUtility::read_file_text(const string& path)
         throw NoSuchFileOrDirectory();
     ifstream ifs(path.c_str());
     if (ifs.is_open() == false)
-        throw NoReadPermission();
+        throw ReadPermissionDenied();
 
     string buf = "";
     string result = "";
