@@ -88,10 +88,8 @@ string FileUtility::read_file_text(const string& path)
     string buf = "";
     string result = "";
     while (getline(ifs, buf)) {
-        cout << buf << endl;
         result += buf + "\n";
     }
-    std::cout << FileUtility::get_cwd() << std::endl;
     return (result);
 }
 

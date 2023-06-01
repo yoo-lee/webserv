@@ -122,6 +122,37 @@ Statement* BlockStatement::clone() const
 }
 
 #ifdef UNIT_TEST
+TEST_CASE("BlockStatement: get_children and get_x_statement_children")
+{
+    vector<string> params;
+    params.push_back("param1");
+    params.push_back("param2");
+
+    vector<Statement const*> child_statements;
+    SimpleStatement const* s1 = new SimpleStatement("directive1", "value1");
+    SimpleStatement const* s2 = new SimpleStatement("directive2", "value2");
+    BlockStatement const* b1 = new BlockStatement("directive3", vector<string>(), vector<Statement const*>());
+    child_statements.push_back(s1);
+    child_statements.push_back(s2);
+    child_statements.push_back(b1);
+
+    BlockStatement b("directive", params, child_statements);
+    vector<Statement const*> children = b.get_children();
+    CHECK(children.size() == 3);
+    CHECK(children[0] == s1);
+    CHECK(children[1] == s2);
+    CHECK(children[2] == b1);
+
+    vector<SimpleStatement const*> simple_children = b.get_simple_statement_children();
+    CHECK(simple_children.size() == 2);
+    CHECK(simple_children[0] == s1);
+    CHECK(simple_children[1] == s2);
+
+    vector<BlockStatement const*> block_children = b.get_block_statement_children();
+    CHECK(block_children.size() == 1);
+    CHECK(block_children[0] == b1);
+}
+
 TEST_CASE("BlockStatement constructor")
 {
     vector<string> params;

@@ -309,14 +309,15 @@ void Webserv::process_communication()
     }
 }
 
+// ここではget_entries_in_directoryの例外を処理していないので、
+// 使う際はget_entries_in_directoryの例外を処理することを念頭に実装してください
 string Webserv::get_auto_index_page(string const& path) const
 {
     string result =
         "<html>\n<head>\n<title>Index of " + path + "</title>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n";
     vector<string> entries = FileUtility::get_entries_in_directory(path);
-    for (size_t i = 0; i < entries.size(); i++) {
+    for (size_t i = 0; i < entries.size(); i++)
         result += "<a href=\"" + entries[i] + "\">" + entries[i] + "</a><br>\n";
-    }
     result += "</body>\n</html>\n";
     return (result);
 }
