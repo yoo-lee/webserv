@@ -33,6 +33,8 @@ class Utility
     static int hex_string_to_int(const string& hex_string);
 
     static string get_http_status_message(string status_code);
+    template <typename T>
+    static void print_vector(vector<T> v);
 };
 
 template <typename T>
@@ -45,6 +47,16 @@ string Utility::to_string(T value)
     str = sss.str();
 
     return (str);
+}
+
+template <typename T>
+void Utility::print_vector(vector<T> v)
+{
+    for (size_t i = 0; i < v.size(); i++)
+        if (v.size() - 1 != i)
+            cout << v[i] << ",";
+        else
+            cout << v[i] << std::endl;
 }
 
 #endif /* UTILITY_H */

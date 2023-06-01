@@ -5,3 +5,4 @@ webserv
 obj/
 objs/
 unit_test
+statics/no*
