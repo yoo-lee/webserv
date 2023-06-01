@@ -5,6 +5,7 @@
 #include <file_utility_exception/no_read_permission.hpp>
 #include <file_utility_exception/no_write_permission.hpp>
 #include <file_utility_exception/not_exist.hpp>
+#include <file_utility_exception/path_is_not_directory.hpp>
 #include <file_utility_exception/path_is_not_file.hpp>
 #include <fstream>
 #include <iostream>
@@ -26,8 +27,6 @@ bool FileUtility::is_file_exist(const string& path)
 {
     struct stat fileInfo;
     int result = stat(path.c_str(), &fileInfo);
-    if (errno == EACCES)
-        throw NoPermission();
     return S_ISREG(fileInfo.st_mode);
 }
 
@@ -35,8 +34,6 @@ bool FileUtility::is_directory_exist(const string& path)
 {
     struct stat fileInfo;
     int result = stat(path.c_str(), &fileInfo);
-    if (errno == EACCES)
-        throw NoPermission();
     return (S_ISDIR(fileInfo.st_mode));
 }
 
@@ -46,7 +43,10 @@ vector<string> FileUtility::get_entries_in_directory(const string& path)
     DIR* dir;
     struct dirent* dp;
     if ((dir = opendir(path.c_str())) == NULL) {
-        perror("opendir");
+        if (errno == ENOTDIR)
+            throw PathIsNotDirectory();
+        if (errno == EACCES)
+            throw NoPermission();
         return entries;
     }
     while ((dp = readdir(dir)) != NULL) {
