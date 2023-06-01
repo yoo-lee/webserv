@@ -129,6 +129,16 @@ void Request::parse_header_field()
         value = Utility::trim_white_space(value);
         this->_headers.insert(make_pair(key, value));
     }
+
+    // uriに関する情報をひとまとめにしたクラスに格納する
+    try {
+        _uri = URI(this);
+        // テスト用　後で消す
+        _uri.print_uri();
+    } catch (std::invalid_argument& e) {
+        cout << "URI Error" << endl;
+        cout << e.what() << endl;
+    }
 }
 
 void Request::parse_content_length()
@@ -202,6 +212,11 @@ vector<string> Request::get_path_list() const
         i++;
     }
     return (path_list);
+}
+
+const URI& Request::get_uri()
+{
+    return (this->_uri);
 }
 
 string Request::get_ip_address() const
@@ -316,7 +331,7 @@ std::string& Request::get_port()
 
 std::string& Request::get_host()
 {
-    return _host;
+    return (this->_headers["host"]);
 }
 
 ContentType const& Request::get_content_type() const

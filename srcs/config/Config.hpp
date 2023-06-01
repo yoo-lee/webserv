@@ -20,6 +20,7 @@ class Config
     static map<pair<string, string>, Server const*> _servers_cache;
     static map<pair<string, string>, vector<string> > _locations_cache;
     static map<pair<pair<string, string>, string>, map<string, vector<string> > > _locations_content_cache;
+    static map<pair<pair<string, string>, string>, map<string, vector<string> > > _locations_properties_cache;
 
   public:
     HTTP const* http;
@@ -38,6 +39,8 @@ class Config
     vector<string> get_location_paths(string const& port, string const& host) const;
     map<string, vector<string> > get_locations_contents(string const& port, string const& host,
                                                         string const& location) const;
+    map<string, vector<string> > get_locations_properties(string const& port, string const& host,
+                                                          string const& filepath) const;
 };
 
 #endif /* CONFIG_H */

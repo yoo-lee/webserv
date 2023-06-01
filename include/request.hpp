@@ -9,6 +9,7 @@
 #include "socket_data.hpp"
 #include "splitted_string.hpp"
 #include "transfer_encoding.hpp"
+#include "uri.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -32,6 +33,7 @@ class Request : public SocketData
     HttpMethod get_method() const;
     const string& get_path() const;
     vector<string> get_path_list() const;
+    const URI& get_uri();
 
     // -- request header --
     const map<string, string>& get_headers() const;
@@ -81,6 +83,7 @@ class Request : public SocketData
     string _path;
     HttpMethod _method;
     string _version;
+    URI _uri;
 
     // -- request header --
     ssize_t _content_length;

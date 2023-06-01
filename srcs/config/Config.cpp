@@ -1,4 +1,6 @@
 #include "Config.hpp"
+#include "splitted_string.hpp"
+#include "utility.hpp"
 #ifdef UNIT_TEST
 #include "doctest.h"
 #endif
@@ -55,6 +57,7 @@ Config const& Config::operator=(Config const& c)
 map<pair<string, string>, Server const*> Config::_servers_cache;
 map<pair<string, string>, vector<string> > Config::_locations_cache;
 map<pair<pair<string, string>, string>, map<string, vector<string> > > Config::_locations_content_cache;
+map<pair<pair<string, string>, string>, map<string, vector<string> > > Config::_locations_properties_cache;
 
 Server const* Config::get_server(string const& port, string const& host) const
 {
@@ -153,6 +156,53 @@ map<string, vector<string> > Config::get_locations_contents(string const& port, 
     }
     map<string, vector<string> > rval;
     return (rval);
+}
+
+static string get_partial_equaled_path(SplittedString& req_path_sp, SplittedString& cgi_path_sp)
+{
+    string path = "";
+    for (size_t i = 0; i < cgi_path_sp.size(); i++) {
+        if (req_path_sp[i] == cgi_path_sp[i]) {
+            path += "/";
+            path += req_path_sp[i];
+        } else {
+            break;
+        }
+    }
+    return (path);
+}
+
+std::map<std::string, std::vector<std::string> > Config::get_locations_properties(const string& port,
+                                                                                  const string& host,
+                                                                                  const string& filepath) const
+{
+    map<pair<pair<string, string>, string>, map<string, vector<string> > >::iterator cash_ite =
+        _locations_properties_cache.find(make_pair(make_pair(port, host), filepath));
+    if (cash_ite != _locations_properties_cache.end()) {
+        return (cash_ite->second);
+    }
+
+    const std::vector<std::string> lo = Config::get_location_paths(port, host);
+    SplittedString req_path_sp(filepath, "/");
+
+    string path;
+    string tmp_path_cfg;
+    for (size_t i = 0; i < lo.size(); i++) {
+        tmp_path_cfg = lo[i];
+        SplittedString cgi_path_sp(tmp_path_cfg, "/");
+        path = get_partial_equaled_path(req_path_sp, cgi_path_sp);
+        if (path != "") {
+            break;
+        } else if (path == "" && lo[i] == "/") {
+            path = "/";
+            break;
+        }
+    }
+
+    std::map<std::string, std::vector<std::string> > properties =
+        Config::get_locations_contents(port, host, tmp_path_cfg);
+    _locations_properties_cache.insert(make_pair(make_pair(make_pair(port, host), filepath), properties));
+    return (properties);
 }
 
 #ifdef UNIT_TEST
