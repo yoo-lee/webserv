@@ -27,15 +27,17 @@ using std::ifstream;
 bool FileUtility::is_file_exist(const string& path)
 {
     struct stat fileInfo;
-    stat(path.c_str(), &fileInfo);
-    return S_ISREG(fileInfo.st_mode);
+    if (stat(path.c_str(), &fileInfo) != 0)
+        return false;
+    return (fileInfo.st_mode & S_IFREG);
 }
 
 bool FileUtility::is_directory_exist(const string& path)
 {
     struct stat fileInfo;
-    stat(path.c_str(), &fileInfo);
-    return (S_ISDIR(fileInfo.st_mode));
+    if (stat(path.c_str(), &fileInfo) != 0)
+        return false;
+    return (fileInfo.st_mode & S_IFDIR);
 }
 
 vector<string> FileUtility::get_entries_in_directory(const string& path)
