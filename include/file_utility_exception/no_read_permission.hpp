@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <file_utility_exception/no_permission.hpp>
-class NoReadPermission : public NoPermission
+class NoReadPermission : public PermissionDenined
 {
   public:
     virtual const char* what() const throw()

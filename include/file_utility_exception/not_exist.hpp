@@ -2,7 +2,7 @@
 #define NOT_EXIST_H
 
 #include <exception>
-class NotExist : public std::exception
+class NoSuchFileOrDirectory : public std::exception
 {
   public:
     virtual const char* what() const throw()

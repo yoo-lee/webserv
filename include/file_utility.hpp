@@ -13,7 +13,7 @@ class FileUtility
     static string get_cwd();
     static string read_file_text(const string& path);
     static ByteVector read_file_binary(const string& path);
-    static bool delete_file(const string& path);
+    static void delete_file(const string& path);
     static vector<string> get_entries_in_directory(const string& path);
 };
 
