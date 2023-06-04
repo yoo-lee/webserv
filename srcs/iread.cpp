@@ -1,5 +1,6 @@
 #include "iread.hpp"
 #include <unistd.h>
+#include <sys/socket.h>
 
 IRead::IRead()
 {
@@ -30,5 +31,5 @@ ReadSocket::~ReadSocket()
 
 int ReadSocket::iread(int fd, char* buf, size_t size)
 {
-    return (read(fd, buf, size));
+    return (recv(fd, buf, size, MSG_DONTWAIT));
 }
