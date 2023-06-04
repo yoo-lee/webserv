@@ -22,7 +22,7 @@ RawRequestReader::RawRequestReader(int fd_)
     this->read_line();
 }
 
-RawRequestReader::RawRequestReader(int fd_, IRead *iread)
+RawRequestReader::RawRequestReader(int fd_, IRead* iread)
     : _buf_body_pos(NULL),
       _buf_body_size(0),
       _buf_size(0),
@@ -33,7 +33,6 @@ RawRequestReader::RawRequestReader(int fd_, IRead *iread)
 {
     this->read_line();
 }
-
 
 RawRequestReader::~RawRequestReader()
 {
