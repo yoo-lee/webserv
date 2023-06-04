@@ -2,6 +2,7 @@
 #define RAW_REQUEST_READER_H
 #include "byte_vector.hpp"
 #include "splitted_string.hpp"
+#include "iread.hpp"
 #include <string>
 #include <unistd.h>
 #include <vector>
@@ -10,6 +11,7 @@ class RawRequestReader
 {
   public:
     RawRequestReader(int fd);
+    RawRequestReader(int fd, IRead *iread);
     ~RawRequestReader();
     std::string& getline();
     ByteVector get_body(size_t size);
@@ -28,6 +30,7 @@ class RawRequestReader
     size_t _pos;
     void read_line();
     int read(char* buf, int size);
+    IRead* _iread;
 };
 
 #endif /* RAW_REQUEST_READER_H */
