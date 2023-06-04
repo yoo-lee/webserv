@@ -16,7 +16,20 @@ RawRequestReader::RawRequestReader(int fd_)
       _buf_size(0),
       _fd(fd_),
       _sp(NULL),
-      _pos(0)
+      _pos(0),
+      _iread(new ReadSocket())
+{
+    this->read_line();
+}
+
+RawRequestReader::RawRequestReader(int fd_, IRead* iread)
+    : _buf_body_pos(NULL),
+      _buf_body_size(0),
+      _buf_size(0),
+      _fd(fd_),
+      _sp(NULL),
+      _pos(0),
+      _iread(iread)
 {
     this->read_line();
 }
@@ -24,11 +37,12 @@ RawRequestReader::RawRequestReader(int fd_)
 RawRequestReader::~RawRequestReader()
 {
     delete _sp;
+    delete _iread;
 }
 
 int RawRequestReader::read(char* buf, int size)
 {
-    return recv(this->_fd, buf, size, MSG_DONTWAIT);
+    return _iread->iread(this->_fd, buf, size);
 }
 
 #include <stdio.h>
